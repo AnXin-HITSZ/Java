@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JavaSECode.iml" filepath="$PROJECT_DIR$/JavaSECode.iml" />
       <module fileurl="file://$PROJECT_DIR$/chapter04/chapter04.iml" filepath="$PROJECT_DIR$/chapter04/chapter04.iml" />
+      <module fileurl="file://$PROJECT_DIR$/chapter05_array/chapter05_array.iml" filepath="$PROJECT_DIR$/chapter05_array/chapter05_array.iml" />
     </modules>
   </component>
 </project>
