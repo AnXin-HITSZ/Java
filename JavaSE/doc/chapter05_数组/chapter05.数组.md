@@ -1253,3 +1253,375 @@ public class ArrayExer03 {
 }
 
 ```
+
+## 六、数组的常见算法
+
+### 6.1 数值型数组特征值统计
+
+这里的特征值涉及到：平均值、最大值、最小值、总和等。
+
+**举例 1 - 数组统计：**
+> 定义一个 `int` 型的一维数组，包含 10 个元素，分别赋一些随机整数，然后求出所有元素的最大值、最小值、总和、平均值，并输出出来。
+>
+> 要求：所有随机数都是两位数：`[10, 99]`。
+>
+> 提示：求 `[a, b]` 范围内的随机数：`(int)(Math.random() * (b - a + 1)) + a;`。
+
+示例代码：
+```java
+public class ArrayExer01 {
+    public static void main(String[] args) {
+        // 1. 动态初始化方式创建数组
+        int[] arr = new int[10];
+        // 2. 通过循环给数组元素赋值
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = (int)(Math.random() * (99 - 10 + 1)) + 10;
+            System.out.print(arr[i] + "\t");
+        }
+
+        System.out.println();
+
+        // 3.1 求最大值
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (max < arr[i]) {
+                max = arr[i];
+            }
+        }
+        System.out.println("最大值为：" + max);
+
+        // 3.2 求最小值
+        int min = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (min > arr[i]) {
+                min = arr[i];
+            }
+        }
+        System.out.println("最小值为：" + min);
+
+        // 3.3 求总和
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
+        }
+        System.out.println("总和为：" + sum);
+
+        // 3.4 求平均值
+        int avgValue = sum / arr.length;
+        System.out.println("平均值为：" + avgValue);
+    }
+}
+
+```
+
+**举例 2 - 评委打分：**
+> 分析以下需求，并用代码实现：
+> 1. 在编程竞赛中，有 10 位评委为参赛的选手打分，分数分别为：`5, 4, 6, 8, 9, 0, 1, 2, 7, 3`；
+> 2. 求选手的最后得分（去掉一个最高分和一个最低分后其余 8 位评委打分的平均值）。
+
+示例代码：
+```java
+public class ArrayExer02 {
+    public static void main(String[] args) {
+        int[] scores = {5, 4, 6, 8, 9, 0, 1, 2, 7, 3};
+
+        // 声明三个特征值
+        int sum = 0;
+        int max = scores[0];
+        int min = scores[0];
+
+        for (int i = 0; i < scores.length; i++) {
+            sum += scores[i];   // 累加总分
+            // 用于获取最高分
+            if (max < scores[i]) {
+                max = scores[i];
+            }
+            // 用于获取最低分
+            if (min > scores[i]) {
+                min = scores[i];
+            }
+        }
+
+        int avg = (sum - max - min) / (scores.length - 2);
+        System.out.println("去掉最高分和最低分之后，平均分为：" + avg);
+    }
+}
+
+```
+
+### 6.2 数组元素的赋值与数组复制
+
+**举例 1 - 杨辉三角：**
+> 使用二维数组打印一个 10 行杨辉三角。
+>
+> 提示：
+> 1. 第一行有 1 个元素，第 n 行有 n 个元素；
+> 2. 每一行的第一个元素和最后一个元素都是 `1`；
+> 3. 从第三行开始，对于非第一个元素和最后一个元素的元素，即：`yanghui[i][j] = yanghui[i - 1][j - 1] + yanghui[i - 1][j];`。
+>
+> ![杨辉三角](./images/20251202105011.png "杨辉三角")
+
+示例代码：
+```java
+public class YangHuiTest {
+    public static void main(String[] args) {
+        // 1. 创建二维数组
+        int[][] yangHui = new int[10][];
+
+        // 2.使用循环结构，初始化外层数组元素
+        for (int i = 0; i < yangHui.length; i++) {
+            yangHui[i] = new int[i + 1];
+            // 3. 给数组的元素赋值
+            // 3.1 给数组每行的首末元素赋值为 1
+            yangHui[i][0] = yangHui[i][i] = 1;
+            // 3.2 给数组每行的非首末元素赋值
+            //if (i >= 2) {
+                for (int j = 1; j < yangHui[i].length - 1; j++) {   // j 从每行的第 2 个元素开始，到倒数第 2 个元素结束
+                    yangHui[i][j] = yangHui[i - 1][j] + yangHui[i - 1][j - 1];
+                }
+            //}
+        }
+
+        // 遍历二维数组
+        for (int i = 0; i < yangHui.length; i++) {
+            for (int j = 0; j < yangHui[i].length; j++) {
+                System.out.print(yangHui[i][j] + "\t");
+            }
+            System.out.println();
+        }
+    }
+}
+
+```
+
+**举例 2 - 复制、赋值：**
+> 使用简单数组：
+> 1. 创建一个名为 `ArrayTest` 的类，在 `main()` 方法中声明 `array1` 和 `array2` 两个变量，它们是 `int[]` 类型的数组；
+> 2. 使用大括号 `{}`，把 `array1` 初始化为 8 个素数：`2, 3, 5, 7, 11, 13, 17, 19`；
+> 3. 显示 `array1` 的内容；
+> 4. 赋值 `array2` 变量等于 `array1`（即 `array2 = array1;`），修改 `array2` 中的偶索引元素，使其等于索引值（如 `array[0] = 0`、`array[2] = 2`），打印出 `array1`；
+>
+> 思考：`array1` 和 `array2` 是什么关系？
+
+示例代码：
+```java
+public class ArrayExer04 {
+    public static void main(String[] args) {
+        // 1. 创建一个名为 `ArrayExer04` 的类，在 `main()` 方法中声明 `array1` 和 `array2` 两个变量，它们是 `int[]` 类型的数组
+        int[] array1, array2;
+        // 2. 使用大括号 `{}`，把 `array1` 初始化为 8 个素数：`2, 3, 5, 7, 11, 13, 17, 19`
+        array1 = new int[]{2, 3, 5, 7, 11, 13, 17, 19};
+        // 3. 显示 `array1` 的内容
+        for (int i = 0; i < array1.length; i++) {
+            System.out.print(array1[i] + "\t");
+        }
+        // 4. 赋值 `array2` 变量等于 `array1`（即 `array2 = array1;`），修改 `array2` 中的偶索引元素，使其等于索引值（如 `array[0] = 0`、`array[2] = 2`）
+        array2 = array1;
+        System.out.println();
+        System.out.println(array1);
+        System.out.println(array2);
+
+        for (int i = 0; i < array2.length; i++) {
+            if (i % 2 == 0) {
+                array2[i] = i;
+            }
+        }
+
+        System.out.println();   // 换行
+        // 5. 打印出 `array1`
+        for (int i = 0; i < array1.length; i++) {
+            System.out.print(array1[i] + "\t");
+        }
+    }
+}
+
+```
+
+答案：`array1` 和 `array2` 是两个变量，共同指向了堆空间中的同一个数组结构；即二者的地址值相同。
+
+赋值时 `array1` 和 `array2` 的关系图解：
+![赋值时 `array1` 和 `array2` 的关系图解](./images/20251202112022.png "赋值时 `array1` 和 `array2` 的关系图解")
+
+> 拓展：修改题目，实现 `array2` 对 `array1` 数组的复制。
+
+示例代码：
+```java
+public class ArrayExer04_1 {
+    public static void main(String[] args) {
+        // 1. 创建一个名为 `ArrayExer04` 的类，在 `main()` 方法中声明 `array1` 和 `array2` 两个变量，它们是 `int[]` 类型的数组
+        int[] array1, array2;
+        // 2. 使用大括号 `{}`，把 `array1` 初始化为 8 个素数：`2, 3, 5, 7, 11, 13, 17, 19`
+        array1 = new int[]{2, 3, 5, 7, 11, 13, 17, 19};
+        // 3. 显示 `array1` 的内容
+        for (int i = 0; i < array1.length; i++) {
+            System.out.print(array1[i] + "\t");
+        }
+        // 4. 复制 `array1` 数组给 `array2`，修改 `array2` 中的偶索引元素，使其等于索引值（如 `array[0] = 0`、`array[2] = 2`）
+        array2 = new int[array1.length];
+        for (int i = 0; i < array1.length; i++) {
+            array2[i] = array1[i];
+        }
+
+        System.out.println();
+        System.out.println(array1);
+        System.out.println(array2);
+
+        for (int i = 0; i < array2.length; i++) {
+            if (i % 2 == 0) {
+                array2[i] = i;
+            }
+        }
+
+        System.out.println();   // 换行
+        // 5. 打印出 `array1`
+        for (int i = 0; i < array1.length; i++) {
+            System.out.print(array1[i] + "\t");
+        }
+    }
+}
+
+```
+
+复制时 `array1` 和 `array2` 的关系图解：
+![复制时 `array1` 和 `array2` 的关系图解](./images/20251202112349.png "复制时 `array1` 和 `array2` 的关系图解")
+
+### 6.3 数组元素的反转
+
+实现思想：数组对称位置的元素互换。
+
+![数组元素反转示意图](./images/image-20221117195931777.png "数组元素反转示意图")
+
+或者也可以通过以下方式实现：
+![数组元素反转的另一种实现方式示意图](./images/1561469087319.png "数组元素反转的另一种实现方式示意图")
+
+实现代码：
+```java
+public class ArrayExer05 {
+    public static void main(String[] args) {
+        int[] arr = new int[]{34, 54, 3, 2, 65, 7, 34, 5, 76, 34, 67};
+
+        // 遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + "\t");
+        }
+        System.out.println();
+
+        //反转操作
+        // 方式 1：
+//        for (int i = 0; i < arr.length / 2; i++) {
+//            // 交互 arr[i] 与 arr[arr.length - 1 - i] 位置的元素
+//            int temp = arr[i];
+//            arr[i] = arr[arr.length - i - 1];
+//            arr[arr.length - i - 1] = temp;
+//        }
+        // 方式 2：
+        for (int i = 0, j = arr.length - 1 /* 尾索引 */; i < j; i++, j--) {
+            // 交互 arr[i] 与 arr[j] 位置的元素
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+
+        // 方式 3（不推荐）：
+//        int[] newArr = new int[arr.length];
+//        for (int i = arr.length - 1; i >= 0; i--) {
+//            newArr[arr.length - 1 - i] = arr[i];
+//        }
+//
+//        arr = newArr;
+
+        // 遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + "\t");
+        }
+    }
+}
+
+```
+
+> 拓展：
+> 
+> 对称数组：
+> ![对称数组示意图](./images/20251202120416.png "对称数组示意图")
+
+### 6.4 数组的扩容与缩容
+
+#### 6.4.1 数组的扩容
+
+题目：
+> 现有数组 `int[] arr = new int[]{1, 2, 3, 4, 5};`，现将数组长度扩容 1 倍，并将 `10`、`20`、`30` 三个数据添加到 `arr` 数组中，如何操作？
+
+示例代码：
+```java
+public class ArrayExer01_1 {
+    public static void main(String[] args) {
+        int[] arr = new int[]{1, 2, 3, 4, 5};
+
+        // 扩容 1 倍容量
+//        int[] newArr = new int[arr.length * 2];
+        // 或
+        int[] newArr = new int[arr.length << 1];
+
+        // 将原有数组中的元素复制到新的数组中
+        for (int i = 0; i < arr.length; i++) {
+            newArr[i] = arr[i];
+        }
+
+        // 将 `10`、`20`、`30` 三个数据添加到新数组中
+        newArr[arr.length] = 10;
+        newArr[arr.length + 1] = 20;
+        newArr[arr.length + 2] = 30;
+
+        // 将新的数组的地址赋值给原有的数组变量
+        arr = newArr;
+
+        // 遍历 arr
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + "\t");
+        }
+    }
+}
+
+```
+
+#### 6.4.2 数组的缩容
+
+题目：
+> 现有数组 `int[] arr = {1, 2, 3, 4, 5, 6, 7};`；现需删除数组中索引为 `4` 的元素。
+
+示例代码：
+```java
+public class ArrayExer01_2 {
+    public static void main(String[] args) {
+        int[] arr = {1, 2, 3, 4, 5, 6, 7};
+
+        int deleteIndex = 4;
+
+        // 方式 1：不新建数组
+//        for (int i = deleteIndex; i < arr.length - 1; i++) {
+//            arr[i] = arr[i + 1];
+//        }
+//
+//        // 修改最后元素，设置为默认值
+//        arr[arr.length - 1] = 0;
+
+        // 方式 2：新建数组，新的数组的长度比原有数组的长度少 1 个
+        int[] newArr = new int[arr.length - 1];
+        for (int i = 0; i < deleteIndex; i++) {
+            newArr[i] = arr[i];
+        }
+
+        for (int i = deleteIndex; i < arr.length - 1; i++) {
+            newArr[i] = arr[i + 1];
+        }
+
+        arr = newArr;
+
+        // 遍历 arr 数组
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i] + "\t");
+        }
+    }
+}
+
+```
