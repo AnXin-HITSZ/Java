@@ -405,6 +405,10 @@ int[] arr = new int[]{1, 2, 3};
 
 ### 3.2 一维数组在内存中的存储
 
+前提 - 在 main() 中声明变量：`int[] arr = new int[]{1, 2, 3};`。
+* 虚拟机栈：`main()` 作为一个栈帧，压入栈空间中；在 `main()` 栈帧中，存储着 `arr` 变量，`arr` 记录着数组实体的首地址值。
+* 堆：数组实体存储在堆空间中。
+
 #### 3.2.1 一个一维数组内存图
 
 示例代码 1：
@@ -1871,3 +1875,166 @@ public class BubbleSortTest {
   * 当记录规模较小时，直接插入排序较好；否则因为直接选择移动的记录数少于直接插入，应选直接选择排序为宜。
 * 若文件初始状态基本有序（指正序），则应选用直接插入、冒泡或随机的快速排序为宜。
 * 若 n 较大，则应采用时间复杂度为 `O(nlgn)` 的排序方法：快速排序、堆排序或归并排序。
+
+## 七、Arrays 工具类的使用
+
+`java.util.Arrays` 类即为操作数组的工具类，包含了用来操作数组（比如排序和搜索）的各种方法。比如：
+* 数组元素拼接：
+  * static String toString(int[] a)：字符串表示形式由数组的元素列表组成，括在方括号（“`[]`”）中；相邻元素用字符“`, `”（逗号加空格）分隔。形式为：`[元素 1, 元素 2, 元素 3, ...]`。
+  * static String toString(Object[] a)：字符串表示形式由数组的元素列表组成，括在方括号（“`[]`”）中；相邻元素用字符“`, `”（逗号加空格）分隔。元素将自动调用自己从 `Object` 继承的 `toString` 方法将对象转为字符串进行拼接，如果没有重写则返回类型 `@hash` 值，如果重写则按重写返回的字符串进行拼接。
+* 数组排序：
+  * `static void sort(int[] a)`：将 `a` 数组按照从小到大进行排序。
+  * `static void sort(int[] a, int fromIndex, int toIndex)`：将 `a` 数组的 `[fromIndex, toIndex)` 部分按照升序排列。
+  * `static void sort(Object[] a)`：根据元素的自然顺序对指定对象数组按升序进行排序。
+  * `static <T> void sort(T[] a, Comparator<? super T> c)`：根据指定比较器产生的顺序对指定对象数组进行排序。
+* 数组元素的二分查找：
+  * `static int binarySearch(int[] a, int key)`、`static int binarySearch(Object[] a, Object key)`：要求数组有序，在数组中查找 `key` 是否存在，如果存在返回第一次找到的下标，不存在返回负数。
+* 数组的复制：
+  * `static int[] copyOf(int[] original, int newLength)`：根据 `original` 原数组复制一个长度为 `newLength` 的新数组，并返回新数组。
+  * `static <T> T[] copyOf(T[] original, int newLength)`：根据 `original` 原数组复制一个长度为 `newLength` 的新数组，并返回新数组。
+  * `static int[] copyOfRange(int[] original, int from, int to)`：复制 `original` 原数组的 `[from, to)` 构成新数组，并返回新数组。
+  * `static <T> T[] copyOfRange(T[] original, int from, int to)`：复制 `original` 原数组的 `[from, to)` 构成新数组，并返回新数组。
+* 比较两个数组是否相等：
+  * `static boolean equals(int[] a, int[] a2)`：比较两个数组的长度、元素是否完全相同。
+  * `static boolean equals(Object[] a, Object[] a2)`：比较两个数组的长度、元素是否完全相同。
+* 填充数组：
+  * `static void fill(int[] a, int val)`：用 `val` 值填充整个 `a` 数组。
+  * `static void fill(Object[] a, Object val)`：用 `val` 对象填充整个 `a` 数组。
+  * `static void fill(int[] a, int fromIndex, int toIndex, int val)`：将 `a` 数组 `[fromIndex, toIndex)` 部分填充为 `val` 值。
+  * `static void fill(Object[] a, int fromIndex, int toIndex, Object val)`：将 `a` 数组 `[fromIndex, toIndex)` 部分填充为 `val` 对象。
+
+举例 - `java.util.Arrays` 类的 `sort` 方法提供了数组元素排序功能：
+```java
+import java.util.Arrays;;
+public class SortTest {
+    public static void main(String[] args) {
+        int[] arr = {3, 2, 5, 1, 6};
+        System.out.println("排序前" + Arrays.toString(arr));
+        Arrays.sort(arr);
+        System.out.println("排序后" + Arrays.toString(arr));
+    }
+}
+
+```
+
+## 八、数组中的常见异常
+
+### 8.1 数组角标越界异常
+
+当访问数组元素时，下标指定超出 `[0, 数组名.length - 1]` 的范围时，就会报数组下标越界异常：`ArrayIndexOutOfBoundsException`。
+
+示例代码：
+```java
+public class TestArrayIndexOutOfBoundsException {
+    public static void main(String[] args) {
+        int[] arr = {1, 2, 3};
+        // System.out.println("最后一个元素：" + arr[3]);  // 错误，下标越界
+        // System.out.println("最后一个元素：" + arr[arr.length]); // 错误，下标越界
+        System.out.println("最后一个元素：" + arr[arr.length - 1]); // 正确
+    }
+}
+
+```
+
+创建数组，赋值 3 个元素，数组的索引就是 `0`、`1`、`2`，没有 `3` 索引，因此我们不能访问数组中不存在的索引；如果我们访问数组中不存在的索引，程序运行后将会抛出 `ArrayIndexOutOfBoundsException` 数组越界异常。在开发中，数组的越界异常是不能出现的，一旦出现了，就必须要修改我们编写的代码。
+
+![数组越界异常](./images/数组越界异常.jpg "数组越界异常")
+
+### 8.2 空指针异常
+
+观察以下代码，运行后会出现什么结果：
+```java
+public class TestNullPointerException {
+    public static void main(String[] args) {
+        // 定义数组
+        int[][] arr = new int[3][];
+
+        System.out.println(arr[0][0]);  // NullPointerException
+    }
+}
+
+```
+
+因为此时数组的每一行还未分配具体存储元素的空间，此时 `arr[0]` 是 `null`，此时访问 `arr[0][0]` 会抛出 `NullPointerException` 空指针异常：
+![空指针异常](./images/空指针异常-1647708157677.jpg "空指针异常")
+
+空指针异常在内存图中的表现：
+![空指针异常在内存图中的表现](./images/1572338767825-1647708157678.png "空指针异常在内存图中的表现")
+
+小结 - 空指针异常情况：
+```java
+public class ArrayExceptionTest {
+    public static void main(String[] args) {
+        // 1. 数组角标越界的异常：
+        int[] arr = new int[10];
+        // 角标的有效范围：0、1、2、...、9
+//        System.out.println(arr[10]);
+//        System.out.println(arr[-1]);
+
+        // 2. 空指针异常：
+        // 情况 1：
+//        int[] arr1 = new int[10];
+//
+//        arr1 = null;
+//
+//        System.out.println(arr1[0]);    // NullPointerException
+
+        // 情况 2：
+//        int[][] arr2 = new int[3][];
+//
+////        arr2[0] = new int[1]; // 此行代码不存在时，下一行代码出现 NullPointerException
+//
+//        System.out.println(arr2[0][1]); // NullPointerException
+
+        // 情况 3：
+        String[] arr3 = new String[4];
+        System.out.println(arr3[0].toString()); // NullPointerException
+    }
+}
+
+```
+
+### 8.3 出现异常会怎样？如何处理？
+
+一旦程序执行中出现了异常，程序就会终止执行。
+
+针对异常提供的信息，修改对应的代码，避免异常再次出现。
+
+## 九、企业真题
+
+**1. （\* 蓝）数组有没有 `length()` 这个方法？`String` 有没有 `length()` 这个方法？**
+答：
+* 数组没有 `length()`，是 `length` 属性；
+* `String` 有 `length()`。
+
+**2. （闪 \* 购）有数组 `int[] arr`，用 Java 代码将数组元素顺序颠倒。**
+答：
+* 略。
+
+**3. （中 \* 支付）为什么数组要从 `0` 开始编号，而不是 `1`？**
+答：
+* 数组的索引，表示了数组元素距离首地址的偏移量。因为第 `1` 个元素的地址与首地址相同，所以偏移量就是 `0`。所以从 `0` 开始。
+
+**4. （平 \* 保险）数组有什么排序的方式？手写一下。**
+答：
+* 冒泡；
+* 快排。
+
+**5. （5 \* 到家）常见排序算法？说下快排过程，及其时间复杂度？**
+答：
+* 常见 10 大内排序算法；
+* 快排的时间复杂度：`O(nlogn)`。
+
+**6. （神舟 \* 天软件）二分算法实现数组的查找？**
+答：
+* 略。
+
+**7. （携 \*）怎么求数组的最大子序列和？**
+答：
+```java
+
+```
+
+**8. （阿 \*、阿 \* 校招）`Arrays` 类的排序方法是什么？如何实现排序的？**
+答：
+* 略。
