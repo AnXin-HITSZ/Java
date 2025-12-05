@@ -159,11 +159,267 @@
 现实生物世界中的细胞又是由什么构成的呢？细胞核、细胞质、……
 Java 中用类 class 来描述事物也是如此。类，是一组相关**属性**和**行为**的集合，这也是类最基本的两个成员。
 * **属性**：该类事物的状态信息。对应类中的**成员变量**。
-  * `成员变量 <=> 属性 <=> Field`。
+  * `成员变量 <=> 属性 <=> Field（字段、域）`。
 * **行为**：该类事物要做什么操作，或者基于事物的状态能做什么。对应类中的**成员方法**。
-  * `（成员）方法 <=> 函数 <=> Method`。
+  * `（成员）方法 <=> 函数（、过程） <=> Method`。
 
 ![简历中的“属性”与“行为”](./images/20251203202439.png "简历中的“属性”与“行为”")
 
 举例：
 ![具体代码中的属性和方法示例](/images/0251203202548.png "具体代码中的属性和方法示例")
+
+### 2.4 面向对象完成功能的三步骤（重要）
+
+**步骤 1：类的定义**
+
+类的定义使用关键字：`class`。格式如下：
+```java
+[修饰符] class 类名{
+    属性声明;
+    方法声明;
+}
+```
+
+**步骤 2：对象的创建**
+
+![对象的创建](./images/20251205102939.png "对象的创建")
+
+创建对象，使用关键字：`new`。
+
+创建对象语法：
+```java
+// 方式 1：给创建的对象命名
+// 把创建的对象用一个引用数据类型的变量保存起来，这样就可以反复使用这个对象了
+类名 对象名 = new 类名();
+
+// 方式 2：
+new 类名(); // 也称为匿名对象
+```
+
+**步骤 3：对象调用属性或方法**
+
+对象是类的一个**实例**，必然具备该类事物的属性和行为（即方法）。
+
+使用 “`对象名.属性`” 或 “`对象名.方法`” 的方式访问对象成员（包括属性和方法）。
+
+示例代码：
+* `Phone.java`：
+```java
+public class Phone {
+
+    // 属性
+    String name;    // 品牌
+    double price;   // 价格
+
+
+    // 方法
+    public void call(){
+        System.out.println("手机能够拨打电话");
+    }
+
+    public void sendMessage(String message){
+        System.out.println("发送信息：" + message);
+    }
+
+    public void playGame(){
+        System.out.println("手机可以玩游戏");
+    }
+}
+
+```
+* `PhoneTest.java`：
+```java
+public class PhoneTest {    // 是 Phone 类的测试类
+    public static void main(String[] args) {
+
+        // 复习：数据类型 变量名 = 变量值
+//        Scanner scann = new Scanner(System.in);
+
+        // 创建 Phone 的对象
+        Phone p1 = new Phone();
+
+        // 通过 Phone 的对象，调用其内部声明的属性或方法
+        // 格式："对象.属性" 或 "对象.方法"
+        p1.name = "huawei mate50";
+        p1.price = 6999;
+
+        System.out.println("name = " + p1.name + "，price = " + p1.price);
+
+        // 调用方法
+        p1.call();
+        p1.sendMessage("有内鬼，终止交易");
+        p1.playGame();
+    }
+}
+
+```
+
+### 2.5 匿名对象（anonymous object）
+
+我们也可以不定义对象的句柄，而直接调用这个对象的方法。这样的对象叫做匿名对象。
+  * 如：`new Person().shout();`。
+
+使用情况：
+* 如果一个对象只需要进行一次方法调用，那么就可以使用匿名对象。
+* 我们经常将匿名对象作为实参传递给一个方法调用。
+
+## 三、对象的内存解析
+
+### 3.1 JVM 内存结构划分
+
+HotSpot（Oracle 自己发布的 Java 虚拟机，即官方发布的虚拟机） Java 虚拟机的架构图如下。其中我们主要关心的是运行时数据区部分（Runtime Data Area）。
+![HotSpot Java 虚拟机架构图](./images/20251205103829.png "HotSpot Java 虚拟机架构图")
+
+其中：
+* **堆（Heap）**：此内存区域的唯一目的就是存放对象实例，几乎所有的对象实例都在这里分配内存。这一点在 Java 虚拟机规范中的描述是：所有的对象实例以及数组都要在堆上分配。
+  * 即：`new` 出来的结构（比如：数组实体、对象的实体），包括对象中的属性。
+* **栈（Stack）**：是指虚拟机栈。虚拟机栈用于存储局部变量等。局部变量表存放了编译器可知长度的各种基本数据类型（`boolean`、`byte`、`char`、`short`、`int`、`float`、`long`、`double`）、对象引用（`reference` 类型，它不等同于对象本身，是对象在堆内存的首地址）。方法执行完，自动释放。
+  * 即：方法内定义的变量，存储在栈中。
+* **方法区（Method Area）**：用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。
+  * 即：存放类的模板，比如 `Person` 类的模板。
+
+### 3.2 对象的内存解析
+
+举例：
+```java
+class Person {  // 类：人
+    String name;
+    int age;
+    boolean isMale;
+}
+
+public static PersonTest {  // 测试类
+    public static void main(String[] args) {
+        Person p1 = new Person();
+        p1.name = "赵同学";
+        p1.age = 20;
+        p1.isMale = true;
+
+        Person p2 = new Person();
+        p2.age = 10;
+
+        Person p3 = p1;
+        p3.name = "郭同学";
+    }
+}
+
+```
+内存解析图：
+![内存解析图](./images/20251205104733.png "内存解析图")
+
+> 说明：
+> * 堆：凡是 `new` 出来的结构（对象、数组）都存放在堆空间中。
+> * 对象的属性存放在堆空间中。
+> * 创建一个类的多个对象（比如 `p1`、`p2`），则每个对象都拥有当前类的一套“副本”（即属性）。当通过一个对象修改其属性时，不会影响其他对象此属性的值。
+> * 当声明一个新的变量使用现有的对象进行赋值时（比如 `p3 = p1`），此时并没有在堆空间中创建新的对象，而是两个变量共同指向了堆空间中同一个对象；当通过一个对象修改属性时，会影响另外一个对象对此属性的调用。
+
+**1. 创建类的一个对象，属性赋值：**
+
+示例代码：
+```java
+public static void main(String[] args) {
+    Person p1 = new Person();
+    p1.name = "杰克";
+    p1.age = 24;
+    p1.gender = '男';
+}
+```
+
+内存解析：
+![示例代码内存解析](./images/20251205114058.png "示例代码内存解析")
+
+**2. 创建类的多个对象，属性赋值：**
+
+示例代码 1：
+```java
+public static void main(String[] args) {
+    Person p1 = new Person();
+    p1.name = "杰克";
+    p1.age = 24;
+
+    // 创建 Person 的对象 2
+    Person p2 = new Person();
+    p2.name = "露丝";
+    p2.age = 20;
+
+    p1.age = 26;
+    System.out.println(p2.age); // 20
+}
+```
+内存解析 1：
+![示例代码 1 内存解析](./images/20251205114438.png "示例代码 1 内存解析")
+
+示例代码 2：
+```java
+public static void main(String[] args) {
+    Person p1 = new Person();
+    p1.name = "杰克";
+    p1.age = 24;
+
+    // 创建 Person 的对象 2
+    Person p2 = new Person();
+    p2.name = "露丝";
+    p2.age = 20;
+
+    p1.age = 26;
+    System.out.println(p2.age); // 20
+
+    Person p3 = p1;
+    p3.age = 28;
+}
+```
+内存解析 2：
+![示例代码 2 内存解析](./images/20251205115508.png "示例代码 2 内存解析")
+
+强调：
+**1. 创建了 `Person` 类的两个对象：**
+
+```java
+Person p1 = new Person();
+Person p2 = new Person();
+```
+说明：创建类的多个对象时，每个对象在堆空间中有一个对象实体，每个对象实体中保存着一份类的属性；如果修改某一个对象的某属性值时，不会影响其他对象此属性的值。
+
+示例代码：
+```java
+p1.age = 10;
+p2.age = 20;
+
+p1.age = 30;
+System.out.println(p2.age); // 20
+```
+**2. 声明类的两个变量：**
+
+```java
+Person p1 = new Person();
+Person p3 = p1;
+```
+说明：此时的 `p1`、`p3` 两个变量指向了堆空间中的同一个对象实体（或 `p1`、`p3` 保存的地址值相同）；如果通过其中某一个对象变量修改对象的属性时，会影响另一个对象变量此属性的值。
+
+示例代码：
+```java
+p1.age = 10;
+p3.age = 20;
+System.out.println(p1.age); // 20
+```
+
+> **面试题：对象名中存储的是什么呢？**
+>
+> 答：对象地址。
+>
+> ```java
+> public class StudentTest{
+>     public static void main(String[] args){
+>         System.out.println(new Student());  // Student@7852e922
+> 
+>         Student stu = new Student();
+>         System.out.println(stu);    // Student@4e25154f
+> 
+>         int[] arr = new int[5];
+>         System.out.println(arr);    // [I@70dea4e
+>     }
+> }
+> 
+> ```
+> 直接打印对象名和数组名都是显示 “`类型@对象的 hashCode 值`”，所以说**类、数组都是引用数据类型，引用数据类型的变量中存储的是对象的地址，或者说指向堆中对象的首地址。**
+> ![类、数组的内存解析](./images/20251205105827.png "类、数组的内存解析")
