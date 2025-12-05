@@ -203,8 +203,9 @@ new 类名(); // 也称为匿名对象
 使用 “`对象名.属性`” 或 “`对象名.方法`” 的方式访问对象成员（包括属性和方法）。
 
 示例代码：
-* `Phone.java`：
 ```java
+/* Phone.java */
+
 public class Phone {
 
     // 属性
@@ -226,9 +227,9 @@ public class Phone {
     }
 }
 
-```
-* `PhoneTest.java`：
-```java
+
+/* PhoneTest.java */
+
 public class PhoneTest {    // 是 Phone 类的测试类
     public static void main(String[] args) {
 
@@ -423,3 +424,227 @@ System.out.println(p1.age); // 20
 > ```
 > 直接打印对象名和数组名都是显示 “`类型@对象的 hashCode 值`”，所以说**类、数组都是引用数据类型，引用数据类型的变量中存储的是对象的地址，或者说指向堆中对象的首地址。**
 > ![类、数组的内存解析](./images/20251205105827.png "类、数组的内存解析")
+
+## 四、类的成员之一：成员变量（field）
+
+### 4.1 如何声明成员变量
+
+语法格式：
+```java
+[修饰符 1] class 类名{
+    [修饰符 2] 数据类型 成员变量名 [= 初始化值];
+}
+```
+
+说明：
+* 位置要求：必须在类中，方法外。
+* 修饰符 2（暂不考虑）：
+  * 常用的权限修饰符有：`private`、缺省、`protected`、`public`（用于表明所修饰的结构可调用的范围的大小）；
+  * 其他修饰符：`static`、`final`。
+* 数据类型：
+  * 任何基本数据类型（如 `int`、`Boolean`）或任何引用数据类型。
+* 成员变量名：
+  * 属于标识符，符合命名规则和规范即可。
+* 初始化值：
+  * 根据情况，可以显式赋值；也可以不赋值，使用默认值。
+
+### 4.2 成员变量 vs 局部变量
+
+#### 4.2.1 变量的分类：成员变量与局部变量
+
+在方法体外、类体内声明的变量称为成员变量；在方法体内部（、方法形参、构造器内、构造器形参、代码块内）等位置声明的变量称为局部变量。
+
+> 属性的几个称谓：成员变量、属性、field（字段、域）。
+
+示例图：
+![成员变量与局部变量示例图](./images/20251205194636.png "成员变量与局部变量示例图")
+
+所有变量的分类结构图：
+![所有变量的分类结构图](./images/20251205194731.png "所有变量的分类结构图")
+
+> 其中，`static` 可以将成员变量分为两大类，分别为静态变量和非静态变量。其中静态变量又称为类变量，非静态变量又称为实例变量或者属性。接下来先学习实例变量。
+
+#### 4.2.2 成员变量与局部变量的对比
+
+相同点：
+* 变量声明的格式相同：`数据类型 变量名 = 初始化值`；
+* 变量必须先声明、后初始化、再使用；
+* 变量都有其对应的作用域，只在其作用域内是有效的。
+
+不同点：
+* 声明位置和方式：
+  * 实例变量：在类中方法外。
+  * 局部变量：在方法体 `{}` 中、构造器内部或方法的形参列表、代码块中。
+* 在内存中存储的位置不同：
+  * 实例变量：随着对象的创建，存储在堆空间中。
+  * 局部变量：存储在栈空间中。
+* 生命周期：
+  * 实例变量：和对象的生命周期一样，随着对象的创建而存在，随着对象被 GC 回收而消亡，而且每一个对象的实例变量是独立的；
+    * 即：随着对象的创建而创建，随着对象的消亡而消亡。
+  * 局部变量：和方法调用的生命周期一样，每一次方法被调用而存在，随着方法执行的结束而消亡，而且每一次方法调用都是独立；
+    * 即：随着方法对应的栈帧入栈，局部变量会在栈中分配；随着方法对应的栈帧出栈，局部变量消亡。
+* 作用域：
+  * 实例变量：通过对象就可以使用，本类中直接调用，其他类中通过 “`对象.实例变量`” 调用；
+    * 即：在整个类的内部都是有效的。
+  * 局部变量：出了作用域就不能使用；
+    * 即：仅限于声明此局部变量所在的方法（或构造器、代码块）中。
+* 是否可以有权限修饰符进行修饰：
+  * 实例变量：`public`、`protected`、`private`、`final`、`volatile`、`transient` 等；
+    * 即：属性是可以使用权限修饰符进行修饰的。
+  * 局部变量：`final`；
+    * 即：局部变量不能使用任何权限修饰符进行修饰的。
+* 是否有默认值：
+  * 实例变量：都有默认初始化值；
+    * 即：意味着，如果没有给属性进行显式初始化赋值，则会有默认初始化值。
+  * 局部变量：都没有默认初始化值，必须手动初始化；其中的形参比较特殊，靠实参给它初始化；
+    * 即：意味着，在使用局部变量之前，必须要显式的赋值，否则报错。
+
+> 注意：对于方法的形参而言，在调用方法时，给此形参赋值即可。
+
+#### 4.2.3 对象属性的默认初始化赋值
+
+当一个对象被创建时，会对其中各种类型的成员变量自动进行初始化赋值。
+![对象属性的默认初始化赋值情况表](./images/20251205200100.png "对象属性的默认初始化赋值情况表")
+
+#### 4.2.4 举例
+
+**举例 1：**
+
+示例代码：
+```java
+class Person {  // 人类
+    // 1. 属性
+    String name;    // 姓名
+    int age = 1;    // 年龄
+    boolean isMale; // 是否是男性
+
+    public void show(String nation) {
+        // nation：局部变量
+        String color;   // color：局部变量
+        color = "yellow";
+    }
+}
+
+// 测试类
+class PersonTest {
+    public static void main(String[] args) {
+        Person p = new Person();
+        p.show("CHN");
+    }
+}
+
+```
+
+上述示例代码对应内存解析如下图所示：
+![示例代码对应内存解析示意图](./images/20251205200602.png "示例代码对应内存解析示意图")
+
+**举例 2：**
+> 声明员工类 `Employee`，包含属性、编号 `id`、姓名 `name`、年龄 `age`、薪资 `salary`。
+>
+> 声明 `EmployeeTest` 测试类，并在 `main` 方法中，创建 2 个员工变量，并为属性赋值，并打印两个员工的信息。
+
+示例代码：
+```java
+/* Employee.java */
+
+public class Employee {
+
+    // 属性（或成员变量）
+    int id; // 编号
+    String name;    // 姓名
+    int age;    // 年龄
+    double salary;  // 薪资
+
+
+}
+
+
+/* EmployeeTest.java */
+
+public class EmployeeTest {
+    public static void main(String[] args) {
+        // 创建类的实例（或 创建类的对象、类的实例化）
+        Employee emp1 = new Employee();
+
+        System.out.println(emp1);   // 类型@地址值
+
+        emp1.id = 1001;
+        emp1.name = "Tom";
+        emp1.age = 24;
+        emp1.salary = 7800;
+
+        System.out.println("id = " + emp1.id + "，name = " + emp1.name +
+                "，age = " + emp1.age + "，salary = " + emp1.salary);
+
+        // 创建 Employee 的第 2 个对象
+//        Employee emp3 = emp1;   // 错误写法
+        Employee emp2 = new Employee();
+
+        System.out.println("id = " + emp2.id + "，name = " + emp2.name +
+                "，age = " + emp2.age + "，salary = " + emp2.salary);
+
+    }
+}
+
+```
+
+**举例 3：**
+> 1. 声明一个 `MyDate` 类型，有属性：年 `year`、月 `month`、日 `day`；
+> 2. 声明一个 `Employee` 类型，包含属性：编号、姓名、年龄、薪资、生日（`Mydate` 类型）；
+> 3. 在 `EmployeeTest` 测试类中的 `main()` 中，创建两个员工对象，并为他们的姓名和生日赋值，并显示。
+
+示例代码：
+```java
+/* MyDate.java */
+
+public class MyDate {
+    int year;   // 年
+    int month;  // 月
+    int day;    // 日
+}
+
+
+/* Employee.java */
+
+public class Employee {
+
+    int id; // 编号
+    String name;    // 姓名
+    int age;    // 年龄
+    double salary;  // 薪资
+    MyDate birthday;    // 生日
+}
+
+
+/* EmployeeTest.java */
+
+public class EmployeeTest {
+    public static void main(String[] args) {
+
+        // 创建 Employee 的一个实例
+        Employee emp1 = new Employee();
+
+        emp1.id = 1001;
+        emp1.name = "杰克";   // emp1.name = new String("杰克");
+        emp1.age = 24;
+        emp1.salary = 8900;
+        emp1.birthday = new MyDate();
+        emp1.birthday.year = 1998;
+        emp1.birthday.month = 2;
+        emp1.birthday.day = 28;
+        /*
+        另一种写法：
+        * MyDate mydate1 = new MyDate();
+        * emp1.birthday = mydate1;
+        * */
+
+        // 打印员工信息
+        System.out.println("id = " + emp1.id + "，name = " + emp1.name +
+                "，age = " + emp1.age + "，salary = " + emp1.salary +
+                "，birthday = [" + emp1.birthday.year + " 年 " + emp1.birthday.month +
+                " 月 " + emp1.birthday.day + " 日]");
+
+    }
+}
+
+```
