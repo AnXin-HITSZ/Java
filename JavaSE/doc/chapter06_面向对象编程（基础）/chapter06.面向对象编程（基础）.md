@@ -776,6 +776,73 @@ class Person{
 
 #### 5.3.3 代码示例
 
+案例：
+> 将属性测试的 exer1 中关于员工信息的输出内容放到方法中，通过调用方法显示。
+
+示例代码：
+```java
+/* Employee.java */
+
+public class Employee {
+
+    // 属性（或成员变量）
+    int id; // 编号
+    String name;    // 姓名
+    int age;    // 年龄
+    double salary;  // 薪资
+
+    // 定义一个方法，用于显示员工的信息
+    public void show(){
+        System.out.println("id = " + id + "，name = " + name +
+                "，age = " + age + "，salary = " + salary);
+    }
+
+    public String show1(){
+        return "id = " + id + "，name = " + name +
+                "，age = " + age + "，salary = " + salary;
+    }
+}
+
+
+/* EmployeeTest.java */
+
+public class EmployeeTest {
+    public static void main(String[] args) {
+        // 创建类的实例（或 创建类的对象、类的实例化）
+        Employee emp1 = new Employee();
+
+        System.out.println(emp1);   // 类型@地址值
+
+        emp1.id = 1001;
+        emp1.name = "Tom";
+        emp1.age = 24;
+        emp1.salary = 7800;
+
+//        System.out.println("id = " + emp1.id + "，name = " + emp1.name +
+//                "，age = " + emp1.age + "，salary = " + emp1.salary);
+
+        // 替换为：
+        emp1.show();
+
+//        System.out.println(emp1.show());  // 编译报错
+
+        System.out.println(emp1.show1());   // 编译通过
+
+        // 创建 Employee 的第 2 个对象
+//        Employee emp3 = emp1;   // 错误写法
+        Employee emp2 = new Employee();
+
+//        System.out.println("id = " + emp2.id + "，name = " + emp2.name +
+//                "，age = " + emp2.age + "，salary = " + emp2.salary);
+
+        // 替换为：
+        emp2.show();
+
+    }
+}
+
+```
+
 ### 5.4 如何调用实例方法
 
 方法通过方法名被调用，且只有被调用才会执行。
@@ -822,3 +889,354 @@ class Person{
 * 作用 2：结束一个方法的同时，可以返回数据给方法的调用者（方法声明中如果有返回值类型，则方法内需要搭配 `return` 使用）。
 
 注意点：在 `return` 关键字的直接后面不能声明执行语句。
+
+### 5.7 方法调用内存分析
+
+方法**没有被调用**的时候，都在**方法区**中的字节码文件（`.class`）中存储。
+
+方法**被调用**的时候，需要进入到**栈内存**中运行。方法每调用一次就会在栈中有一个**入栈**动作，即给当前方法开辟一块独立的内存区域，用于存储当前方法的局部变量的值。
+
+当方法执行结束后，会释放该内存，称为**出栈**。如果方法有返回值，就会把结果返回调用处；如果没有返回值，就直接结束，回到调用处继续执行下一条指令。
+
+> 栈结构：先进后出，后进先出。
+
+形参：方法在声明时，一对 `()` 内声明的一个或多个形式参数，简称为形参。
+实参：方法在被调用时，实际传递给形参的变量或常量，就称为实际参数，简称实参。
+
+对于对象调用方法的过程，示例代码如下所示：
+```java
+public static void main(String[] args) {
+  Person p1 = new Person();
+  p1.name = "杰克";
+  p1.age = 24;
+  p1.gender = '男';
+
+  p1.eat();
+
+  p1.sleep(6);
+  p1.interests("编程");
+}
+```
+
+内存解析：
+![示例代码内存解析](./images/20251207163937.png "示例代码内存解析")
+
+> 注意：栈中不存在 GC，只存在入栈和出栈；GC 存在于堆。
+
+### 5.8 练习
+
+**案例 1：**
+> 1. 创建 `Person` 类的对象，设置该对象的 `name`、`age` 和 `gender` 属性。调用 `study` 方法，输出字符串“`studying`”；调用 `showAge()` 方法，返回 `age` 值；调用 `addAge(int addAge)` 方法给对象的 `age` 属性值增加 `addAge` 岁，比如 `2` 岁。
+> 2. 创建第二个对象，执行上述操作，体会同一个类的不同对象之间的关系。
+
+示例代码：
+```java
+/* Person.java */
+
+public class Person {
+    String name;
+    int age;
+    char gender;
+
+    public void study(){
+        System.out.println("studying");
+    }
+
+    public int showAge(){
+        return age;
+    }
+
+    public void addAge(int addAge){
+        age += addAge;
+    }
+}
+
+
+/* PersonTest.java */
+
+public class PersonTest {
+    public static void main(String[] args) {
+        Person p1 = new Person();
+
+        // 调用属性
+        p1.name = "Tom";
+        p1.age = 12;
+        p1.gender = '男';
+
+        // 调用方法
+        p1.study();
+
+        p1.addAge(2);
+
+        int age = p1.showAge();
+        System.out.println("age = " + age); // 12 -> 14
+
+
+        Person p2 = new Person();
+
+        System.out.println(p2.age); // 0
+
+        p2.addAge(10);
+
+        System.out.println(p2.showAge());   // 10
+
+        System.out.println(p1.showAge());   // 14
+    }
+}
+
+```
+
+**案例 2：**
+> 1. 编写程序，声明一个 `method1` 方法，在方法中打印一个 10 * 8 的 `*` 型矩阵，在 `main` 方法中调用该方法。
+> 2. 编写程序，声明一个 `method2` 方法，除打印一个 10 * 8 的 `*` 型矩阵外，再计算该矩形的面积，并将其作为方法的返回值。在 `main` 方法中调用该方法，接收返回的面积值并打印。
+> 3. 编写程序，声明一个 `method3` 方法，在 `method3` 方法提供 `m` 和 `n` 两个参数，方法中打印一个 m * n 的 `*` 型矩形，并计算该矩形的面积，将其作为方法返回值。在 `main` 方法中调用该方法，接收返回的面积值并打印。
+
+示例代码：
+```java
+/* Exer02.java */
+
+public class Exer02 {
+
+    public void method1(){
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }
+    }
+
+    public int method2(){
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }
+
+        return 10 * 8;
+    }
+
+    public int method3(int m, int n){
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }
+
+        return m * n;
+    }
+}
+
+
+/* Exer02Test.java */
+
+public class Exer02Test {
+    public static void main(String[] args) {
+
+        // 创建 Exer02 的对象
+        Exer02 exer = new Exer02();
+//        exer.method1();
+
+//        int area = exer.method2();
+//        System.out.println("面积为：" + area);
+
+        int area1 = exer.method3(3, 8);
+        System.out.println("面积为：" + area1);
+    }
+}
+
+```
+
+**案例 3：**
+> 利用面向对象的编程方法，设计类 `Circle` 计算圆的面积。
+
+示例代码：
+```java
+/* Circle.java */
+
+public class Circle {
+    // 属性
+    double radius;  // 半径
+
+    // 方法
+    public void findArea() {
+        System.out.println("面积为：" + 3.14 * radius * radius);
+    }
+    // 或：
+    public double findArea2() {
+        return 3.14 * radius * radius;
+    }
+
+    // 错误的：
+//    public void findArea1(double r) {
+//        System.out.println("面积为：" + 3.14 * r * r);
+//    }
+
+}
+
+
+/* CircleTest.java */
+
+public class CircleTest {
+    public static void main(String[] args) {
+        Circle c1 = new Circle();
+
+        c1.radius = 2.3;
+        c1.findArea();
+
+        System.out.println("面积为：" + c1.findArea2());
+    }
+}
+
+```
+
+**案例 4：**
+> 根据上一章数组中常用的算法操作，自定义一个操作 `int[]` 的工具类。
+>
+> 涉及到的方法有：求最大值、最小值、总和、平均数、遍历数组、复制数组、数组反转、数组排序（默认从小到大排序）、查找等。
+
+示例代码：
+```java
+/* MyArrays.java */
+
+public class MyArrays {
+
+    /**
+     * 获取 int[] 数组的最大值
+     * @param arr 要获取最大值的数组
+     * @return 数组的最大值
+     */
+    public int getMax(int[] arr) {
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (max < arr[i]) {
+                max = arr[i];
+            }
+        }
+        return max;
+    }
+
+    /**
+     * 获取 int[] 数组的最小值
+     * @param arr 要获取最小值的数组
+     * @return 数组的最小值
+     */
+    public int getMin(int[] arr) {
+        int min = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (min > arr[i]) {
+                min = arr[i];
+            }
+        }
+        return min;
+    }
+
+    public int getSum(int[] arr) {
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
+        }
+        return sum;
+    }
+
+    public int getAvg(int[] arr) {
+
+        return getSum(arr) / arr.length;
+    }
+
+    public void print(int[] arr) {  // [12, 231, 34, ...]
+        System.out.print("[");
+        for (int i = 0; i < arr.length; i++) {
+            if (i == 0) {
+                System.out.print(arr[i]);
+            } else {
+                System.out.print(", " + arr[i]);
+            }
+        }
+
+        System.out.println("]");
+    }
+
+    public int[] copy(int[] arr) {
+        int[] newArr = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            newArr[i] = arr[i];
+        }
+        return newArr;
+    }
+
+    public void reverse(int[] arr) {
+        for (int i = 0, j = arr.length - 1 /* 尾索引 */; i < j; i++, j--) {
+            // 交互 arr[i] 与 arr[j] 位置的元素
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+
+    public void sort(int[] arr) {
+        for (int j = 0; j < arr.length - 1; j++) {
+            for (int i = 0; i < arr.length - 1 - j; i++) {
+                if (arr[i] > arr[i + 1]) {
+                    // 交互 arr[i] 和 arr[i + 1]
+                    int temp = arr[i];
+                    arr[i] = arr[i + 1];
+                    arr[i + 1] = temp;
+                }
+            }
+        }
+    }
+
+    /**
+     * 使用线性查找的算法，查找指定的元素
+     * @param arr 待查找的数组
+     * @param target 要查找的元素
+     * @return target 元素在 arr 数组中的索引位置。若未找到，则返回 -1
+     */
+    public int linearSearch(int[] arr, int target) {
+        for (int i = 0; i < arr.length; i++) {
+            if (target == arr[i]) {
+                return i;
+            }
+        }
+
+        // 只要代码执行到此位置，一定是没找到
+        return -1;
+    }
+}
+
+
+/* MyArraysTest.java */
+
+public class MyArraysTest {
+    public static void main(String[] args) {
+
+        MyArrays arrs = new MyArrays();
+        int[] arr = new int[] {34, 56, 223, 2, 56, 24, 56, 67, 778, 45};
+
+        // 求最大值
+        System.out.println("最大值为：" + arrs.getMax(arr));
+        // 求平均值
+        System.out.println("平均值为：" + arrs.getAvg(arr));
+
+        // 遍历
+        arrs.print(arr);
+
+        // 查找
+        int index = arrs.linearSearch(arr, 24);
+        if (index >= 0) {
+            System.out.println("找到了，位置：" + index);
+        } else {
+            System.out.println("未找到");
+        }
+
+        // 排序
+        arrs.sort(arr);
+        // 遍历
+        arrs.print(arr);
+    }
+}
+
+```
