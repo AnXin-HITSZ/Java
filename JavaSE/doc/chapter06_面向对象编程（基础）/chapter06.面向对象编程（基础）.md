@@ -1516,3 +1516,389 @@ public class StudentTest {
 ### 6.2 注意点
 
 对象数组，首先要创建数组对象本身，即确定数组的长度，然后再创建每一个元素对象。如果不创建，数组的元素的默认值就是 `null`，所以很容易出现 `空指针异常 NullPointerException`。
+
+## 七、再谈方法
+
+### 7.1 方法的重载（overload）
+
+#### 7.1.1 概念及特点
+
+**方法重载**：在同一个类中，允许存在一个以上的同名方法，只要它们的参数列表不同即可；满足这样特征的多个方法，彼此之间构成方法的重载。
+* 参数列表不同，意味着参数个数或参数类型的不同。
+
+例如，`Arrays` 类中 `sort(xxx[] arr)`、`binarySearch(xxx[] arr, xxx)`、`equals(xxx[], yyy[])`。
+
+> 总结为：“两同一不同”。
+> * 两同：同一个类、相同的方法名。
+> * 一不同：参数列表不同（1. 参数个数不同；2. 参数类型不同）。
+>
+> 注意：此处的“2. 参数类型不同”可指参数的顺序不同。
+
+**重载的特点**：与修饰符、返回值类型无关，只看参数列表，且参数列表必须不同（参数个数或参数类型）。调用时，根据方法参数列表的不同来区别。
+
+> 注意：方法的重载与形参的名、权限修饰符、返回值类型都没有关系。
+
+**重载方法调用**：JVM 通过方法的参数列表，调用匹配的方法。
+* 先找个数、类型最匹配的；
+* 再找个数和类型可以兼容的，如果同时多个方法可以兼容将会报错。
+
+> 注意：在同一个类中不允许定义两个相同的方法。
+>
+> 如何判断两个方法是相同的呢？（换句话说，编译器是如何确定调用的某个具体的方法呢？）
+> * 方法名相同，且形参列表相同（形参列表相同指的是参数个数和类型都相同，与形参名没关系）。
+>
+> 要求：在一个类中，允许存在多个相同名字的方法，只要它们的形参列表不同即可。
+>
+> 编译器是如何确定调用的某个具体的方法呢？
+> * 先通过方法名确定了某个或某些重载的方法，进而通过不同的形参列表，确定具体的某一个方法。
+
+> 面试题：
+>
+> 问以下代码的执行结果是什么？
+> ```java
+> public class InterviewTest {
+>     public static void main(String[] args) {
+> 
+>         int[] arr = new int[]{1, 2, 3};
+>         System.out.println(arr);    // 地址值
+> 
+>         char[] arr1 = new char[]{'a', 'b', 'c', 'd', 'e'};
+>         System.out.println(arr1);   // abcde
+> 
+>         boolean[] arr2 = new boolean[]{false, true, true};
+>         System.out.println(arr2);   //地址值
+> 
+>     }
+> }
+> ```
+>
+> `System.out.println(arr1);` 的执行结果与其余两个 `sout` 的执行结果不同的原因在于，`System.out.println(arr1);` 对函数 `println()` 进行了重载。
+
+#### 7.1.2 示例
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._01overload;
+
+/**
+ * ClassName: OverloadTest
+ * Package: com.anxin_hitsz_05.method_more._01overload
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/16 20:04
+ * @Version 1.0
+ */
+public class OverloadTest {
+    public static void main(String[] args) {
+
+        OverloadTest test = new OverloadTest();
+
+        test.add(1, 2, 3);
+
+        test.add(10, 20);   // 优先调用 public void add(int i, int j)
+
+        test.add(10, 20.0);
+
+    }
+
+    public void add(int i, int j) {
+        System.out.println("1111");
+    }
+
+    public void add(double d1, double d2) {
+        System.out.println("3333");
+    }
+
+    public void add(int i, int j, int k) {
+
+    }
+
+    public void add(String s1, String s2) {
+
+    }
+
+    public void add(int i, String s) {
+
+    }
+
+    public void add(String s, int i) {
+
+    }
+
+//    public void add(int m, int n) {
+//        System.out.println("2222");
+//    }
+
+//    public int add(int m, int n) {
+//        return m + n;
+//    }
+}
+
+```
+
+#### 7.1.3 练习
+
+**练习 1：**
+> 题目：判断与 void show(int a, char b, double c){} 构成重载的有：
+> a) void show(int x, char y, double z){}
+> b) int show(int a, double c, char b){}
+> c) void show(int a, double c, char b){}
+> d) boolean show(int c, char b){}
+> e) void show(double c){}
+> f) double show(int x, char y, double z){}
+> g) void shows(){double c}
+
+a) no；
+b) yes；
+c) yes；
+d) yes；
+e) yes；
+f) no；
+g) no。
+
+**练习 2：**
+> 题目：
+>
+> 编写程序，定义三个重载方法并调用。
+> * 方法名为 `mOL`。
+> * 三个方法分别接收一个 `int` 参数、两个 `int` 参数、一个字符串参数；分别执行平方运算并输出结果、相乘并输出结果、输出字符串信息。
+> * 在主类的 `main()` 方法中分别用参数区别调用三个方法。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._01overload.exer;
+
+/**
+ * ClassName: OverLoadExer
+ * Package: com.anxin_hitsz_05.method_more._01overload.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/16 20:18
+ * @Version 1.0
+ */
+public class OverLoadExer {
+    // 练习二：
+    public void mOL(int num) {
+        System.out.println(num * num);
+    }
+    public void mOL(int num1, int num2) {
+        System.out.println(num1 * num2);
+    }
+    public void mOL(String message) {
+        System.out.println(message);
+    }
+
+    // 练习三：
+    public int max(int i, int j) {
+        return (i >= j) ? i : j;
+    }
+    public double max(double d1, double d2) {
+        return (d1 >= d2) ? d1 : d2;
+    }
+    public double max(double d1, double d2, double d3) {
+//        double tempMax = max(d1, d2);
+//        return max(tempMax, d3);
+
+        return (max(d1, d2) > d3) ? max(d1, d2) : d3;
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> 定义三个重载方法 `max()`，第一个方法中求两个 `int` 值中的最大值，第二个方法求两个 `double` 值中的最大值，第三个方法求三个 `double` 值中的最大值，并分别调用三个方法。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._01overload.exer;
+
+/**
+ * ClassName: OverLoadExer
+ * Package: com.anxin_hitsz_05.method_more._01overload.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/16 20:18
+ * @Version 1.0
+ */
+public class OverLoadExer {
+    // 练习二：
+    public void mOL(int num) {
+        System.out.println(num * num);
+    }
+    public void mOL(int num1, int num2) {
+        System.out.println(num1 * num2);
+    }
+    public void mOL(String message) {
+        System.out.println(message);
+    }
+
+    // 练习三：
+    public int max(int i, int j) {
+        return (i >= j) ? i : j;
+    }
+    public double max(double d1, double d2) {
+        return (d1 >= d2) ? d1 : d2;
+    }
+    public double max(double d1, double d2, double d3) {
+//        double tempMax = max(d1, d2);
+//        return max(tempMax, d3);
+
+        return (max(d1, d2) > d3) ? max(d1, d2) : d3;
+    }
+}
+
+```
+
+### 7.2 可变个数的形参
+
+在 JDK 5.0 中提供了 Varargs（Variable number of arguments）机制。即当定义一个方法时，形参的类型可以确定，但是形参的个数不确定，那么可以考虑使用可变个数的形参。
+
+#### 7.2.1 语法格式及特点
+
+可变个数形参的格式如下：
+```java
+方法名(参数的类型名 ... 参数名)
+```
+
+举例：
+```java
+// JDK 5.0 以前，采用数组形参来定义方法，传入多个同一类型变量
+public static void test(int a, String[] books);
+
+// JDK 5.0：采用可变个数形参来定义方法，传入多个同一类型变量
+public static void test(int a, String ... books);
+```
+
+特点：
+1. 可变参数：方法参数部分指定类型的参数个数是可变多个：0 个、1 个或多个。
+2. 可变个数形参的方法与同名的方法之间，彼此构成重载。
+3. 可变参数方法的使用与方法参数部分使用数组是一致的，二者不能同时声明，否则报错。
+4. 方法的参数部分有可变形参，需要放在形参声明的最后。
+5. 在一个方法的形参中，最多只能声明一个可变个数的形参。
+
+> 注意：可变个数形参的方法与同名的多个方法之间彼此构成重载，且优先调用形参个数对应的非可变个数形参的方法。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._02args;
+
+/**
+ * ClassName: ArgsTest
+ * Package: com.anxin_hitsz_05.method_more._02args
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/16 21:02
+ * @Version 1.0
+ */
+public class ArgsTest {
+
+    public static void main(String[] args) {
+        ArgsTest test = new ArgsTest();
+
+        test.print();
+        test.print(1);
+        test.print(1, 2);
+
+        test.print(new int[]{1, 2, 3});
+//        test.print(1, 2, 3);
+    }
+
+    public void print(int ... nums) {
+        System.out.println("1111");
+
+        for (int i = 0; i < nums.length; i++) {
+            System.out.println(nums[i]);
+        }
+    }
+
+//    public void print(int[] nums) {
+//        for (int i = 0; i < nums.length; i++) {
+//            System.out.println(nums[i]);
+//        }
+//    }
+
+    public void print(int i, int ... nums) {
+
+    }
+
+    // 编译不通过
+//    public void print(int ... nums, int i) {
+//
+//    }
+
+    public void print(int i) {
+        System.out.println("2222");
+    }
+
+    public void print(int i, int j) {
+        System.out.println("3333");
+    }
+
+    /*
+    场景举例：
+    * String sql = "update customers set name = ?,email = ? where id = ?";
+    *
+    * String sql1 = "update customers set name = ? where id = ?";
+    *
+    * public void update(String sql,String ... objs);
+    *
+    * */
+
+}
+
+```
+
+#### 7.2.2 案例分析
+
+> 题目：
+>
+> `n` 个字符串进行拼接，每一个字符串之间使用某字符进行分割，如果没有传入字符串，那么返回空字符串 `""`。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._02args.exer;
+
+/**
+ * ClassName: StringConCatTest
+ * Package: com.anxin_hitsz_05.method_more._02args.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/16 21:20
+ * @Version 1.0
+ */
+public class StringConCatTest {
+
+    public static void main(String[] args) {
+        StringConCatTest test = new StringConCatTest();
+        String info = test.concat("-", "hello", "world");
+        System.out.println(info);   // hello-world
+
+        System.out.println(test.concat("/", "hello"));
+
+        System.out.println(test.concat("-"));
+    }
+
+    // n 个字符串进行拼接，每一个字符串之间使用某字符进行分割，如果没有传入字符串，那么返回空字符串 ""
+    public String concat(String operator, String ... strs) {
+        String result = "";
+
+        for (int i = 0; i < strs.length; i++) {
+            if (i == 0) {
+                result += strs[i];
+            } else {
+                result += (operator + strs[i]);
+            }
+        }
+
+        return result;
+    }
+}
+
+```
