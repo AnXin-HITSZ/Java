@@ -1902,3 +1902,557 @@ public class StringConCatTest {
 }
 
 ```
+
+### 7.3 方法的参数传递机制
+
+#### 7.3.1 形参和实参
+
+**形参**（formal parameter）：在定义方法时，方法名后面括号 `()` 中声明的变量称为形式参数，简称形参。
+
+**实参**（actual parameter）：在调用方法时，方法名后面括号 `()` 中的使用的值 / 变量 / 表达式称为实际参数，简称实参。
+
+#### 7.3.2 参数传递机制：值传递
+
+Java 里方法的参数传递方式只有一种：**值传递**（不是引用传递）。即将实际参数值的副本（复制品）传入方法内，而参数本身不受影响。
+* 形参是基本数据类型：将实参基本数据类型变量的“数据值”传递给形参。
+* 形参是引用数据类型：将实参引用数据类型变量的“地址值”传递给形参。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._03valueTransferTest;
+
+/**
+ * ClassName: ValueTransferTest
+ * Package: com.anxin_hitsz_05.method_more._03valueTransferTest
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/17 10:32
+ * @Version 1.0
+ */
+public class ValueTransferTest {
+    public static void main(String[] args) {
+        // 1. 基本数据的局部变量
+        int m = 10;
+        int n = m;  // 传递的是数据值
+
+        System.out.println("m = " + m + ", n = " + n);
+
+        m++;
+
+        System.out.println("m = " + m + ", n = " + n);
+
+        // 2. 引用数据类型的局部变量
+        // 2.1 数组类型
+        int[] arr1 = new int[]{1, 2, 3, 4, 5};
+        int[] arr2 = arr1;  // 传递的是地址值
+
+        arr2[0] = 10;
+
+        System.out.println(arr1[0]);    // 10
+
+        // 2.2 对象类型
+        Order order1 = new Order();
+        order1.orderId = 1001;
+
+        Order order2 = order1;  // 传递的是地址值
+        order2.orderId = 1002;
+
+        System.out.println(order1.orderId); // 1002
+    }
+}
+
+class Order {
+    int orderId;
+}
+
+```
+
+#### 7.3.3 举例
+
+**1. 形参是基本数据类型**
+
+**案例：**
+> 题目：编写方法，交换两个整型变量的值。
+
+示例代码：
+```java
+
+```
+
+内存解析：
+* 示例代码：
+    ```java
+    public static void main(String[] args) {
+        // ...
+        int m = 10;
+        int n = 20;
+        test.swap(m, n);    // test 对象提前已经创建
+
+    }
+    public void swap(int m, int n) {
+        int temp = m;
+        m = n;
+        n = temp;
+
+    }
+    ```
+* 内存解析：
+    ![内存解析](./images/20260117110255.png "内存解析")
+
+**2. 形参是引用数据类型**
+
+**案例：**
+> 题目：对一个类的两个属性的值实现换序操作。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._03valueTransferTest;
+
+/**
+ * ClassName: ValueTransferTest3
+ * Package: com.anxin_hitsz_05.method_more._03valueTransferTest
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/17 11:03
+ * @Version 1.0
+ */
+public class ValueTransferTest3 {
+    public static void main(String[] args) {
+        Data data =  new Data();
+        ValueTransferTest3 test = new ValueTransferTest3();
+        data.m = 10;
+        data.n = 20;
+
+        System.out.println("m = " + data.m + ", n = " + data.n);
+
+        // 操作 1：
+//        int temp = data.m;
+//        data.m = data.n;
+//        data.n = temp;
+
+        // 操作 2：
+        test.swap(data);
+        System.out.println("m = " + data.m + ", n = " + data.n);
+    }
+
+    public void swap(Data data) {
+        int temp = data.m;
+        data.m = data.n;
+        data.n = temp;
+    }
+}
+
+class Data {
+    int m;
+    int n;
+}
+
+```
+
+内存解析：
+* 示例代码：
+    ```java
+    class Test {
+        public static void main(String[] args) {
+            // 创建 Test 对象 test（略）
+            Data data = new Data;
+            data.m = 10;
+            data.n = 20;
+            test.swap(data);
+        }
+        public void swap(Data data) {
+            int temp = data.m;
+            data.m = data.n;
+            data.n = temp;
+        }
+    }
+    class Data {
+        int m;
+        int n;
+    }
+    ```
+* 内存解析：
+    ![内存解析](./images/20260117111125.png "内存解析")
+
+#### 7.3.4 练习
+
+**练习 1：**
+> 题目：定义一个 `Circle` 类，包含一个 `double` 型的 `radius` 属性代表圆的半径，一个 `findArea()` 方法返回圆的面积。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._03valueTransferTest.exer1;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_05.method_more._03valueTransferTest.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/17 11:12
+ * @Version 1.0
+ */
+public class Circle {
+    double radius;  // 半径
+
+    public double findArea() {
+        return Math.PI * radius * radius;
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+> 
+> 定义一个类 `PassObject`，在类中定义一个方法 `printAreas()`，该方法的定义如下：
+> ```java
+> public void printAreas(Circle c, int time)
+> ```
+>
+> 在 `printAreas` 方法中打印输出 `1` 到 `time` 之间的每个整数半径值，以及对应的面积。例如，`time` 为 `5`，则输出半径 `1`、`2`、`3`、`4`、`5` 以及对应的圆的面积。
+>
+> 在 `main` 方法中调用 `printAreas()` 方法，调用完毕后输出当前半径值。
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._03valueTransferTest.exer1;
+
+/**
+ * ClassName: PassObject
+ * Package: com.anxin_hitsz_05.method_more._03valueTransferTest.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/17 11:16
+ * @Version 1.0
+ */
+public class PassObject {
+    public static void main(String[] args) {
+        PassObject obj = new PassObject();
+        Circle c = new Circle();
+        obj.printAreas(c, 5);
+
+        System.out.println("now radius is: " + c.radius);
+    }
+    public void printAreas(Circle c, int time) {
+        System.out.println("Radius\t\tArea");
+
+        int i = 1;
+        for (i = 1; i <= time; i++) {
+            c.radius = i;
+            System.out.println(c.radius + "\t\t\t" + c.findArea());
+        }
+        System.out.println();
+
+        c.radius = i;
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：针对 atguigu04.example.exer4 中 `MyArrays` 类的如下方法进行改进：
+>
+> 数组排序，可以指明排序的方式（从小到大、从大到小）。
+
+示例代码：
+```java
+/* MyArrays.java */
+
+package com.anxin_hitsz_05.method_more._03valueTransferTest.exer2;
+
+/**
+ * ClassName: MyArrays
+ * Package: com.anxin_hitsz_04.example.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2025/12/7 17:28
+ * @Version 1.0
+ */
+public class MyArrays {
+
+    /**
+     * 获取 int[] 数组的最大值
+     * @param arr 要获取最大值的数组
+     * @return 数组的最大值
+     */
+    public int getMax(int[] arr) {
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (max < arr[i]) {
+                max = arr[i];
+            }
+        }
+        return max;
+    }
+
+    /**
+     * 获取 int[] 数组的最小值
+     * @param arr 要获取最小值的数组
+     * @return 数组的最小值
+     */
+    public int getMin(int[] arr) {
+        int min = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (min > arr[i]) {
+                min = arr[i];
+            }
+        }
+        return min;
+    }
+
+    public int getSum(int[] arr) {
+        int sum = 0;
+        for (int i = 0; i < arr.length; i++) {
+            sum += arr[i];
+        }
+        return sum;
+    }
+
+    public int getAvg(int[] arr) {
+
+        return getSum(arr) / arr.length;
+    }
+
+    public void print(int[] arr) {  // [12, 231, 34, ...]
+        System.out.print("[");
+        for (int i = 0; i < arr.length; i++) {
+            if (i == 0) {
+                System.out.print(arr[i]);
+            } else {
+                System.out.print(", " + arr[i]);
+            }
+        }
+
+        System.out.println("]");
+    }
+
+    public int[] copy(int[] arr) {
+        int[] newArr = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            newArr[i] = arr[i];
+        }
+        return newArr;
+    }
+
+    public void reverse(int[] arr) {
+        for (int i = 0, j = arr.length - 1 /* 尾索引 */; i < j; i++, j--) {
+            // 交互 arr[i] 与 arr[j] 位置的元素
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+
+    public void sort(int[] arr) {
+        for (int j = 0; j < arr.length - 1; j++) {
+            for (int i = 0; i < arr.length - 1 - j; i++) {
+                if (arr[i] > arr[i + 1]) {
+                    // 交互 arr[i] 和 arr[i + 1]
+                    int temp = arr[i];
+                    arr[i] = arr[i + 1];
+                    arr[i + 1] = temp;
+                }
+            }
+        }
+    }
+
+    /**
+     * 针对于数组进行排序操作
+     * @param arr 待排序的数组
+     * @param sortMethod    acs: 升序     desc: 降序
+     */
+    public void sort(int[] arr, String sortMethod) {
+        if("asc".equals(sortMethod)) {//if (sortMethod.equals("asc")) { // ascend: 升序
+            for (int j = 0; j < arr.length - 1; j++) {
+                for (int i = 0; i < arr.length - 1 - j; i++) {
+                    if (arr[i] > arr[i + 1]) {
+                        // 交互 arr[i] 和 arr[i + 1]
+//                        int temp = arr[i];
+//                        arr[i] = arr[i + 1];
+//                        arr[i + 1] = temp;
+                        // 错误的：
+//                        swap(arr[i], arr[i + 1]);
+
+                        // 正确的：
+                        swap(arr, i, i + 1);
+                    }
+                }
+            }
+        } else if ("desc".equals(sortMethod)) {
+            for (int j = 0; j < arr.length - 1; j++) {
+                for (int i = 0; i < arr.length - 1 - j; i++) {
+                    if (arr[i] < arr[i + 1]) {
+                        // 交互 arr[i] 和 arr[i + 1]
+//                        int temp = arr[i];
+//                        arr[i] = arr[i + 1];
+//                        arr[i + 1] = temp;
+                        // 错误的：
+//                        swap(arr[i], arr[i + 1]);
+
+                        // 正确的：
+                        swap(arr, i, i + 1);
+                    }
+                }
+            }
+        } else {
+            System.out.println("你输入的排序方式有误！");
+        }
+    }
+
+    public void swap(int i, int j) {
+        int temp = i;
+        i = j;
+        j = temp;
+    }
+
+    public void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    /**
+     * 使用线性查找的算法，查找指定的元素
+     * @param arr 待查找的数组
+     * @param target 要查找的元素
+     * @return target 元素在 arr 数组中的索引位置。若未找到，则返回 -1
+     */
+    public int linearSearch(int[] arr, int target) {
+        for (int i = 0; i < arr.length; i++) {
+            if (target == arr[i]) {
+                return i;
+            }
+        }
+
+        // 只要代码执行到此位置，一定是没找到
+        return -1;
+    }
+}
+
+
+/* MyArraysTest.java */
+
+package com.anxin_hitsz_05.method_more._03valueTransferTest.exer2;
+
+/**
+ * ClassName: MyArraysTest
+ * Package: com.anxin_hitsz_04.example.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2025/12/7 17:31
+ * @Version 1.0
+ */
+public class MyArraysTest {
+    public static void main(String[] args) {
+
+        MyArrays arrs = new MyArrays();
+        int[] arr = new int[] {34, 56, 223, 2, 56, 24, 56, 67, 778, 45};
+
+        // 求最大值
+        System.out.println("最大值为：" + arrs.getMax(arr));
+        // 求平均值
+        System.out.println("平均值为：" + arrs.getAvg(arr));
+
+        // 遍历
+        arrs.print(arr);
+
+        // 查找
+        int index = arrs.linearSearch(arr, 24);
+        if (index >= 0) {
+            System.out.println("找到了，位置：" + index);
+        } else {
+            System.out.println("未找到");
+        }
+
+        // 排序
+//        arrs.sort(arr);
+        arrs.sort(arr, "asc");
+        arrs.sort(arr, "desc");
+        // 遍历
+        arrs.print(arr);
+    }
+}
+
+```
+
+### 7.4 递归（recursion）方法
+
+#### 7.4.1 递归方法介绍
+
+**递归方法调用**：方法自己调用自己的现象就称为递归。
+
+**递归的分类**：
+* 直接递归：方法自身调用自己。
+    ```java
+    public void methodA() {
+        methodA();
+    }
+    ```
+* 间接递归：可以理解为 `A()` 方法调用 `B()` 方法，`B()` 方法调用 `C()` 方法，`C()` 方法调用 `A()` 方法。
+```java
+public static void A() {
+    B();
+}
+
+public static void B() {
+    C();
+}
+
+public static void C() {
+    A();
+}
+```
+
+**说明**：
+* 递归方法包含了一种**隐式的循环**。
+* 递归方法会**重复执行**某段代码，但这种重复执行无须循环控制。
+* 递归一定要向**已知方向**递归，否则这种递归就变成了无穷递归，停不下来，类似于**死循环**，最终发生**栈内存溢出**。
+
+#### 7.4.2 练习
+
+**练习 1：**
+> 题目：
+>
+> 已知一个数列：f(20) = 1，f(21) = 4，f(n + 2) = 2 * f(n + 1) + f(n)；其中 n 是大于 0 的整数。
+>
+> 求 f(10) 的值。
+
+示例代码：
+```java
+
+```
+
+**练习 2：**
+> 题目：
+> 
+> 已知有一个数列：f(0) = 1，f(1) = 4，f(n + 2) = 2 * f(n + 1) + f(n)；其中 n 是大于 0 的整数。
+>
+> 求 f(10) 的值。
+
+示例代码：
+```java
+
+```
+
+练习 3 - 不死神兔：
+> 题目：
+>
+> 用递归实现不死神兔。
+> 故事得从西元 1202 年说起，话说有一位意大利青年，名叫斐波那契（Fibonacci）。斐波那契在他的一部著作中提出了一个有趣的问题：假设一对刚出生的小兔一个月后就能长成大兔，再过一个月就能生下一对小兔，并且此后每个月都生一对小兔，没有发生死亡，问现有一对刚出生的兔子 2 年（24 个月）后会有多少对兔子？
+>
+> 示例过程如下：
+> 月份          1   2   3   4   5   ...
+> 兔子对数      1   1   2   3   5   ...
+
+示例代码：
+```java
+
+```
+
+> 【奇妙的属性】随着数列的增加，斐波那契数列前一个数与后一个数的比值越来越逼近黄金分割的数值 0.618。
