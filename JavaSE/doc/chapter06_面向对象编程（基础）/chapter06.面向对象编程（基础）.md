@@ -2414,6 +2414,116 @@ public static void C() {
 * 递归方法会**重复执行**某段代码，但这种重复执行无须循环控制。
 * 递归一定要向**已知方向**递归，否则这种递归就变成了无穷递归，停不下来，类似于**死循环**，最终发生**栈内存溢出**。
 
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._04recursion;
+
+/**
+ * ClassName: RecursionTest
+ * Package: com.anxin_hitsz_05.method_more._04recursion
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 12:27
+ * @Version 1.0
+ */
+public class RecursionTest {
+
+    public static void main(String[] args) {
+        RecursionTest test = new RecursionTest();
+
+//        test.method1();
+
+        System.out.println(test.getSum(100));   // 5050
+        System.out.println(test.getSum1(100));  // 5050
+
+        int n = 5;
+        System.out.println(test.getMul(n)); // 120
+
+        System.out.println(test.f(10));
+    }
+
+    /*
+    * 举例 1：计算 1 - 100 内自然数的总和
+    * */
+    public int getSum(int num) {
+        int sum = 0;
+        for (int i = 1; i <= num; i++) {
+            sum += i;
+        }
+        return sum;
+    }
+
+    public int getSum1(int num) {
+        if (num == 1) {
+            return 1;
+        } else {
+            return getSum1(num - 1) + num;
+        }
+    }
+
+    /*
+    * 举例 2：计算 n!
+    * */
+    public int getMul(int n) {
+        if (n == 1) {
+            return 1;
+        } else {
+            return n * getMul(n - 1);
+        }
+    }
+
+    /*
+    * 举例 3：快速排序
+    * */
+
+    /*
+    * 举例 4：汉诺塔游戏
+    * */
+
+    /*
+    * 举例 5：斐波那契数列
+    *   数列如下：1 1 2 3 5 8 13 21 34 55 ...
+    *
+    *   f(n) = f(n - 1) + f(n - 2)
+    * */
+    public int f(int n) {
+        if (n == 1) {
+            return 1;
+        } else if (n == 2) {
+            return 1;
+        } else {
+            return f(n - 1) + f(n - 2);
+        }
+    }
+
+    /*
+    * 举例 6：
+    *   File 类的对象表示一个文件目录
+    *   计算指定的文件目录的大小，遍历指定多个文件目录中的所有的文件，删除指定的文件目录
+    * */
+
+
+    /*
+    * 如下递归方法的调用，会导致 StackOverflowError
+    * */
+//    public void method1() {
+//        System.out.println("method1() ...");
+//        method1();
+//    }
+}
+
+```
+
+代码执行图解 1：
+![代码执行图解 1](./images/20260119123429.png "代码执行图解 1")
+代码执行图解 2：
+![代码执行图解 2](./images/20260119123951.png "代码执行图解 2")
+
+> 注意：
+> 1. 递归调用会占用大量的系统堆栈，内存耗用多，在递归调用层次多时速度要比循环**慢得多**，所以在使用递归时要慎重。
+> 2. 在要求高性能的情况下尽量避免使用递归，递归调用既花时间又**耗内存**；考虑使用循环迭代。
+
 #### 7.4.2 练习
 
 **练习 1：**
@@ -2425,6 +2535,53 @@ public static void C() {
 
 示例代码：
 ```java
+package com.anxin_hitsz_05.method_more._04recursion.exer1;
+
+/**
+ * ClassName: RecursionExer01
+ * Package: com.anxin_hitsz_05.method_more._04recursion.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 12:51
+ * @Version 1.0
+ */
+public class RecursionExer01 {
+    public static void main(String[] args) {
+        RecursionExer01 test = new RecursionExer01();
+
+        System.out.println(test.f(10)); // -3771
+        System.out.println(test.func(10));  // 243
+    }
+
+    public int f(int n) {
+        if (n == 20) {
+            return 1;
+        } else if (n == 21) {
+            return 4;
+        } else {
+            // 正确的
+            return f(n + 2) - 2 * f(n + 1);
+
+            // 错误的：
+//            return 2 * f(n - 1) + f(n - 2);
+        }
+    }
+
+    public int func(int n) {
+        if (n == 0) {
+            return 1;
+        } else if (n == 1) {
+            return 4;
+        } else {
+            // 错误的：
+//            return func(n + 2) - 2 * func(n + 1);
+
+            // 正确的：
+            return 2 * func(n - 2) + func(n - 2);
+        }
+    }
+}
 
 ```
 
@@ -2437,6 +2594,53 @@ public static void C() {
 
 示例代码：
 ```java
+package com.anxin_hitsz_05.method_more._04recursion.exer1;
+
+/**
+ * ClassName: RecursionExer01
+ * Package: com.anxin_hitsz_05.method_more._04recursion.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 12:51
+ * @Version 1.0
+ */
+public class RecursionExer01 {
+    public static void main(String[] args) {
+        RecursionExer01 test = new RecursionExer01();
+
+        System.out.println(test.f(10)); // -3771
+        System.out.println(test.func(10));  // 243
+    }
+
+    public int f(int n) {
+        if (n == 20) {
+            return 1;
+        } else if (n == 21) {
+            return 4;
+        } else {
+            // 正确的
+            return f(n + 2) - 2 * f(n + 1);
+
+            // 错误的：
+//            return 2 * f(n - 1) + f(n - 2);
+        }
+    }
+
+    public int func(int n) {
+        if (n == 0) {
+            return 1;
+        } else if (n == 1) {
+            return 4;
+        } else {
+            // 错误的：
+//            return func(n + 2) - 2 * func(n + 1);
+
+            // 正确的：
+            return 2 * func(n - 2) + func(n - 2);
+        }
+    }
+}
 
 ```
 
@@ -2447,12 +2651,542 @@ public static void C() {
 > 故事得从西元 1202 年说起，话说有一位意大利青年，名叫斐波那契（Fibonacci）。斐波那契在他的一部著作中提出了一个有趣的问题：假设一对刚出生的小兔一个月后就能长成大兔，再过一个月就能生下一对小兔，并且此后每个月都生一对小兔，没有发生死亡，问现有一对刚出生的兔子 2 年（24 个月）后会有多少对兔子？
 >
 > 示例过程如下：
-> 月份          1   2   3   4   5   ...
-> 兔子对数      1   1   2   3   5   ...
+>   月份          1   2   3   4   5   ...
+>   兔子对数      1   1   2   3   5   ...
+
+示例代码：
+```java
+package com.anxin_hitsz_05.method_more._04recursion.exer2;
+
+/**
+ * ClassName: RabbitExer
+ * Package: com.anxin_hitsz_05.method_more._04recursion.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 12:59
+ * @Version 1.0
+ */
+public class RabbitExer {
+    public static void main(String[] args) {
+        RabbitExer exer = new RabbitExer();
+        int month = 24;
+        System.out.println("兔子的对数为：" + exer.getRabbitNumber(month));    // 46368
+    }
+
+    public int getRabbitNumber(int month) {
+        if (month == 1) {
+            return 1;
+        } else if (month == 2) {
+            return 1;
+        } else {
+            return getRabbitNumber(month - 1) + getRabbitNumber(month - 2);
+        }
+    }
+}
+
+```
+
+拓展 - 走台阶问题：
+> 题目：
+> 
+> 假如有 10 阶楼梯，小朋友每次只能向上走 1 阶或者 2 阶，请问一共有多少种不同的走法呢？
+>
+> 示例过程如下：
+>   阶数    1   2   3   4   ...
+>   走法    1   2   3   5   ...
+>
+> 因此，从 n 为 3 开始：f(n) = f(n - 1) + f(n - 2)。
+
+> 【奇妙的属性】随着数列的增加，斐波那契数列前一个数与后一个数的比值越来越逼近黄金分割的数值 0.618。
+
+## 八、关键字：`package`、`import`
+
+### 8.1 `package`（包）
+
+`package`，称为包，用于指明该文件中定义的类、接口等结构所在的包。
+
+#### 8.1.1 语法格式
+
+```java
+package 顶层包名.子包名;
+```
+
+举例 - pack1\pack2\PackageTest.java：
+```java
+package pack1.pack2;    // 指定类 PackageTest 属于包 pack1.pack2
+
+public class PackageTest {
+    public void display() {
+        System.out.println("in method display()");
+    }
+}
+
+```
+
+说明：
+* 一个源文件只能有一个声明包的 `package` 语句。
+* `package` 语句作为 Java 源文件的第一条语句出现；若缺省该语句，则指定为无名包。
+* 包名，属于标识符，满足标识符命名的规则和规范（全部小写）、见名知意。
+  * 包通常使用所在公司域名的倒置：`com.atguigu.xxx`。
+  * 大家取包名时不要使用 “`java.xx`” 包。
+* 包对应于文件系统的目录，package 语句中用 “`.`” 来指明包（目录）的层次，每 `.` 一次就表示一层文件目录。
+* 同一个包下可以声明多个结构（类、接口），但是不能定义同名的结构（类、接口）；不同的包下可以定义同名的结构（类、接口）。
+
+#### 8.1.2 包的作用
+
+包的作用如下：
+* 包可以包含类和子包，划分**项目层次**，便于管理。
+* 帮助**管理大型软件**系统：将功能相近的类划分到同一个包中。比如：MVC 的设计模式。
+* 解决**类命名冲突**的问题。
+* 控制**访问权限**。
+
+#### 8.1.3 应用举例
+
+**举例 1：**
+> 某航运软件系统包括：一组域对象、GUI 和 reports 子系统。
+
+![举例 1](./images/20260119134031.png "举例 1")
+
+**举例 2：** MVC 设计模式。
+
+MVC 是一种软件构件模式，目的是为了降低程序开发中代码业务的耦合度。
+
+MVC 设计模式将整个程序分为三个层次：**视图模型（Viewer）层**、**控制器（Controller）层**与**数据模型（Model）层**。这种将程序输入输出、数据处理以及数据的展示分离开来的设计模式使程序结构变得灵活而且清晰，同时也描述了程序各个对象间的通信方式，降低了程序的耦合性。
+
+> 视图层 viewer：显示数据，为用户提供使用界面，与用户直接进行交互。
+> * 相关工具类：`view.utils`。
+> * 自定义 view：`view.ui`。
+>
+> 控制层 controller：解析用户请求，处理业务逻辑，给予用户相应。
+> * 应用界面相关：`controller.activity`。
+> * 存放 fragment：`controller.fragment`。
+> * 显示列表的适配器：`controller.adapter`。
+> * 服务相关的：`controller.service`。
+> * 抽取的基类：`controller.base`。
+>
+> 模型层 model：主要承载数据、处理数据。
+> * 数据对象封装：`model.bean/domain`。
+> * 数据库操作类：`model.dao`。
+> * 数据库：`model.db`。
+
+![MVC 设计模式的三个层次](./images/20260119134819.png "MVC 设计模式的三个层次")
+
+#### 8.1.4 JDK 中主要的包介绍
+
+`java.lang`：包含一些 Java 语言的核心类，如 `String`、`Math`、`Integer`、`System` 和 `Thread`，提供常用功能。
+
+`java.net`：包含执行与网络相关的操作的类和接口。
+
+`java.io`：包含能提供多种输入 / 输出功能的类。
+
+`java.util`：包含一些实用工具类，如定义系统特性、接口的集合框架类、使用与日期日历相关的函数。
+
+`java.text`：包含了一些 Java 格式化相关的类。
+
+`java.sql`：包含了 Java 进行 JDBC 数据库编程的相关类 / 接口。
+
+`java.awt`：包含了构成抽象窗口工具集（abstract window toolkits）的多个类，这些类被用来构建和管理应用程序的图形用户界面（GUI）。
+
+### 8.2 `import`（导入）
+
+为了使用定义在其它包中的 Java 类，需用 `import` 语句来显式引入指定包下所需要的类。相当于 **`import` 语句告诉编译器到哪里去寻找这个类**。
+
+#### 8.2.1 语法格式
+
+```java
+import 包名.类名;
+```
+
+#### 8.2.2 应用举例
+
+```java
+import pack1.pack2.Test;    // import pack1.pack2.*; 表示引入 pack1.pack2 包中的所有结构
+
+public class PackTest {
+    public static void main(String[] args) {
+        Test t = new Test();    // Test 类在 pack1.pack2 包中定义
+        t.display();
+    }
+}
+
+```
+
+#### 8.2.3 注意事项
+
+`import` 语句，声明在包的声明和类的声明之间。
+
+如果需要导入多个类或接口，那么就并列显示多个 `import` 语句即可。
+
+如果使用 `a.*` 导入结构，表示可以导入 `a` 包下的所有的结构。举例：可以使用 `java.util.*` 的方式，一次性导入 `util` 包下所有的类或接口。
+
+如果导入的类或接口是 `java.lang` 包下的，或者是当前包下的，则可以省略此 `import` 语句。
+
+如果已经导入 `java.a` 包下的类，那么如果需要使用 `a` 包的子包下的类的话，仍然需要导入。
+
+如果在代码总使用不同包下的同名的类，那么就需要使用类的全类名的方式指明调用的是哪个类，且使用类的全类名的方式指明调用类时不需要通过 `import` 导入。
+
+（了解）`import static` 组合的使用：调用指定类或接口下的静态的属性或方法。
+
+### 8.3 举例
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_06.package_import;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.package_import
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 14:32
+ * @Version 1.0
+ */
+public class Person {
+}
+
+
+/* PackageImportTest.java */
+
+package com.anxin_hitsz_06.package_import;
+
+//import java.util.ArrayList;
+//import java.util.HashMap;
+//import java.util.Scanner;
+
+import com.anxin_hitsz_05.method_more._04recursion.RecursionTest;
+import com.anxin_hitsz_05.method_more._04recursion.exer2.RabbitExer;
+
+import java.lang.reflect.Field;
+import java.util.*;
+
+import static java.lang.System.out;
+import static java.lang.Math.PI;
+
+/**
+ * ClassName: PackageImportTest
+ * Package: com.anxin_hitsz_06.package_import
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 14:06
+ * @Version 1.0
+ */
+public class PackageImportTest {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        ArrayList list = new ArrayList();
+
+        HashMap map = new HashMap();
+
+        HashSet set = new HashSet();
+
+        String str = "hello";
+        System.out.println("str");
+
+        Person p =  new Person();
+
+        Field field = null;
+
+        RecursionTest test = null;
+
+        RabbitExer exer = null;
+
+        // Date 可以使用 import 的方式指明
+        Date date = new Date();
+
+        // 使用全类名的方式
+        java.sql.Date date1 = new java.sql.Date(121231231L);
+
+        out.println("hello");
+
+        out.println(PI);
+
+    }
+}
+
+```
+
+## 九、面向对象特征一：封装性（encapsulation）
+
+### 9.1 为什么需要封装？
+
+> 客观世界里每一个事物的内部信息都隐藏在其内部，外界无法直接操作和修改，只能通过指定的方式进行访问和修改。
+
+随着我们系统越来越复杂，类会越来越多，那么类之间的访问边界必须把握好，面向对象的开发原则要遵循“**高内聚、低耦合**”。
+
+> 高内聚、低耦合是软件工程中的概念，也是 UNIX 操作系统设计的经典原则。
+>
+> 内聚，指一个模块内各个元素彼此结合的紧密程度；耦合指一个软件结构内不同模块之间互连程度的度量。内聚意味着重用和独立，耦合意味着多米诺效应——牵一发动全身。
+
+而“高内聚、低耦合”的体现之一：
+* **高内聚**：类的内部数据操作细节自己完成，不允许外部干涉；
+* **低耦合**：仅暴露少量的方法给外部使用，尽量方便外部调用。
+
+### 9.2 何为封装性？
+
+所谓**封装**，就是把客观事物封装成抽象概念的类，并且类可以把自己的数据和方法只向可信的类或者对象开放，向没必要开放的类或者对象隐藏信息。
+
+**通俗的讲，把该隐藏的隐藏起来，该暴露的暴露出来。这就是封装性的设计思想。**
+
+### 9.3 Java 如何实现数据封装？
+
+实现封装就是控制类或成员的可见性范围。这就需要依赖访问控制修饰符，也成为权限修饰符来控制。
+
+我们可以使用 4 种权限修饰符来修饰类及类的内部成员。当这些成员被调用时，体现可见性的大小。
+
+权限修饰符包括 `public`、`protected`、`缺省`、`private`。具体访问范围如下，访问范围从上至下依次增大：
+| 修饰符 | 本类内部 | 本包内 | 其他包的子类 | 其他包非子类 |
+| :--: | :--: | :--: | :--: | :--: |
+| `private` | √ | × | × | × |
+| `缺省` | √ | √ | × | × |
+| `protected` | √ | √ | √ | × |
+| `public` | √ | √ | √ | √ |
+
+具体修饰的结构：
+* 外部类：`public`、`缺省`。
+* 成员变量、成员方法、构造器、成员内部类：`public`、`protected`、`缺省`、`private`。
+
+![调用结构示意图](./images/20260119150954.png "调用结构示意图")
+
+开发中 4 种权限使用频率的情况：
+* 比较高：`public`、`private`。
+* 比较低：`缺省`、`protected`。
+
+案例：
+> 在题目中，我们给 `Animal` 的对象的 `legs` 属性赋值。在实际的常识中，我们知道 `legs` 不能赋值为负数；但是如果直接调用属性 `legs`，是不能加入判断逻辑的。那怎么办呢？
+> * 将 `legs` 属性私有化（`private`），禁止在 `Animal` 类的外部直接调用此属性。
+> * 提供给 `legs` 属性赋值的 `setLegs()` 方法，在此方法中加入 `legs` 赋值的判断逻辑 `if(legs >= 0 && legs % 2 == 0)`。将此方法暴露出去，使得在 `Animal` 类的外部调用此方法，对 `legs` 属性赋值。
+> * 提供给 `legs` 属性获取的 `getLegs()` 方法，此方法对外暴露，使得在 `Animal` 类的外部还可以调用此属性的值。
+
+示例代码：
+```java
+package com.anxin_hitsz_07.encapsulation;
+
+/**
+ * ClassName: AnimalTest
+ * Package: com.anxin_hitsz_07.encapsulation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/19 15:41
+ * @Version 1.0
+ */
+public class AnimalTest {
+    public static void main(String[] args) {
+        Animal animal1 = new Animal();
+
+        animal1.name = "金蟾";
+        // 因为 legs 声明为 private ，是私有的，出了 Animal 类之外就不能调用了
+//        animal1.legs = 4;
+//        animal1.legs = -4;
+
+        // 只能通过 setLegs()，间接地对 legs 属性进行赋值
+        animal1.setLegs(2);
+        animal1.setLegs(-2);
+
+//        System.out.println("name = " + animal1.name + "，legs = " + animal1.legs);
+
+        System.out.println("name = " + animal1.name + "，legs = " + animal1.getLegs());
+
+        animal1.eat();
+
+    }
+
+
+
+}
+
+class Animal {  // 动物
+    // 属性
+    String name;    // 名字
+    private int legs;   // 腿的个数
+
+    // 方法
+    // 设置 legs 的属性值
+    public void setLegs(int l) {
+        if (l >= 0 && l % 2 == 0) {
+            legs = l;
+        } else {
+            System.out.println("你输入的数据非法");
+        }
+    }
+
+    // 获取 legs 的属性值
+    public int getLegs() {
+        return legs;
+    }
+
+    public void eat() {
+        System.out.println("动物觅食");
+    }
+}
+
+```
+
+### 9.4 封装性的体现
+
+场景体现：
+1. 场景 1：私有化（`private`）类的属性，提供公共（`public`）的 `get` 和 `set` 方法，对此属性进行获取或修改。
+2. 场景 2：将类中不需要对外暴露的方法，设置为 `private`。
+3. 场景 3：单例模式中构造器被声明为 `private`，避免在类的外部创建实例。（放到 `static` 关键字后讲。）
+
+#### 9.4.1 成员变量 / 属性私有化
+
+**概述：私有化（`private`）类的成员变量，提供公共（`public`）的 `get` 和 `set` 方法，对外暴露获取和修改属性的功能。**
+
+**实现步骤：**
+**1. 使用 private 修饰成员变量：**
+
+```java
+private 数据类型 变量名;
+```
+
+代码如下：
+```java
+public class Person {
+    private String name;
+    private int age;
+    private boolean marry;
+}
+```
+
+**2. 提供 `getXxx` 方法 / `setXxx` 方法，可以访问成员变量：**
+
+代码如下：
+```java
+public class Person {
+    private String name;
+    private int age;
+    private boolean marry;
+
+    public void setName(String n) {
+        name = n;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setAge(int a) {
+        age = a;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setMarry(boolean m) {
+        marry = m;
+    }
+
+    public boolean isMarry() {
+        return marry;
+    }
+}
+
+```
+
+**3. 测试：**
+
+代码如下：
+```java
+public class PersonTest {
+    public static void main(String[] args) {
+        Person p = new Person();
+
+        // 实例变量私有化，跨类是无法直接使用的
+        /* 
+        p.name = "张三";
+        p.age = 23;
+        p.marry = true;
+        */
+
+       p.setName("张三");
+       System.out.println("p.name = " + p.getName());
+
+       p.setAge(23);
+       System.out.println("p.age = " + p.getAge());
+
+       p.setMarry(true);
+       System.out.println("p.marry = " + p.isMarry());
+    }
+}
+
+```
+
+成员变量封装的好处：
+* 让使用者只能通过事前预定的方法来**访问数据**，从而可以在该方法里面加入控制逻辑，限制对成员变量的不合理访问；还可以进行数据检查，从而有利于保证对象信息的完整性。
+* **便于修改**，提高代码的可维护性。主要是指隐藏的部分若在内部进行修改，如果其对外可以访问的方式不变的话，外部根本感觉不到它的修改。例如：Java 8 -> Java 9，`String` 从 `char[]` 转为 `byte[]` 内部实现，而对外的方法不变，我们使用者根本感觉不到它内部的修改。
+
+#### 9.4.2 私有化方法
 
 示例代码：
 ```java
 
 ```
 
-> 【奇妙的属性】随着数列的增加，斐波那契数列前一个数与后一个数的比值越来越逼近黄金分割的数值 0.618。
+> 注意：
+>
+> 开发中，一般成员实例变量都习惯使用 `private` 修饰，再提供相应的 `public` 权限的 `get` / `set` 方法访问。
+>
+> 对于 `final` 的实例变量，不提供 `set()` 方法。（后面 `final` 关键字的时候会讲到。）
+>
+> 对于 `static final` 的成员变量，习惯上使用 `public` 修饰。
+
+### 9.5 练习
+
+练习 1：
+> 题目：
+> 
+> 创建程序，在其中定义两个类，分别为 Person 类和 PersonTest 类。
+> 
+> 要求如下：
+> 1. 用 `setAge()` 设置人的合法年龄（0 ~ 130），用 `getAge()` 返回人的年龄。
+> 2. 在 `PersonTest` 类中实例化 `Person` 类的对象 `b`，调用 `setAge()` 和 `getAge()` 方法，体会 `Java` 的封装性。
+
+示例代码：
+```java
+
+```
+
+练习 2 - 自定义图书类：
+> 题目：
+>
+> 设定属性包括：
+> * 书名 `bookName`；
+> * 作者 `author`；
+> * 价格 `price`。
+>
+> 方法包括：
+> * 相应属性的 `get` / `set` 方法；
+> * 图书信息介绍等。
+
+示例代码：
+```java
+
+```
+
+练习 3 - 普通员工类：
+> 题目：
+>
+> 1. 声明员工类 `Employee`：
+>   * 包括属性：姓名、性别、年龄、电话，属性私有化；
+>   * 提供 `get` / `set` 方法；
+>   * 提供 `String getInfo()` 方法。
+> 2. 在测试类的 `main` 中创建员工数组，并从键盘输入员工对象信息，最后遍历输出。
+
+示例代码：
+```java
+
+```
+
+练习 4：
+> 题目：
+>
+> 使用 com.atguigu07.encapsulation.exer4.test1 和 com.atguigu07.encapsulation.exer4.test2 两个包来测试几种常见的权限修饰符。
