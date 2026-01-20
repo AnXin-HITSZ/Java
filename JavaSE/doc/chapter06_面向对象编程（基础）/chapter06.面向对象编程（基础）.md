@@ -3144,7 +3144,7 @@ public class PersonTest {
 练习 1：
 > 题目：
 > 
-> 创建程序，在其中定义两个类，分别为 Person 类和 PersonTest 类。
+> 创建程序，在其中定义两个类，分别为 `Person` 类和 `PersonTest` 类。
 > 
 > 要求如下：
 > 1. 用 `setAge()` 设置人的合法年龄（0 ~ 130），用 `getAge()` 返回人的年龄。
@@ -3152,6 +3152,76 @@ public class PersonTest {
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_07.encapsulation.exer1;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_07.encapsulation.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 13:06
+ * @Version 1.0
+ */
+public class Person {
+
+    private int age;
+
+    // 设置 age 属性
+    public void setAge(int a) {
+        if (a >= 0 && a <= 130) {
+            age = a;
+        } else {
+            System.out.println("你输入的数据非法");
+        }
+    }
+
+    // 获取 age 属性
+    public int getAge() {
+        return age;
+    }
+
+    // 错误的
+//    public int doAge(int a) {
+//        if (a >= 0 && a <= 130) {
+//            age = a;
+//            return age;
+//        } else {
+//            System.out.println("你输入的数据非法");
+//            return -1;
+//        }
+//    }
+
+}
+
+
+/* PersonTest.java */
+
+package com.anxin_hitsz_07.encapsulation.exer1;
+
+/**
+ * ClassName: PersonTest
+ * Package: com.anxin_hitsz_07.encapsulation.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 13:07
+ * @Version 1.0
+ */
+public class PersonTest {
+    public static void main(String[] args) {
+        // 创建 Person 实例 1
+        Person p1 =  new Person();
+//        p1.age = 10;  // 编译不通过
+//        System.out.println(p1.age());
+
+        p1.setAge(10);
+        System.out.println(p1.getAge());
+
+    }
+}
 
 ```
 
@@ -3169,6 +3239,80 @@ public class PersonTest {
 
 示例代码：
 ```java
+/* Book.java */
+
+package com.anxin_hitsz_07.encapsulation.exer2;
+
+/**
+ * ClassName: Book
+ * Package: com.anxin_hitsz_07.encapsulation.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 13:12
+ * @Version 1.0
+ */
+public class Book {
+    private String bookName;    // 书名
+    private String author;  // 作者
+    private double price;   // 价格
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bn) {
+        bookName = bn;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String a) {
+        author = a;
+    }
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double p) {
+        price = p;
+    }
+
+    // 获取图书信息
+    public String showInfo() {
+        return "bookName: " + bookName + ", author: " + author + ", price: " + price;
+    }
+}
+
+
+/* BookTest.java */
+
+package com.anxin_hitsz_07.encapsulation.exer2;
+
+/**
+ * ClassName: BookTest
+ * Package: com.anxin_hitsz_07.encapsulation.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 13:15
+ * @Version 1.0
+ */
+public class BookTest {
+    public static void main(String[] args) {
+
+        Book book1 = new Book();
+
+        book1.setBookName("剑指 Java");
+        book1.setAuthor("尚硅谷教育");
+        book1.setPrice(180.0);
+
+        System.out.println(book1.showInfo());
+
+    }
+}
 
 ```
 
@@ -3183,6 +3327,112 @@ public class PersonTest {
 
 示例代码：
 ```java
+/* Employee.java */
+
+package com.anxin_hitsz_07.encapsulation.exer3;
+
+/**
+ * ClassName: Employee
+ * Package: com.anxin_hitsz_07.encapsulation.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 13:19
+ * @Version 1.0
+ */
+public class Employee {
+    // 属性
+    private String name;
+    private char gender;
+    private int age;
+    private String phoneNumber;
+
+    // 提供属性的 get 和 set 方法
+    public void setName(String n) {
+        name = n;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setGender(char g) {
+        gender = g;
+    }
+    public char getGender() {
+        return gender;
+    }
+
+    public void setAge(int a) {
+        age = a;
+    }
+    public int getAge() {
+        return age;
+    }
+
+    public void setPhoneNumber(String p) {
+        phoneNumber = p;
+    }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getinfo() {
+//        return name + "\t" + gender + "\t" + age + "\t" + phoneNumber;
+        return getName() + "\t" + getGender() + "\t" + getAge() + "\t" + getPhoneNumber();
+    }
+
+}
+
+
+/* EmployeeTest.java */
+
+package com.anxin_hitsz_07.encapsulation.exer3;
+
+import java.util.Scanner;
+
+/**
+ * ClassName: EmployeeTest
+ * Package: com.anxin_hitsz_07.encapsulation.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 14:36
+ * @Version 1.0
+ */
+public class EmployeeTest {
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        // 创建 Employee[]
+        Employee[] emps = new Employee[2];
+
+        for (int i = 0; i < emps.length; i++) {
+            emps[i] = new Employee();
+            System.out.println("---------- 添加第 " + (i + 1) + " 个员工 ----------");
+            System.out.print("姓名：");
+            String name = scan.next();
+            System.out.print("性别：");
+            char gender = scan.next().charAt(0);
+            System.out.print("年龄：");
+            int age = scan.nextInt();
+            System.out.print("电话：");
+            String phoneNumber = scan.next();
+
+            // 给指定的 employee 对象的各属性赋值
+            emps[i].setName(name);
+            emps[i].setGender(gender);
+            emps[i].setAge(age);
+            emps[i].setPhoneNumber(phoneNumber);
+        }
+
+        // 遍历员工列表
+        System.out.println("---------- 员工列表 ----------");
+        System.out.println("编号\t姓名\t性别\t年龄\t电话");
+        for (int i = 0; i < emps.length; i++) {
+            System.out.println((i + 1) + "\t" + emps[i].getinfo());
+        }
+        System.out.println("---------- 员工列表完成 ----------");
+    }
+}
 
 ```
 
@@ -3190,3 +3440,787 @@ public class PersonTest {
 > 题目：
 >
 > 使用 com.atguigu07.encapsulation.exer4.test1 和 com.atguigu07.encapsulation.exer4.test2 两个包来测试几种常见的权限修饰符。
+
+示例代码：
+```java
+/* com.anxin_hitsz_07.encapsulation.exer4.test1.Order.java */
+
+package com.anxin_hitsz_07.encapsulation.exer4.test1;
+
+/**
+ * ClassName: Order
+ * Package: com.anxin_hitsz_07.encapsulation.exer4.test1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 14:44
+ * @Version 1.0
+ */
+public class Order {
+    // 声明不同权限的属性
+    private int orderPrivate;
+    int orderDefault;
+    public int orderPublic;
+
+    // 声明不同权限的方法
+    private void methodPrivate() {
+
+    }
+    void methodDefault() {
+
+    }
+    public void methodPublic() {
+
+    }
+
+    public void test() {
+        orderPrivate = 1;
+        orderDefault = 2;
+        orderPublic = 3;
+
+        methodPrivate();
+        methodDefault();
+        methodPublic();
+    }
+
+}
+
+
+/* com.anxin_hitsz_07.encapsulation.exer4.test1.OrderTest.java */
+
+package com.anxin_hitsz_07.encapsulation.exer4.test1;
+
+/**
+ * ClassName: OrderTest
+ * Package: com.anxin_hitsz_07.encapsulation.exer4.test1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 14:47
+ * @Version 1.0
+ */
+public class OrderTest {
+    public static void main(String[] args) {
+
+        Order order = new Order();
+
+        // 调用属性
+        order.orderDefault = 1;
+        order.orderPublic = 2;
+        // 调用方法
+        order.methodDefault();
+        order.methodPublic();
+
+
+        // 不能调用
+//        order.orderPrivate = 3;
+//        order.methodPrivate();
+
+    }
+}
+
+
+/* com.anxin_hitsz_07.encapsulation.exer4.test2.OrderTest.java */
+
+package com.anxin_hitsz_07.encapsulation.exer4.test2;
+
+import com.anxin_hitsz_07.encapsulation.exer4.test1.Order;
+
+/**
+ * ClassName: OrderTest
+ * Package: com.anxin_hitsz_07.encapsulation.exer4.test2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 14:50
+ * @Version 1.0
+ */
+public class OrderTest {
+    public static void main(String[] args) {
+        Order order = new Order();
+
+        // 调用属性
+        order.orderPublic = 1;
+
+        // 调用方法
+        order.methodPublic();
+
+
+        // 不能调用
+//        order.oderPrivate = 1;
+//        order.orderDefault = 2;
+
+//        order.methodPrivate();
+//        order.orderDefault();
+
+    }
+}
+
+```
+
+## 十、类的成员之三：构造器（Constructor）
+
+> constructor：（n.）建设者、建造者。
+> construct：（v.）建设、建造、创造。
+> construction：（n.）建设、建造，如 中国建设银行（CCB）。
+
+我们 `new` 完对象时，所有成员变量都是默认值，如果我们需要赋别的值，需要挨个为它们再赋值，太麻烦了。我们能不能在 `new` 对象时，直接为当前对象的某个或所有成员变量直接赋值呢？
+
+可以，Java 给我们提供了**构造器（Constructor）**，也称为**构造方法**。
+
+> 注意：凡是类（包括抽象类）都有构造器。
+
+### 10.1 构造器的作用
+
+构造器的作用如下：
+1. 搭配 `new` 关键字，创建类的对象。
+2. 在创建对象的同时，可以给对象的相关属性赋值。
+
+因此，构造器的作用可总结为：`new` 对象，并在 `new` 对象的时候为实例变量赋值。
+
+举例：
+```java
+Person p = new Person("Peter", 15);
+```
+
+解释：如同我们规定每个“人”一出生就必须先洗澡，我们就可以在“人”的构造器中加入完成“洗澡”的程序代码，于是每个“人”一出生就会自动完成“洗澡”，程序就不必在每个人刚出生时一个一个地告诉他们要“洗澡”了。
+
+### 10.2 构造器的语法格式
+
+构造器的语法格式如下：
+```java
+[修饰符] class 类名 {
+    // 无参构造
+    [修饰符] 构造器名（即类名）() {
+        // 实例初始化代码
+    }
+
+    // 有参构造
+    [修饰符] 构造器名（即类名）(形参列表) {
+        // 实例初始化代码
+    }
+}
+```
+
+说明：
+1. 构造器名必须与它所在的类名相同。
+2. 构造器没有返回值，所以不需要返回值类型，也不需要 `void`。
+3. 构造器的修饰符只能是权限修饰符，不能被其他任何修饰符修饰。比如，不能被 `static`、`final`、`synchronized`、`abstract`、`native` 修饰，不能有 `return` 语句返回值。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_08.constructor;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_08.constructor
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 15:53
+ * @Version 1.0
+ */
+public class Person {
+    // 属性
+    String name;
+    int age;
+
+    // 构造器
+    public Person() {
+        System.out.println("Person() ...");
+    }
+
+    // 声明其它的构造器
+    public Person(int a) {
+        age = a;
+    }
+    public Person(String n) {
+        name = n;
+    }
+    public Person(String n, int a) {
+        name = n;
+        age = a;
+    }
+
+
+    // 方法
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void sleep(int hour) {
+        System.out.println("每天睡眠 " + hour + " 小时");
+    }
+
+}
+
+
+/* PersonTest.java */
+
+package com.anxin_hitsz_08.constructor;
+
+import java.util.Scanner;
+
+/**
+ * ClassName: PersonTest
+ * Package: com.anxin_hitsz_08.constructor
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 15:54
+ * @Version 1.0
+ */
+public class PersonTest {
+    public static void main(String[] args) {
+
+        Person p1 = new Person();
+
+        p1.eat();
+
+        Person p2 = new Person(1);
+        System.out.println(p2.age); // 1
+
+        Scanner scan = new Scanner(System.in);
+
+    }
+}
+
+```
+
+### 10.3 使用说明
+
+当我们没有显式地声明类中的构造器时，系统会默认提供一个无参（空参）的构造器并且该构造器的修饰符默认与类的修饰符相同。
+![未显式声明类中的构造器的情况](./images/20260120152400.png "未显式声明类中的构造器的情况")
+
+当我们显式地定义类地构造器以后，系统就不再提供默认的无参地构造器了。
+
+在类中，至少会存在一个构造器。
+
+构造器是可以重载的。
+
+> 注意：在测试类中，将光标放置在待创建实例的类的构造器的小括号内，通过组合键 `Ctrl + p` 即可调出全部构造器及其参数说明。
+
+关于**匿名对象**：
+1. 匿名对象往往只能被调用一次。
+2. 匿名对象常常作为实参传递给方法的形参。
+
+例如：
+```java
+// 创建 Customer 实例
+Customer customer = new Customer("Jane", "Smith");
+
+// Account account = new Account(1000, 2000, 0.0123);
+// customer.setAccount(account);
+// 或 使用匿名对象
+customer.setAccount(new Account(1000, 2000, 0.0123));
+```
+
+### 10.4 练习
+
+**练习 1：**
+> 题目：
+>
+> 1. 定义 `Student` 类，有 4 个属性：
+>   * `String name`；
+>   * `int age`；
+>   * `String school`；
+>   * `String major`。
+> 2. 定义 `Student` 类的 3 个构造器：
+> * 第一个构造器 `Student(String n, int a)` 设置类的 `name` 和 `age` 属性；
+> * 第二个构造器 `Student(String n, int a, String s)` 设置类的 `name`、`age` 和 `school` 属性。
+> * 第三个构造器 `Student(String n, int a, String s, String m)` 设置类的 `name`、`age`、`school` 和 `major` 属性。
+> 3. 在 `main` 方法中分别调用不同的构造器创建的对象，并输出其属性值。
+
+示例代码：
+```java
+/* Student.java */
+
+package com.anxin_hitsz_08.constructor.exer1;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_08.constructor.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:15
+ * @Version 1.0
+ */
+public class Student {
+
+    String name;
+    int age;
+    String school;
+    String major;   // 专业
+
+
+    public Student(String n, int a) {
+        name = n;
+        age = a;
+    }
+
+    public Student(String n, int a, String s) {
+        name = n;
+        age = a;
+        school = s;
+    }
+
+    Student(String n, int a, String s, String m) {
+        name = n;
+        age = a;
+        school = s;
+        major = m;
+    }
+
+    public String getInfo() {
+        return "name = " + name + ", age = " + age +
+                ", school = " + school + ", major = " + major;
+    }
+}
+
+
+/* StudentTest.java */
+
+package com.anxin_hitsz_08.constructor.exer1;
+
+/**
+ * ClassName: StudentTest
+ * Package: com.anxin_hitsz_08.constructor.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:18
+ * @Version 1.0
+ */
+public class StudentTest {
+    public static void main(String[] args) {
+
+        Student s1 = new Student("An", 21, "哈尔滨工业大学", "计算机技术");
+        System.out.println(s1.getInfo());
+
+        Student s2 = new Student("Xin", 21, "哈尔滨工业大学");
+        System.out.println(s2.getInfo());
+
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 编写两个类 `TriAngle` 和 `TriAngleTest`。
+> 
+> 其中 `TriAngle` 类中声明私有的底边长 `base` 和高 `height`，同时声明公共方法访问私有变量；此外，提供类必要的构造器。
+>
+> 另一个类中使用这些公共方法，计算三角形的面积。
+
+示例代码：
+```java
+/* TriAngle.java */
+
+package com.anxin_hitsz_08.constructor.exer2;
+
+/**
+ * ClassName: TriAngle
+ * Package: com.anxin_hitsz_08.constructor.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:22
+ * @Version 1.0
+ */
+public class TriAngle {
+    // 属性
+    private double base;    // 底边长
+    private double height;  // 高
+
+    public double getBase() {
+        return base;
+    }
+    public void setBase(double b) {
+        base = b;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+    public void setHeight(double h) {
+        height = h;
+    }
+
+    public TriAngle() {
+
+    }
+    public TriAngle(double b, double h) {
+        base = b;
+        height = h;
+    }
+    // ...
+
+    // 求面积的方法
+    public double findArea() {
+        return base * height / 2;
+    }
+
+}
+
+
+/* TriAngleTest.java */
+
+package com.anxin_hitsz_08.constructor.exer2;
+
+/**
+ * ClassName: TriiAngleTest
+ * Package: com.anxin_hitsz_08.constructor.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:25
+ * @Version 1.0
+ */
+public class TriiAngleTest {
+    public static void main(String[] args) {
+        // 创建 TriAngle 的实例 1
+        TriAngle t1 = new TriAngle();
+        System.out.println("面积为：" + t1.findArea());
+
+        t1.setHeight(2.3);
+        t1.setBase(3.4);
+
+        System.out.println("面积为：" + t1.findArea());
+
+        // 创建 TriAngle 的实例 2
+        TriAngle t2 = new TriAngle(2.4, 4.5);
+
+        System.out.println("底边长为：" + t2.getBase());
+        System.out.println("高为：" + t2.getHeight());
+        System.out.println("面积为：" + t2.findArea());
+
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> 1. 写一个名为 `Account` 的类模拟账户。该类的属性和方法如下图所示：
+> ![Account 类的属性和方法](./images/Account.png "Account 类的属性和方法")
+>   * 该类包括的属性：账号 `id`、余额 `balance`、年利率 `annualInterestRate`。
+>   * 该类包含的构造器：自定义。
+>   * 该类包含的方法：访问器方法（`getter` 和 `setter` 方法）、取款方法 `withdraw()`、存款方法 `deposit()`。
+> 
+> 提示：在提款方法 `withdraw()` 中，需要判断用户余额是否能够满足提款数额的要求，如果不能，应给出提示。
+>
+> 2. 创建 `Customer` 类。该类的属性和方法如下图所示：
+> ![Customer 类的属性和方法](./images/Customer.png "Customer 类的属性和方法")
+>   * 声明三个私有对象属性：`firstName`、`lastName` 和 `account`。
+>   * 声明一个公有构造器，这个构造器带有两个代表对象属性的参数（`f` 和 `l`）。
+>   * 声明两个公有存取器来访问该对象属性，方法 `getFirstName` 和 `getLastName` 返回相应的属性。
+>   * 声明 `setAccount` 方法来对 `account` 属性赋值。
+>   * 声明 `getAccount` 方法以获取 `account` 属性。
+>
+> 3. 写一个测试程序。
+> * 创建一个 `Customer`，名字叫 Jane Smith，他有一个账号为 1000、余额为 2000 元、年利率为 1.23% 的账户。
+> * 对 Jane Smith 操作：
+>   * 存入 100 元，再取出 960 元；再取出 2000 元。
+>   * 打印出 Jane Smith 的基本信息。
+
+示例代码：
+```java
+/* Account.java */
+
+package com.anxin_hitsz_08.constructor.exer3;
+
+/**
+ * ClassName: Account
+ * Package: com.anxin_hitsz_08.constructor.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:29
+ * @Version 1.0
+ */
+public class Account {
+    private int id; // 账号
+    private double balance; // 余额
+    private double annualInterestRate;  // 年利率
+
+    public Account(int i, double b, double a) {
+        id = i;
+        balance = b;
+        annualInterestRate = a;
+    }
+
+    public void setId(int i) {
+        id = i;
+    }
+    public int getId() {
+        return id;
+    }
+    public void setBalance(double b) {
+        balance = b;
+    }
+    public double getBalance() {
+        return balance;
+    }
+    public void setAnnualInterestRate(double a) {
+        annualInterestRate = a;
+    }
+    public double getAnnualInterestRate() {
+        return annualInterestRate;
+    }
+
+    // 取钱
+    public void withdraw(double ammount) {
+        if (ammount <= balance && ammount > 0) {
+            balance -= ammount;
+            System.out.println("成功取出：" + ammount);
+        } else {
+            System.out.println("余额不足，取款失败");
+        }
+    }
+
+    // 存款
+    public void deposit(double ammount) {
+        if (ammount > 0) {
+            balance += ammount;
+            System.out.println("成功存入：" + ammount);
+        }
+    }
+}
+
+
+/* Customer.java */
+
+package com.anxin_hitsz_08.constructor.exer3;
+
+/**
+ * ClassName: Customer
+ * Package: com.anxin_hitsz_08.constructor.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:40
+ * @Version 1.0
+ */
+public class Customer {
+
+    private String firstName;
+    private String lastName;
+    private Account account;
+
+    public Customer(String f, String l) {
+        firstName = f;
+        lastName = l;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public void setAccount(Account a) {
+        account = a;
+    }
+    public Account getAccount() {
+        return account;
+    }
+
+}
+
+
+/* CustomerTest.java */
+
+package com.anxin_hitsz_08.constructor.exer3;
+
+/**
+ * ClassName: CustomerTest
+ * Package: com.anxin_hitsz_08.constructor.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 16:43
+ * @Version 1.0
+ */
+public class CustomerTest {
+    public static void main(String[] args) {
+        // 创建 Customer 实例
+        Customer customer = new Customer("Jane", "Smith");
+
+//        Account account = new Account(1000, 2000, 0.0123);
+//        customer.setAccount(account);
+        // 或 使用匿名对象
+        customer.setAccount(new Account(1000, 2000, 0.0123));
+
+        // 针对于客户的账户进行取钱、存钱的操作
+        customer.getAccount().deposit(100);
+        customer.getAccount().withdraw(960);
+        customer.getAccount().withdraw(2000);
+
+        // 输出客户信息
+        // Customer [Smith, Jane] has an account: id is 1000, annualInterestRate is 1.23%, balance is 1140.0
+        System.out.println("Customer [" + customer.getLastName() + ", " + customer.getFirstName() +
+                "] has an account: id is " + customer.getAccount().getId() + ", annualInterestRate is " +
+                customer.getAccount().getAnnualInterestRate() * 100 + "%, balance is " +
+                customer.getAccount().getBalance());
+
+
+        /*
+        * 关于匿名对象
+        *
+        * 1. 匿名对象往往只能被调用一次。
+        * 2. 匿名对象常常作为实参传递给方法的形参。
+        * */
+        new Account(1001, 2000, 0.0123).withdraw(1000);
+        System.out.println(new Account(1001, 2000, 0.0123).getBalance());
+
+    }
+}
+
+```
+
+## 十一、阶段性知识补充
+
+### 11.1 类中属性赋值过程
+
+**1. 在类的属性中，可以有哪些位置给属性赋值？**
+① 默认初始化；
+② 显式初始化；
+③ 构造器中初始化；
+
+> 注意：以上为对象创建之前的过程，称为初始化。
+
+④ 通过 “`对象.方法`” 的方式赋值。
+⑤ 通过 “`对象.属性`” 的方式赋值。
+
+**2. 这些位置执行的先后顺序是怎样？**
+顺序：① -> ② -> ③ -> ④ / ⑤。
+
+**3. 说明：**
+* 上述中的 ①、②、③ 在对象创建过程中，只能执行一次。
+* ④、⑤ 是在对象创建后执行的，可以根据需求多次执行。
+
+示例代码：
+```java
+package com.anxin_hitsz_09.bean_uml;
+
+/**
+ * ClassName: UserTest
+ * Package: com.anxin_hitsz_09.bean_uml
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 17:43
+ * @Version 1.0
+ */
+public class UserTest {
+    public static void main(String[] args) {
+        User u1 = new User();
+
+        System.out.println(u1.age);
+
+        User u2 = new User(2);
+        System.out.println(u2.age);
+        u2.age = 3;
+        u2.age = 4;
+    }
+}
+
+class User {
+    // 属性（或实例变量）
+    String name;
+    int age = 10;
+
+    public User() {
+
+    }
+
+    public User(int a) {
+        age = a;
+    }
+
+    // 静态变量（或类变量，非实例变量）
+//    static int age;
+
+}
+
+```
+
+### 11.2 JavaBean
+
+JavaBean 是一种 Java 语言写成的可重用组件。
+* 好比你做了一个扳手，这个扳手会在很多地方被拿去用。这个扳手也提供多种功能（你可以拿这个扳手扳、锤、撬等等），而这个扳手就是一个组件。
+
+所谓 JavaBean，是指符合如下标准的 Java 类：
+* 类是公共的；
+* 有一个无参的公共的构造器；
+* 有属性，且有对应的 `get`、`set` 方法。
+
+用户可以使用 JavaBean 将功能、处理、值、数据库访问和其他任何可以用 Java 代码创造的对象进行打包，并且其他的开发者可以通过内部的 JSP 页面、Servlet、其他 JavaBean、applet 程序或者应用来使用这些对象。用户可以认为 JavaBean 提供了一种随时随地的复制和粘贴的功能，而不用关心任何改变。
+
+《Think in Java》中提到，JavaBean 最初是为 Java GUI 的可视化编程实现的。你拖动 IDE 构建工具创建一个 GUI 组件（如多选框），其实是工具给你创建 Java 类，并提供将类的属性暴露出来给你修改调整，将事件监听器暴露出来。
+
+示例代码：
+```java
+package com.anxin_hitsz_09.bean_uml;
+
+/**
+ * ClassName: Customer
+ * Package: com.anxin_hitsz_09.bean_uml
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/20 18:08
+ * @Version 1.0
+ */
+public class Customer {
+
+    public Customer() {
+
+    }
+
+    private int id;
+    private String name;
+
+    public void setId(int i) {
+        id = i;
+    }
+    public int getId() {
+        return id;
+    }
+
+    public void setName(String n) {
+        name = n;
+    }
+    public String getName() {
+        return name;
+    }
+
+}
+
+```
+
+### 11.3 UML 类图
+
+UML（Unified Modeling Language，统一建模语言），用来描述**软件模型**和**架构**的图形化语言。
+
+常用的 UML 工具软件有 PowerDesigner、Rose 和 Enterprise Architect。
+
+UML 工具软件不仅可以绘制软件开发中所需的各种图表，还可以生成对应的源代码。
+
+在软件开发中，使用 **UML 类图** 可以更加直观地描述类内部结构（类地属性和操作）以及类之间的关系（如关联、依赖、聚合等）。
+
+示例如下：
+![UML 类图示例 1](./images/20260120173725.png "UML 类图示例 1")
+![UML 类图示例 2](./images/20260120174119.png "UML 类图示例 2")
+* `+` 表示 `public` 类型，`-` 表示 `private` 类型，`#` 表示 `protected` 类型。
+* 方法的写法：
+    ```uml
+    方法的类型（+、-）方法名(参数名 : 参数类型) : 返回值类型
+    ```
+* 斜体表示抽象方法或类。
