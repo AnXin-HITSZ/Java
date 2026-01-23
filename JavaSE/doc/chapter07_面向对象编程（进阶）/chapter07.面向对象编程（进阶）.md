@@ -187,7 +187,9 @@ public class UserTest {
 
 ### 1.3 练习
 
-> 注意：使用 `alt + insert` 组合键可以快速生成 `Constructor`、`Getter` 和 `Setter` 方法。
+> 注意：
+> * 使用 `alt + insert` 组合键可以快速生成 `Constructor`、`Getter` 和 `Setter` 方法。
+> * 使用 `Ctrl + F12` 组合键可以列出当前 `.java` 文件中所实现的类的所有成员方法和成员属性。
 
 练习 1：
 > 题目：
