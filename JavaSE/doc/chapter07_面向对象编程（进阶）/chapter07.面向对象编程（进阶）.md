@@ -1849,12 +1849,24 @@ public class CylinderTest {
 
 ## 五、关键字：`super`
 
+为什么需要 `super`？
+
+举例 1：子类继承父类以后，对父类的方法进行了重写；那么在子类中，是否还可以对父类中被重写的方法进行调用？
+* 可以！
+
+举例 2：子类继承父类以后，发现子类和父类中定义了同名的属性；是否可以在子类中区分两个同名的属性？
+* 可以！
+
+如何调用？使用 `super` 关键字即可。
+
 ### 5.1 `super` 的理解
 
+> `super` 的理解：`父类的`。
+
 在 Java 类中使用 `super` 来调用父类中的指定操作：
-* `super` 可用于访问父类中定义的属性。
-* `super` 可用于调用父类中定义的成员方法。
-* `super` 可用于在子类构造器中调用父类的构造器。
+* `super` 可用于访问父类中定义的**属性**。
+* `super` 可用于调用父类中定义的成员**方法**。
+* `super` 可用于在子类构造器中调用父类的**构造器**。
 
 > 注意：
 > * 尤其当子父类出现同名成员时，可以用 `super` 表明调用的是父类中的成员。
@@ -1862,6 +1874,24 @@ public class CylinderTest {
 > * `super` 和 `this` 的用法相像：`this` 代表本类对象的引用，`super` 代表父类的内存空间的标识。
 
 ### 5.2 `super` 的使用场景
+
+**1. `super` 调用属性、方法：**
+
+子类继承父类以后，我们就可以在子类的方法或构造器中，调用父类中声明的属性或方法。（满足封装性的前提下。）
+
+如何调用呢？需要使用 “`super.`” 的结构，表示调用父类的属性或方法。
+
+一般情况下，我们可以考虑省略 “`super.`” 的结构。但是，如果出现子类重写了父类的方法或子父类中出现了同名的属性时，则必须使用 “`super.`” 的声明，显式地调用父类被重写的方法或父类中声明的同名的属性。
+
+**2. `super` 调用构造器：**
+
+见如下《5.2.3 子类构造器中调用父类构造器》。
+
+> 注意：
+> 
+> 我们在通过子类的构造器创建对象时，一定在调用子类构造器的过程中，直接或间接地调用到父类的构造器。
+> 
+> 也正因为调用过父类的构造器，我们才会将父类中声明的属性或方法加载到内存中，供子类对象使用。
 
 #### 5.2.1 子类中调用父类被重写的方法
 
@@ -1871,6 +1901,108 @@ public class CylinderTest {
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:52
+ * @Version 1.0
+ */
+public class Person {
+    // 属性
+    String name;
+    private int age;
+
+    // 方法
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+    public void sleep() {
+        System.out.println("人睡觉");
+    }
+
+    public void doSport() {
+        System.out.println("人运动");
+    }
+
+}
+
+
+/* Student.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:57
+ * @Version 1.0
+ */
+public class Student extends Person {
+    // 属性
+
+    String school;
+
+    // 方法
+
+    public void study() {
+        System.out.println("学生学习");
+    }
+
+    public void eat() {
+        System.out.println("学生多吃有营养的食物");
+    }
+    public void sleep() {
+        System.out.println("学生保证每天不低于 10 个小时的睡眠");
+    }
+
+    public void show() {
+        eat();  // 省略了 this.
+        this.eat();
+
+        super.eat();
+    }
+
+    public void show1() {
+        doSport();
+        this.doSport();
+        super.doSport();
+    }
+
+}
+
+
+/* StudentTest.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: StudentTest
+ * Package: com.anxin_hitsz_05._super
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 21:27
+ * @Version 1.0
+ */
+public class StudentTest {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        s1.eat();
+        s1.sleep();
+
+        s1.show();
+    }
+}
 
 ```
 
@@ -1881,3 +2013,379 @@ public class CylinderTest {
   * 先从子类找匹配方法，如果没有，再从直接父类找；再没有，继续往上追溯。
 * 方法前面有 `super.`：
   * 从当前子类的直接父类找，如果没有，继续往上追溯。
+
+#### 5.2.2 子类中调用父类中同名的成员变量
+
+如果实例变量与局部变量重名，可以在实例变量前面加 `this.` 进行区别。
+
+如果子类实例变量和父类实例变量重名，并且父类的该实例变量在子类仍然可见，则在子类中要访问父类声明的实例变量需要在父类实例变量前加 `super.`，否则默认访问的是子类自己声明的实例变量。
+
+如果父子类实例变量没有重名，只要权限修饰符允许，在子类中完全可以直接访问父类中声明的实例变量，也可以用 `this.实例变量` 访问，亦可以用 `super.实例变量` 访问。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:52
+ * @Version 1.0
+ */
+public class Person {
+    // 属性
+    String name;
+    private int age;
+
+    int id = 1001; // 身份证号
+
+    // 方法
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+    public void sleep() {
+        System.out.println("人睡觉");
+    }
+
+    public void doSport() {
+        System.out.println("人运动");
+    }
+
+}
+
+
+/* Student.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:57
+ * @Version 1.0
+ */
+public class Student extends Person {
+    // 属性
+
+    String school;
+
+    int id = 1002; // 学号
+
+    public void setSchool(String school) {
+        this.school = school;
+    }
+
+    // 方法
+
+    public void study() {
+        System.out.println("学生学习");
+    }
+
+    public void eat() {
+        System.out.println("学生多吃有营养的食物");
+    }
+    public void sleep() {
+        System.out.println("学生保证每天不低于 10 个小时的睡眠");
+    }
+
+    // 测试 super 调用方法、属性
+    public void show() {
+        eat();  // 省略了 this.
+        this.eat();
+
+        super.eat();
+    }
+
+    public void show1() {
+        doSport();
+        this.doSport();
+        super.doSport();
+    }
+
+    public void show2() {
+        System.out.println(id); // 1002
+        System.out.println(this.id);    // 1002
+
+        System.out.println(super.id);   // 1001
+    }
+
+    public void show3() {
+        System.out.println(name);
+        System.out.println(this.name);
+        System.out.println(super.name);
+    }
+
+}
+
+
+/* StudentTest.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: StudentTest
+ * Package: com.anxin_hitsz_05._super
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 21:27
+ * @Version 1.0
+ */
+public class StudentTest {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        s1.eat();
+        s1.sleep();
+
+        s1.show();
+
+        System.out.println();
+        s1.show2();
+    }
+}
+
+```
+
+总结 - 起点不同（就近原则）：
+* 变量前面没有 `super.` 和 `this.`：
+  * 在构造器、代码块、方法中如果出现使用某个变量，先查看是否是当前块声明的**局部变量**；
+  * 如果不是局部变量，先从当前执行代码的**本类去找成员变量**；
+  * 如果从当前执行代码的本类中没有找到，会往上找**父类声明的成员变量**（权限修饰符允许在子类中访问的）。
+* 变量前面有 `this.`：
+  * 通过 `this` 找成员变量时，先从当前执行代码的**本类去找成员变量**；
+  * 如果从当前执行代码的本类中没有找到，会网上找**父类声明的成员变量**（权限修饰符允许在子类中访问的）。
+* 变量前面 `super.`：
+  * 通过 `super` 找成员变量，直接从当前执行代码的直接父类去找成员变量（权限修饰符允许在子类中访问的）；
+  * 如果直接父类没有，就去父类的父类中找（权限修饰符允许在子类中访问的）。
+
+**<font color='red'>特别说明：应该避免子类声明和父类重名的成员变量！</font>**
+
+在阿里的开发规范等文档中都做出明确说明：
+![在阿里的开发规范等文档中做出的明确说明](./images/image-20211230110411580.png "在阿里的开发规范等文档中做出的明确说明")
+
+#### 5.2.3 子类构造器中调用父类构造器
+
+① 子类继承父类时，不会继承父类的构造器。只能通过 “`super(形参列表)`” 的方式调用父类指定的构造器。
+
+② 规定：“`super(形参列表)`” 必须声明在构造器的首行。
+
+③ 我们前面讲过，在构造器的首行可以使用 “`this(形参列表)`” 调用本类中重载的构造器。结合②，得出结论：在构造器的首行，“`this(形参列表)`” 和 “`super(形参列表)`” 只能二选一。
+
+④ 如果在子类构造器的首行既没有显式调用 “`this(形参列表)`”，也没有显式调用 “`super(形参列表)`”，则子类此构造器默认调用 “`super()`”，即调用父类中空参的构造器。
+
+⑤ 由③和④得到结论：子类的任何一个构造器中，要么会调用本类中重载的构造器，要么会调用父类的构造器；只能是这两种情况之一。
+
+⑥ 由⑤得到：一个类中声明有 n 个构造器，最多有 n - 1 个构造器中使用了 “`this(形参列表)`”，则剩下的那个一定使用 “`super(形参列表)`”。
+
+> 开发中常见错误：
+>
+> 如果子类构造器中既未显式调用父类或本类的构造器，且父类中又没有空参的构造器，则**编译出错**。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:52
+ * @Version 1.0
+ */
+public class Person {
+    // 属性
+    String name;
+    private int age;
+
+    int id = 1001; // 身份证号
+
+    public Person() {
+
+        System.out.println("Person() ...");
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Person(String name, int age, int id) {
+        this.name = name;
+        this.age = age;
+        this.id = id;
+    }
+
+    // 方法
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+    public void sleep() {
+        System.out.println("人睡觉");
+    }
+
+    public void doSport() {
+        System.out.println("人运动");
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+
+/* Student.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_03._extends
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 14:57
+ * @Version 1.0
+ */
+public class Student extends Person {
+    // 属性
+
+    String school;
+
+    int id = 1002; // 学号
+
+    public void setSchool(String school) {
+        this.school = school;
+    }
+
+    // 方法
+
+    public void study() {
+        System.out.println("学生学习");
+    }
+
+    public void eat() {
+        System.out.println("学生多吃有营养的食物");
+    }
+    public void sleep() {
+        System.out.println("学生保证每天不低于 10 个小时的睡眠");
+    }
+
+    // 测试 super 调用方法、属性
+    public void show() {
+        eat();  // 省略了 this.
+        this.eat();
+
+        super.eat();
+    }
+
+    public void show1() {
+        doSport();
+        this.doSport();
+        super.doSport();
+    }
+
+    public void show2() {
+        System.out.println(id); // 1002
+        System.out.println(this.id);    // 1002
+
+        System.out.println(super.id);   // 1001
+    }
+
+    public void show3() {
+        System.out.println(name);
+        System.out.println(this.name);
+        System.out.println(super.name);
+    }
+
+    // 测试 super 调用父类的构造器
+    public Student() {
+        super();
+//        this("Tom", 12);
+        System.out.println("Student() ...");
+    }
+
+    public Student(String name, int age) {
+//        setAge(age);
+//        super.name = name;
+        super(name, age);
+    }
+
+}
+
+
+/* StudentTest.java */
+
+package com.anxin_hitsz_05._super;
+
+/**
+ * ClassName: StudentTest
+ * Package: com.anxin_hitsz_05._super
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 21:27
+ * @Version 1.0
+ */
+public class StudentTest {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        s1.eat();
+        s1.sleep();
+
+        s1.show();
+
+        System.out.println();
+        s1.show2();
+
+        System.out.println(s1.name);
+
+        // *****************************************
+        System.out.println();
+
+        Student s2 = new Student();
+
+        System.out.println("*****************************************");
+
+        Student s3 = new Student("Tom", 12);
+    }
+}
+
+```
+
+### 5.3 小结：`this` 与 `super`
+
+#### 5.3.1 `this` 和 `super` 的意义
+
+`this`：当前对象。
+* 在构造器和非静态代码块中，表示正在 `new` 的对象。
+* 在实例方法中，表示调用当前方法的对象。
+
+`super`：引用父类声明的成员。
+
+#### 5.3.2 `this` 和 `super` 的使用格式
+
+`this`：
+* `this.成员变量`：表示当前对象的某个成员变量，而不是局部变量。
+* `this.成员方法`：表示当前对象的某个成员方法，完全可以省略 this.。
+* `this()` 或 `this(实参列表)`：调用另一个构造器协助当前对象的实例化，只能在构造器首行，只会找本类的构造器，找不到就报错。
+
+`super`：
+* `super.成员变量`：表示当前对象的某个成员变量，该成员变量在父类中声明的。
+* `super.成员方法`：表示当前对象的某个成员方法，该成员方法在父类中声明的。
+* `super()` 或 `super(实参列表)`：调用父类的构造器协助当前对象的实例化，只能在构造器首行，只会找直接父类的对应构造器，找不到就报错。
