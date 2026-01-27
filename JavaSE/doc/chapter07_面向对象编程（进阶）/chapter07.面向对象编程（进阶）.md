@@ -41,6 +41,8 @@
 > 注意：
 >
 > **就近原则**：当形参与成员变量同名时，如果在方法内或构造器内使用该变量名，则根据“**就近原则**”，该变量名所指的是**形参**。
+>
+> 同理，在子父类的使用过程中，同样遵循**就近原则**。
 
 示例代码：
 ```java
@@ -2389,3 +2391,1138 @@ public class StudentTest {
 * `super.成员变量`：表示当前对象的某个成员变量，该成员变量在父类中声明的。
 * `super.成员方法`：表示当前对象的某个成员方法，该成员方法在父类中声明的。
 * `super()` 或 `super(实参列表)`：调用父类的构造器协助当前对象的实例化，只能在构造器首行，只会找直接父类的对应构造器，找不到就报错。
+
+### 5.4 练习
+
+**练习 1：**
+> 题目：
+>
+> 修改方法重写的练习 2 中定义的类 `Kids` 中 `employeed()` 方法，在该方法中调用父类 `ManKind` 的 `employeed()` 方法；然后再输出 “`but Kids should study and no job.`”。
+
+示例代码：
+```java
+/* ManKind.java */
+
+package com.anxin_hitsz_05._super.exer1;
+
+/**
+ * ClassName: ManKind
+ * Package: com.anxin_hitsz_03._extends.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 15:56
+ * @Version 1.0
+ */
+public class ManKind {
+    private int sex;
+    private int salary;
+
+    public ManKind() {
+    }
+
+    public ManKind(int sex, int salary) {
+        this.sex = sex;
+        this.salary = salary;
+    }
+
+    public int getSex() {
+        return sex;
+    }
+
+    public void setSex(int sex) {
+        this.sex = sex;
+    }
+
+    public int getSalary() {
+        return salary;
+    }
+
+    public void setSalary(int salary) {
+        this.salary = salary;
+    }
+
+    public void manOrWoman() {
+        if (sex == 1) {
+            System.out.println("Man");
+        } else if (sex == 0) {
+            System.out.println("Woman");
+        }
+    }
+
+    public void employeed() {
+        if (salary == 0) {
+            System.out.println("no job!");
+        } else {
+            System.out.println("job!");
+        }
+    }
+}
+
+
+/* Kids.java */
+
+package com.anxin_hitsz_05._super.exer1;
+
+/**
+ * ClassName: Kids
+ * Package: com.anxin_hitsz_03._extends.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 15:59
+ * @Version 1.0
+ */
+public class Kids extends ManKind {
+    private int yearsOld;
+
+    public Kids() {
+
+    }
+
+    public Kids(int yearsOld) {
+        this.yearsOld = yearsOld;
+    }
+
+    public Kids(int sex, int salary, int yearsOld) {
+        this.yearsOld = yearsOld;
+        setSex(sex);
+        setSalary(salary);
+    }
+
+    public int getYearsOld() {
+        return yearsOld;
+    }
+
+    public void setYearsOld(int yearsOld) {
+        this.yearsOld = yearsOld;
+    }
+
+    public void printAge() {
+        System.out.println("I am " + yearsOld + " years old.");
+    }
+
+    public void employeed() {
+        super.employeed();
+        System.out.println("but Kids should study and no job.");
+    }
+}
+
+
+/* KidsTest.java */
+
+package com.anxin_hitsz_05._super.exer1;
+
+/**
+ * ClassName: KidsTest
+ * Package: com.anxin_hitsz_03._extends.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 16:02
+ * @Version 1.0
+ */
+public class KidsTest {
+    public static void main(String[] args) {
+
+        Kids kid = new Kids();
+
+//        kid.setSex(1);
+//        kid.setSalary(100);
+//        kid.setYearsOld(12);
+//
+//        // 来自于父类中声明的方法
+//        kid.employeed();
+//        kid.manOrWoman();
+//
+//        // Kids 类自己声明的方法
+//        kid.printAge();
+
+        System.out.println("******************************");
+        kid.employeed();
+
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 在 `Cylinder` 类中修改求表面积的方法 `findArea()` 和求体积的方法 `findVolume()`，并使用 `super`。
+
+示例代码：
+```java
+/* Circle.java */
+
+package com.anxin_hitsz_05._super.exer2;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_03._extends.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 16:06
+ * @Version 1.0
+ */
+public class Circle {
+    private double radius;  // 半径
+
+    public Circle() {
+        this.radius = 1;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    // 求圆的面积
+    public double findArea() {
+        return 3.14 * radius * radius;
+    }
+}
+
+
+/* Cylinder.java */
+
+package com.anxin_hitsz_05._super.exer2;
+
+/**
+ * ClassName: Cylinder
+ * Package: com.anxin_hitsz_03._extends.exer2
+ * Description:
+ *      圆柱类
+ * @Author AnXin
+ * @Create 2026/1/26 16:07
+ * @Version 1.0
+ */
+public class Cylinder extends Circle {
+
+    private double length;  // 高
+
+    public Cylinder() {
+        length = 1;
+    }
+
+    public double getLength() {
+        return length;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
+    // 求圆柱的体积
+    public double findVolume() {
+//        return 3.14 * getRadius() * getRadius() * getLength();
+        // 错误的
+        return super.findArea() * getLength();
+    }
+
+    // 求表面积
+    public double findArea() {
+        return 3.14 * getRadius() * getRadius() * 2 +
+                2 * 3.14 * getRadius() * getLength();
+    }
+}
+
+
+/* CylinderTest.java */
+
+package com.anxin_hitsz_05._super.exer2;
+
+/**
+ * ClassName: CylinderTest
+ * Package: com.anxin_hitsz_03._extends.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/26 16:10
+ * @Version 1.0
+ */
+public class CylinderTest {
+    public static void main(String[] args) {
+
+        Cylinder cy =  new Cylinder();
+
+        cy.setRadius(2.3);
+        cy.setLength(1.4);
+
+        System.out.println("圆柱的体积为：" + cy.findVolume());
+
+        System.out.println("圆柱的表面积：" + cy.findArea());
+
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> **1.**
+> 
+> 写一个名为 `Account` 的类模拟账户。该类的属性和方法如下图所示：
+> ![UML - Account 类](./images/super_exer3_UML_Account.png "UML - Account 类")
+> * 该类包括的属性：账号 `id`、余额 `balance`、年利率 `annualInterestRate`。
+> * 该类包含的方法：访问器方法（`getter` 和 `setter` 方法）、返回月利率的方法 `getMonthlyInterest()`、取款方法 `withdraw()`、存款方法 `deposit()`。
+> 
+> 写一个用户程序测试 `Account` 类。在用户程序中，创建一个账号为 1122、余额为 20000、年利率 4.5% 的 `Account` 对象；使用 `withdraw()` 方法提款 2500 元，使用 `deposit()` 方法存款 3000 元，然后打印余额和月利率。
+>
+> 提示：在提款方法 `withdraw()` 中，需要判断用户余额是否能够满足提款数额的要求；如果不能，应给出提示。
+>
+> **2.**
+>
+> 创建 `Account` 类的一个子类 `CheckAccount` 代表可透支的账户，该账户中定义一个属性 `overdraft` 代表可透支限额。
+> 
+> 在 `CheckAccount` 类中重写 `withdraw()` 方法，其算法如下：
+> ```java
+> 如果 (取款金额 < 账户余额),
+>     可直接取款
+> 如果 (取款金额 > 账户余额),
+>     计算需要透支的额度
+>     判断可透支额 overdraft 是否足够支付本次透支需要；如果可以
+>         将账户余额修改为 0，冲减可透支金额
+>     如果不可以
+>         提示用户超过可透支额的限额
+> ```
+>
+> 要求：写一个用户程序测试 `CheckAccount` 类。
+> 在用户程序中，创建一个账号为 1122、余额为 20000、年利率 4.5%、可透支限额为 5000 元的 `CheckAccount` 对象。
+> 使用 `withdraw()` 方法提款 5000 元，并打印账户余额和可透支额。
+> 再使用 `withdraw()` 方法提款 18000 元，并打印账户余额和可透支额。
+> 再使用 `withdraw()` 方法提款 3000 元，并打印账户余额和可透支额。
+>
+> 提示：
+> 1. 子类 `CheckAccount` 的构造方法需要将从父类继承的 3 个属性和子类自己的属性全部初始化。
+> 2. 父类 `Account` 的属性 `balance` 被设置为 `private`，但在子类 `CheckAccount` 的 `withdraw()` 方法中需要修改它的值，因此应修改父类的 `balance` 属性，定义其为 `protected`。
+
+示例代码：
+```java
+/* Account.java */
+
+package com.anxin_hitsz_05._super.exer3;
+
+/**
+ * ClassName: Account
+ * Package: com.anxin_hitsz_05._super.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 13:19
+ * @Version 1.0
+ */
+public class Account {
+    private int id;
+    private double balance;
+    private double annualInterestRate;  // 年利率
+
+//    public Account() {}
+
+    public Account(int id, double balance, double annualInterestRate) {
+//        super();
+        this.id = id;
+        this.balance = balance;
+        this.annualInterestRate = annualInterestRate;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+//    public void setBalance(double balance) {
+//        this.balance = balance;
+//    }
+
+    public double getAnnualInterestRate() {
+        return annualInterestRate;
+    }
+
+    public void setAnnualInterestRate(double annualInterestRate) {
+        this.annualInterestRate = annualInterestRate;
+    }
+
+    /**
+     * 获取月利率
+     * @return
+     */
+    public double getMonthlyInterest() {
+        return annualInterestRate / 12;
+    }
+
+    /**
+     * 取钱操作
+     * @param amount 要取的钱数
+     */
+    public void withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+        } else {
+            System.out.println("余额不足！");
+        }
+    }
+
+    /**
+     * 存钱操作
+     * @param amount 要存的额度
+     */
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+        }
+    }
+}
+
+
+/* AccountTest.java */
+
+package com.anxin_hitsz_05._super.exer3;
+
+/**
+ * ClassName: AccountTest
+ * Package: com.anxin_hitsz_05._super.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 13:23
+ * @Version 1.0
+ */
+public class AccountTest {
+    public static void main(String[] args) {
+
+        Account acct = new Account(1122, 20000, 0.045);
+
+        acct.withdraw(30000);
+        System.out.println("您的账户余额为：" + acct.getBalance());
+
+        acct.withdraw(2500);
+        acct.deposit(3000);
+        System.out.println("您的账户余额为：" + acct.getBalance());
+
+        System.out.println("月利率为：" + acct.getMonthlyInterest());
+
+    }
+}
+
+
+/* CheckAccount.java */
+
+package com.anxin_hitsz_05._super.exer3;
+
+/**
+ * ClassName: CheckAccount
+ * Package: com.anxin_hitsz_05._super.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 13:26
+ * @Version 1.0
+ */
+public class CheckAccount extends Account {
+    private double overdraft;   // 可透支限额
+
+    public CheckAccount(int id, double balance, double annualInterestRate) {
+        super(id, balance, annualInterestRate);
+    }
+
+    public CheckAccount(int id, double balance, double annualInterestRate, double overdraft) {
+        super(id, balance, annualInterestRate);
+        this.overdraft = overdraft;
+    }
+
+    public double getOverdraft() {
+        return overdraft;
+    }
+
+    public void setOverdraft(double overdraft) {
+        this.overdraft = overdraft;
+    }
+
+    /**
+     * 针对于可透支的账户的取钱的操作
+     * @param amount 要取的钱数
+     */
+    public void withdraw(double amount) {
+        if (getBalance() >= amount) {
+            // 错误的：
+//            getBalance() = getBalance() - amount;
+            // 正确的：
+            super.withdraw(amount);
+        } else if (getBalance() + overdraft >= amount) {
+            overdraft -= amount - getBalance();
+            super.withdraw(getBalance());
+        } else {
+            System.out.println("超过可透支限额");
+        }
+    }
+}
+
+
+/* CheckAccountTest.java */
+
+package com.anxin_hitsz_05._super.exer3;
+
+/**
+ * ClassName: CheckAccountTest
+ * Package: com.anxin_hitsz_05._super.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 13:40
+ * @Version 1.0
+ */
+public class CheckAccountTest {
+    public static void main(String[] args) {
+
+        CheckAccount checkAccount = new CheckAccount(1122, 20000, 0.045, 5000);
+
+        checkAccount.withdraw(5000);
+        System.out.println("您的账户余额：" + checkAccount.getBalance());
+        System.out.println("您的可透支额：" + checkAccount.getOverdraft());
+
+        checkAccount.withdraw(18000);
+        System.out.println("您的账户余额：" + checkAccount.getBalance());
+        System.out.println("您的可透支额：" + checkAccount.getOverdraft());
+
+        checkAccount.withdraw(3000);
+        System.out.println("您的账户余额：" + checkAccount.getBalance());
+        System.out.println("您的可透支额：" + checkAccount.getOverdraft());
+
+    }
+}
+
+```
+
+> 注意：
+>
+> 以下代码：
+> ```java
+> public class Interview01 {
+> 
+>     public static void main(String[] args) {
+>         new A(new B());
+>     }
+> }
+> 
+> ```
+>
+> 在上述代码中，首先会 `new` 类 `B` 的实例，之后 `new` 出来的该类 `B` 的实例作为参数参与类 `A` 的实例的 `new` 过程。
+
+## 六、子类对象实例化全过程
+
+![子类对象实例化流程图](./images/image-20220324003713230.png "子类对象实例化流程图")
+
+示例：
+```java
+Dog dog = new Dog("旺财", "汪汪");
+```
+
+内存解析：
+![示例内存解析示意图](./images/image-20220324003735416.png "示例内存解析示意图")
+
+构造器调用关系：
+![示例构造器调用关系示意图](./images/image-20220324003813163.png "示例构造器调用关系示意图")
+
+> 注意：
+> 
+> 加载顺序为：先加载父类，再加载子类；即在上图中，加载顺序为由上至下加载。
+
+示例代码：
+```java
+class Creature {    // 生物类
+    // 声明属性、方法、构造器
+}
+
+class Animal extends Creature { // 动物类
+    // 声明属性、方法、构造器
+}
+
+class Dog extends Animal {  // 狗类
+    // 声明属性、方法、构造器
+}
+
+class DogTest {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        dog.xxx();
+        dog.yyy = ...;
+    }
+}
+
+```
+
+**总结：**
+**1. 从结果的角度来看：体现为类的继承性。**
+
+当我们创建子类对象后，子类对象就获取了其父类中声明的所有属性和方法。在权限允许的情况下，可以直接调用。
+
+**2. 从过程的角度来看：**
+
+当我们通过子类的构造器创建对象时，子类的构造器一定会直接或间接地调用到其父类的构造器；而父类的构造器同样会直接或间接地调用到其父类的父类的构造器，……；直到调用了 `Object` 类中的构造器为止。
+
+正因为我们调用过子类所有的父类的构造器，所以我们就会将父类中声明的属性、方法加载到内存中，供子类的对象使用。
+
+> 问题：
+> * 在创建子类对象的过程中，一定会调用父类中的构造器吗？
+>   * Yes！
+> * 创建子类的对象时，内存中到底有多少个对象？
+>   * 就只有一个对象！即为当前 `new` 后面构造器对应的类的对象。
+
+## 七、面向对象特征三：多态性
+
+> 一千个读者眼中有一千个哈姆雷特。
+
+多态性的理解：理解为一个事物的多种形态。
+
+### 7.1 多态的形式和体现
+
+#### 7.1.1 对象的多态性
+
+多态性，是面向对象中最重要的概念。在 Java 中的体现为 **子类对象的多态性：父类的引用指向子类的对象（或子类的对象赋给父类的引用）**。
+
+比如：
+```java
+Person p2 = new Man();
+```
+
+格式：
+```java
+父类类型 变量名 = 子类对象;
+```
+其中，**父类类型**指子类继承的父类类型，或者实现的接口类型。
+
+举例：
+```java
+Person p = new Student();
+
+Object o = new Person();    // Object 类型的变量 o，指向 Person 类型的对象
+
+o = new Student();  // Object 类型的变量 o，指向 Student 类型的对象
+```
+
+对象的多态：在 Java 中，子类的对象可以替代父类的对象使用；所以，一个引用类型变量可能指向（引用）多种不同类型的对象。
+
+#### 7.1.2 多态的理解
+
+Java 引用变量有两个类型：**编译时类型**和**运行时类型**。编译时类型由**声明**该变量时使用的类型决定，运行时类型由**实际赋给该变量的对象**决定。简称：**编译时，看左边；运行时，看右边。**
+* 若编译时类型和运行时类型不一致，就出现了对象的多态性（Polymorphosm）。
+* 多态情况下：
+  * “看左边”：看的是父类的引用（父类中不具备子类特有的方法）。
+  * “看右边”：看的是子类的对象（实际运行的是子类重写父类的方法）。
+
+> 注意：
+>
+> 问题：多态是编译时行为还是运行时行为？
+> * **多态是运行时行为！**
+
+多态的使用前提：
+1. 要有类的继承关系；
+2. 要有方法的重写。
+
+多态的适用性：适用于方法，不适用于属性。
+> 注意：对于属性，多态性不适用；即“编译看左边，运行看左边”。
+
+#### 7.1.3 举例
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:27
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    int id = 1001;
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+
+/* Man.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Man
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:28
+ * @Version 1.0
+ */
+public class Man extends Person {
+
+    boolean isSmoking;
+
+    int id = 1002;
+
+    public void eat() {
+        System.out.println("男人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("男人走路");
+    }
+
+    public void earnMoney() {
+        System.out.println("挣钱 ...");
+    }
+
+}
+
+
+/* Woman.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Woman
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:29
+ * @Version 1.0
+ */
+public class Woman extends Person {
+
+    boolean isBeauty;
+
+    public void eat() {
+        System.out.println("女人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("女人走路");
+    }
+
+    public void goShopping() {
+        System.out.println("逛街 ...");
+    }
+
+}
+
+
+/* PersonTest.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: PersonTest
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:33
+ * @Version 1.0
+ */
+public class PersonTest {
+    public static void main(String[] args) {
+
+        // 多态性之前的场景：
+        Person p1 = new Person();
+        Man m1 = new Man();
+
+        // 多态性：子类对象的多态性
+        Person p2 = new Man();
+
+        /*
+        * 多态性的应用：虚拟方法调用（虚方法调用）
+        *
+        * 在多态的场景下，调用方法时。
+        *   编译时，认为方法是左边声明的父类的类型的方法（即被重写的方法）。
+        *   执行时，实际执行的是子类重写父类的方法。
+        * 简称为：编译看左边，运行看右边。
+        *
+        * */
+        p2.eat();
+        p2.walk();
+
+        // 测试属性是否满足多态性？不满足！
+        System.out.println(p2.id);  // 1001
+
+        /*
+        * 多态的弊端？
+        * 问题：Person p2 = new Man();
+        *   针对于创建的对象，在内存中是否加载了 Man 类中声明的特有的属性和方法？加载了！
+        * 问题：能不能直接调用 Man 类中加载的特有的属性和方法？不能！
+        * */
+//        p2.earnMoney();
+//        System.out.println(p2.isSmoking);
+//        Man m2 = new Man();
+
+    }
+}
+
+```
+
+### 7.2 为什么需要多态性（polymorphism）？
+
+开发中，有时我们在设计一个数组、或一个成员变量、或一个方法的形参、返回值类型时，无法确定它具体的类型，只能确定它是某个系列的类型。
+
+### 7.3 多态的好处和弊端
+
+**好处**：变量引用的子类对象不同，执行的方法就不同，实现动态绑定；代码编写更灵活、功能更强大，可维护性和扩展性更好了。
+即：极大地减少了代码的冗余，不需要定义多个重载的方法。
+
+**弊端**：一个引用类型变量如果声明为父类的类型，但实际引用的是子类对象，那么该变量就不能再访问子类中添加的属性和方法。
+即：在多态的场景下，我们创建了子类的对象，也加载了子类特有的属性和方法；但是由于声明为父类的引用，导致我们没有办法直接调用子类特有的属性和方法。
+
+示例代码：
+```java
+Student m = new Student();
+m.school = "pku";   // 合法，Student 类有 school 成员变量
+Person e = new Student();
+e.school = "pku";   // 非法，Person 类没有 school 成员变量
+
+// 属性是在编译时确定的，编译时 e 为 Person 类型，没有 school 成员变量，因而编译错误。
+```
+
+> 开发中：
+>
+> 使用父类做方法的形参，是多态使用最多的场合。即使增加了新的子类，方法也无需改变，提高了扩展性，符合开闭原则。
+>
+> 【开闭原则 OCP（Open Close Principle）】：
+> * 对扩展开放，对修改关闭。
+> * 通俗解释：软件系统中的各种组件，如模块（Modules）、类（Classes）以及功能（Functions）等，应该在不修改现有代码的基础上，引入新功能。
+
+**举例 1：**
+```java
+class Account {
+    public void withdraw() {}   // 取钱
+}
+
+class CheckAccount extends Account {    // 信用卡
+    // 存在方法的重写
+    public void withdraw() {}   // 取钱
+}
+class SavingAccount extends Account {   // 储蓄卡
+    // 存在方法的重写
+}
+
+class Customer {
+    Account account;
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+}
+
+class CustomerTest {
+    public static void main(String[] args) {
+        Customer cust = new Customer();
+        cust.setAccount(new CheckAccount());
+
+        cust.getAccount().withdraw();
+
+    }
+}
+```
+举例 2：
+```java
+/* AnimalTest.java */
+
+package com.anxin_hitsz_06.polymorphism.apply;
+
+/**
+ * ClassName: AnimalTest
+ * Package: com.anxin_hitsz_06.polymorphism.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:54
+ * @Version 1.0
+ */
+public class AnimalTest {
+
+    public static void main(String[] args) {
+        AnimalTest test = new AnimalTest();
+
+        test.adopt(new Dog());
+        test.adopt(new Cat());
+    }
+
+    public void adopt(Animal animal) {  // Animal animal = new Dog();
+        animal.eat();
+        animal.jump();
+
+//        animal.watchDoor();
+
+    }
+
+//    public void adopt(Dog dog) {
+//        dog.eat();
+//        dog.jump();
+//
+//    }
+//
+//    public void adopt(Cat cat) {
+//        cat.eat();
+//        cat.jump();
+//
+//    }
+
+}
+
+class Animal {
+    public void eat() {
+        System.out.println("动物进食");
+    }
+
+    public void jump() {
+        System.out.println("动物跳");
+    }
+}
+
+class Dog extends Animal {
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+
+    public void jump() {
+        System.out.println("狗跳");
+    }
+
+    public void watchDoor() {
+        System.out.println("狗能看家");
+    }
+}
+
+class Cat extends Animal {
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+
+    public void jump() {
+        System.out.println("猫跳");
+    }
+
+    public void catchMouse() {
+        System.out.println("猫抓老鼠");
+    }
+}
+
+```
+
+### 7.4 虚方法调用（Virtual Method Invocation）
+
+在 Java 中虚方法是在编译阶段不能确定方法的调用入口地址，在运行阶段才能确定的方法；即可能被重写的方法。
+
+示例代码：
+```java
+Person e = new Student();
+e.getInfo();    // 调用 Student 类的 getInfo() 方法
+```
+
+子类中定义了与父类同名同参数的方法，在多态情况下，将此时父类的方法称为虚方法，父类根据赋给它的不同子类对象，动态调用属于子类的该方法。这样的方法调用在编译期是无法确定的。
+
+举例：
+![虚方法调用举例](./images/image-20220324234208997.png "虚方法调用举例")
+* 前提：`Person` 类中定义了 `welcome()` 方法，各个子类重写了 `welcome()`。
+* 执行：多态的情况下，调用对象的 `welcome()` 方法，实际执行的是子类重写的方法。
+
+> 拓展：
+>
+> **静态链接（或早期绑定）**：当一个字节码文件被装载进 JVM 内部时，如果被调用的目标方法在编译期可知，且运行期保持不变时。这种情况下将调用方法的符号引用转换为直接引用的过程称之为静态链接；那么调用这样的方法，就称为非虚方法调用。比如调用静态方法、私有方法、`final` 方法、父类构造器、本类重载构造器等。
+>
+> **动态链接（或晚期绑定）**：如果被调用的方法在编译期无法被确定下来，也就是说，只能够在程序运行期将调用方法的符号引用转换为直接引用。由于这种引用转换过程具备动态性，因此也就被称之为动态链接；调用这样的方法，就称为虚方法调用。比如调用重写的方法（针对父类）、实现的额方法（针对接口）。
+
+### 7.5 成员变量没有多态性
+
+若子类重写了父类方法，就意味着子类里定义的方法彻底覆盖了父类里的同名方法，系统将不可能把父类里的方法转移到子类中。
+
+对于实例变量则不存在这样的现象，即使子类里定义了与父类完全相同的实例变量，这个实例变量依然不可能覆盖父类中定义的实例变量。
+
+### 7.6 向上转型与向下转型
+
+首先，一个对象在 `new` 的时候创建的是哪个类型的对象，它从头至尾都不会变；即这个对象的运行时类型、本质的类型永远不会变。但是，把这个对象赋值给不同类型的变量时，这些变量的编译时类型却不同。
+
+#### 7.6.1 为什么要类型转换？
+
+因为多态，就一定会有把子类对象赋值给父类变量的时候。这个时候，在**编译期间**，就会出现类型转换的现象。
+
+但是，使用父类变量接收了子类对象之后，我们就**不能调用**子类拥有而父类没有的方法了，这也是多态给我们带来的一点“小麻烦”。所以，想要调用子类特有的方法，必须做类型转换，使得**编译通过**。
+
+> 类型转换与转型的对比：
+> 
+> ![类型转换与转型的对比示意图](./images/image-20220324235337563.png "类型转换与转型的对比示意图")
+
+转型分为向上转型与向下转型：
+* **向上转型**：当 `左边的变量的类型（父类） > 右边对象 / 变量的类型（子类）`，我们就称为向上转型。
+  * 此时，编译时按照左边变量的类型处理，就只能调用父类中有的变量和方法，不能调用子类特有的变量和方法了。
+  * 但是，**运行时仍然是对象本身的类型**，所以执行的方法是子类重写的方法体。
+  * 此时，一定是安全的，而且也是自动完成的。
+* **向下转型**：当 `左边的变量的类型（子类） < 右边对象 / 变量的编译时类型（父类）`，我们就称为向下转型。
+  * 此时，编译时按照左边变量的类型处理，就可以调用子类特有的变量和方法了。
+  * 但是，运行时仍然是对象本身的类型。
+  * 不是所有通过编译的向下转型都是正确的，可能会发生 `ClassCastException`；为了安全，可以通过 `isInstanceof` 关键字进行判断。
+
+#### 7.6.2 如何向上或向下转型
+
+向上转型：自动完成。
+
+向下转型：`(子类类型)父类变量`。
+
+示例代码：
+```java
+
+```
+
+#### 7.6.3 `instanceof` 关键字
+
+为了避免 `ClassCastException` 的发生，Java 提供了 `instanceof` 关键字，给引用变量做类型的校验。如下代码格式：
+```java
+// 检验对象 a 是否是数据类型 A 的对象，返回值为 boolean 型
+对象a instanceof 数据类型A
+```
+
+> 说明：
+> * 只要用 `instanceof` 判断返回 `true` 的，那么强转为该类型就一定是安全的，不会报 `ClassCastException` 异常。
+> * 如果对象 `a` 属于类 `A` 的子类 `B`，`a instanceof A` 值也为 `true`。
+> * 要求对象 `a` 所属的类与类 `A` 必须是子类和父类的关系，否则编译错误。
+
+示例代码：
+```java
+
+```
+
+### 7.7 练习
+
+练习 1：
+> 题目：
+>
+> 定义三个类，父类 `GeometricObject` 代表几何形状，子类 `Circle` 代表圆形，`MyRectangle` 代表矩形。UML 类图如下：
+> ![练习 1 - UML](./images/polymorphism_exer1_UML.png "练习 1 - UML")
+> 
+> 定义一个测试类 `GeometricTest`：
+> * 编写 equalsArea 方法测试两个对象的面积是否相等（注意方法的参数类型）。
+> * 编写 displayGeometricObject 方法显示对象的面积（注意方法的参数类型）。
+
+示例代码：
+```java
+
+```
+
+练习 2：
+> 题目：
+>
+> 修改 com.anxin_hitsz_06.polymorphism.apply 包下的 `AnimalTest` 类的方法，在判断 `Animal` 是 `Dog` 或 `Cat` 时向下转型，并调用各自特有的方法。
+
+示例代码：
+```java
+
+```
+
+练习 3：
+> 题目：
+>
+> 已知代码如下：
+> ```java
+> class Person {
+>     protected String name = "person";
+>     protected int age = 50;
+>     public String getInfo() {
+>         return "Name: " + name + "\n" + "age: " + age;
+>     }
+> }
+> class Student extends Person {
+>     protected String school = "pku";
+>     public String getInfo() {
+>         return "Name: " + name + "\nage: " + age 
+>         + "\nschool: " + school;
+>     }
+> }
+> class Graduate extends Student {
+>     public String major = "IT";
+>     public String getInfo() {
+>         return "Name: " + name + "\nage: " + age 
+>         + "\nschool: " + school + "\nmajor: " + major;
+>     }
+> }
+> ```
+>
+> 建立 `InstanceTest` 类，在类中定义方法 `method(Person e)`；在 `method` 中：
+> 1. 根据 `e` 的类型调用相应类的 `getInfo()` 方法。
+> 2. 根据 `e` 的类型执行：
+> * 如果 `e` 为 `Person` 类的对象，输出：
+>   ```java
+>   a person
+>   ```
+> * 如果 `e` 为 `Student` 类的对象，输出：
+>   ```java
+>   a student
+>   a person
+>   ```
+> * 如果 `e` 为 `Graduate` 类的对象，输出：
+>   ```java
+>   a graduate student
+>   a student
+>   a person
+>   ```
+>
+> 以上为题目描述。
+
+示例代码：
+```java
+
+```
+
+练习 4：
+> 题目：
+>
+> **1. 在包中声明人 `Person`、男人 `Man`、女人 `Woman` 类。**
+> 1. 在 `Person` 类中，包含：
+> * `public void eat()`：打印吃饭。
+> * `public void toilet()`：打印上洗手间。
+> 2. 在 `Man` 类中，包含：
+> * 重写上面的方法。
+> * 增加 `public void smoke()`：打印吸烟。
+> 3. 在 `Woman` 类中，包含：
+> * 重写上面的方法。
+> * 增加 `public void makeup()`：打印化妆。
+>
+> **2. 在包中声明测试类 `Exer4`。**
+> 1. `public static void meeting(Person ... ps)`：
+> 在该方法中，每一个人先吃饭，然后上洗手间。然后如果是男人，随后抽根烟；如果是女人，随后化个妆。
+> 2. `public static void main(String[] args)`：
+> 在主方法中，创建多个男人和女人对象，并调用 `meeting()` 方法进行测试。
+
+示例代码：
+```java
+
+```
