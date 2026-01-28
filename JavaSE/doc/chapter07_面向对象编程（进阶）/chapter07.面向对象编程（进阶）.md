@@ -3390,7 +3390,7 @@ e.getInfo();    // 调用 Student 类的 getInfo() 方法
 * **向下转型**：当 `左边的变量的类型（子类） < 右边对象 / 变量的编译时类型（父类）`，我们就称为向下转型。
   * 此时，编译时按照左边变量的类型处理，就可以调用子类特有的变量和方法了。
   * 但是，运行时仍然是对象本身的类型。
-  * 不是所有通过编译的向下转型都是正确的，可能会发生 `ClassCastException`；为了安全，可以通过 `isInstanceof` 关键字进行判断。
+  * 不是所有通过编译的向下转型都是正确的，可能会发生 `ClassCastException`；为了安全，可以通过 `instanceof` 关键字进行判断。
 
 #### 7.6.2 如何向上或向下转型
 
@@ -3400,6 +3400,160 @@ e.getInfo();    // 调用 Student 类的 getInfo() 方法
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:27
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    int id = 1001;
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+
+/* Man.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Man
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:28
+ * @Version 1.0
+ */
+public class Man extends Person {
+
+    boolean isSmoking;
+
+    int id = 1002;
+
+    public void eat() {
+        System.out.println("男人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("男人走路");
+    }
+
+    public void earnMoney() {
+        System.out.println("挣钱 ...");
+    }
+
+}
+
+
+/* Woman.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Woman
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:29
+ * @Version 1.0
+ */
+public class Woman extends Person {
+
+    boolean isBeauty;
+
+    public void eat() {
+        System.out.println("女人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("女人走路");
+    }
+
+    public void goShopping() {
+        System.out.println("逛街 ...");
+    }
+
+}
+
+
+/* PersonTest1.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: PersonTest1
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:17
+ * @Version 1.0
+ */
+public class PersonTest1 {
+    public static void main(String[] args) {
+        Person p1 = new Man();
+
+        // 不能直接调用子类特有的结构
+//        p1.earnMoney();
+//        System.out.println(p1.isSmoking);
+
+        // 向下转型：使用强转符
+        Man m1 = (Man)p1;
+        m1.earnMoney();
+        System.out.println(m1.isSmoking);
+
+        System.out.println(p1 == m1);   // true，p1 和 m1 指向堆空间中的同一个对象
+
+        /*
+        * 向下转型可能会出现：类型转换异常（ClassCastException）
+        * */
+        Person p2 = new Woman();
+//        Man m2 = (Man)p2;
+//        m2.earnMoney();
+
+        /*
+        * 1. 建议在向下转型之前，使用 instanceof 进行判断，避免出现类型转换异常
+        * 2. 格式：a instanceof A：判断对象 a 是否是类 A 的实例
+        * 3. 如果 a instanceof A 返回 true，则：
+        *       a instanceof superA 返回也是 true，其中 A 是 superA 的子类。
+        * */
+        if (p2 instanceof Man) {
+            Man m2 = (Man)p2;
+            m2.earnMoney();
+        }
+
+        if (p2 instanceof Woman) {
+            System.out.println("Woman");
+        }
+
+        if (p2 instanceof Person) {
+            System.out.println("Person");
+        }
+
+        if (p2 instanceof Object) {
+            System.out.println("Object");
+        }
+    }
+}
 
 ```
 
@@ -3418,37 +3572,405 @@ e.getInfo();    // 调用 Student 类的 getInfo() 方法
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:27
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    int id = 1001;
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+
+/* Man.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Man
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:28
+ * @Version 1.0
+ */
+public class Man extends Person {
+
+    boolean isSmoking;
+
+    int id = 1002;
+
+    public void eat() {
+        System.out.println("男人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("男人走路");
+    }
+
+    public void earnMoney() {
+        System.out.println("挣钱 ...");
+    }
+
+}
+
+
+/* Woman.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: Woman
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:29
+ * @Version 1.0
+ */
+public class Woman extends Person {
+
+    boolean isBeauty;
+
+    public void eat() {
+        System.out.println("女人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("女人走路");
+    }
+
+    public void goShopping() {
+        System.out.println("逛街 ...");
+    }
+
+}
+
+
+/* PersonTest1.java */
+
+package com.anxin_hitsz_06.polymorphism;
+
+/**
+ * ClassName: PersonTest1
+ * Package: com.anxin_hitsz_06.polymorphism
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:17
+ * @Version 1.0
+ */
+public class PersonTest1 {
+    public static void main(String[] args) {
+        Person p1 = new Man();
+
+        // 不能直接调用子类特有的结构
+//        p1.earnMoney();
+//        System.out.println(p1.isSmoking);
+
+        // 向下转型：使用强转符
+        Man m1 = (Man)p1;
+        m1.earnMoney();
+        System.out.println(m1.isSmoking);
+
+        System.out.println(p1 == m1);   // true，p1 和 m1 指向堆空间中的同一个对象
+
+        /*
+        * 向下转型可能会出现：类型转换异常（ClassCastException）
+        * */
+        Person p2 = new Woman();
+//        Man m2 = (Man)p2;
+//        m2.earnMoney();
+
+        /*
+        * 1. 建议在向下转型之前，使用 instanceof 进行判断，避免出现类型转换异常
+        * 2. 格式：a instanceof A：判断对象 a 是否是类 A 的实例
+        * 3. 如果 a instanceof A 返回 true，则：
+        *       a instanceof superA 返回也是 true，其中 A 是 superA 的子类。
+        * */
+        if (p2 instanceof Man) {
+            Man m2 = (Man)p2;
+            m2.earnMoney();
+        }
+
+        if (p2 instanceof Woman) {
+            System.out.println("Woman");
+        }
+
+        if (p2 instanceof Person) {
+            System.out.println("Person");
+        }
+
+        if (p2 instanceof Object) {
+            System.out.println("Object");
+        }
+    }
+}
 
 ```
 
 ### 7.7 练习
 
-练习 1：
+**练习 1：**
 > 题目：
 >
 > 定义三个类，父类 `GeometricObject` 代表几何形状，子类 `Circle` 代表圆形，`MyRectangle` 代表矩形。UML 类图如下：
 > ![练习 1 - UML](./images/polymorphism_exer1_UML.png "练习 1 - UML")
 > 
 > 定义一个测试类 `GeometricTest`：
-> * 编写 equalsArea 方法测试两个对象的面积是否相等（注意方法的参数类型）。
-> * 编写 displayGeometricObject 方法显示对象的面积（注意方法的参数类型）。
+> * 编写 `equalsArea` 方法测试两个对象的面积是否相等（注意方法的参数类型）。
+> * 编写 `displayGeometricObject` 方法显示对象的面积（注意方法的参数类型）。
 
 示例代码：
 ```java
+/* GeometricObject.java */
+
+package com.anxin_hitsz_06.polymorphism.exer1;
+
+/**
+ * ClassName: GeometricObject
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:31
+ * @Version 1.0
+ */
+public class GeometricObject {
+    protected String color;
+    protected double weight;
+
+    protected GeometricObject(String color, double weight) {
+        this.color = color;
+        this.weight = weight;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    public double findArea() {
+        return 0.0;
+    }
+}
+
+
+/* Circle.java */
+
+package com.anxin_hitsz_06.polymorphism.exer1;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:35
+ * @Version 1.0
+ */
+public class Circle extends GeometricObject {
+
+    private double radius;  // 半径
+
+    public Circle(String color, double weight, double radius) {
+        super(color, weight);
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public double findArea() {
+        return 3.14 * radius * radius;
+    }
+}
+
+
+/* MyRectangle.java */
+
+package com.anxin_hitsz_06.polymorphism.exer1;
+
+/**
+ * ClassName: MyRectangle
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:37
+ * @Version 1.0
+ */
+public class MyRectangle extends GeometricObject {
+    private double width;   // 宽
+    private double height;  // 高
+
+    public MyRectangle(String color, double weight, double width, double height) {
+        super(color, weight);
+        this.width = width;
+        this.height = height;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    @Override
+    public double findArea() {
+
+        return width * height;
+    }
+}
 
 ```
 
-练习 2：
+**练习 2：**
 > 题目：
 >
 > 修改 com.anxin_hitsz_06.polymorphism.apply 包下的 `AnimalTest` 类的方法，在判断 `Animal` 是 `Dog` 或 `Cat` 时向下转型，并调用各自特有的方法。
 
 示例代码：
 ```java
+/* AnimalTest.java */
+
+package com.anxin_hitsz_06.polymorphism.exer2;
+
+/**
+ * ClassName: AnimalTest
+ * Package: com.anxin_hitsz_06.polymorphism.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 15:54
+ * @Version 1.0
+ */
+public class AnimalTest {
+
+    public static void main(String[] args) {
+        AnimalTest test = new AnimalTest();
+
+        test.adopt(new Dog());
+        test.adopt(new Cat());
+    }
+
+    public void adopt(Animal animal) {  // Animal animal = new Dog();
+        animal.eat();
+        animal.jump();
+
+        if (animal instanceof Dog) {
+            Dog dog = (Dog)animal;
+            dog.watchDoor();
+        }
+        if (animal instanceof Cat) {
+            Cat cat = (Cat)animal;
+            cat.catchMouse();
+        }
+
+    }
+
+//    public void adopt(Dog dog) {
+//        dog.eat();
+//        dog.jump();
+//
+//    }
+//
+//    public void adopt(Cat cat) {
+//        cat.eat();
+//        cat.jump();
+//
+//    }
+
+}
+
+class Animal {
+    public void eat() {
+        System.out.println("动物进食");
+    }
+
+    public void jump() {
+        System.out.println("动物跳");
+    }
+}
+
+class Dog extends Animal {
+    public void eat() {
+        System.out.println("狗吃骨头");
+    }
+
+    public void jump() {
+        System.out.println("狗跳");
+    }
+
+    public void watchDoor() {
+        System.out.println("狗能看家");
+    }
+}
+
+class Cat extends Animal {
+    public void eat() {
+        System.out.println("猫吃鱼");
+    }
+
+    public void jump() {
+        System.out.println("猫跳");
+    }
+
+    public void catchMouse() {
+        System.out.println("猫抓老鼠");
+    }
+}
 
 ```
 
-练习 3：
+**练习 3：**
 > 题目：
 >
 > 已知代码如下：
@@ -3499,10 +4021,129 @@ e.getInfo();    // 调用 Student 类的 getInfo() 方法
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_06.polymorphism.exer3;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.polymorphism.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:57
+ * @Version 1.0
+ */
+class Person {
+    protected String name="person";
+    protected int age=50;
+    public String getInfo() {
+        return "Name: "+ name + "\n" +"age: "+ age;
+    }
+}
+
+
+/* Student.java */
+
+package com.anxin_hitsz_06.polymorphism.exer3;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_06.polymorphism.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:58
+ * @Version 1.0
+ */
+class Student extends Person {
+    protected String school="pku";
+    public String getInfo() {
+        return  "Name: "+ name + "\nage: "+ age
+                + "\nschool: "+ school;
+    }
+}
+
+
+/* Graduate.java */
+
+package com.anxin_hitsz_06.polymorphism.exer3;
+
+/**
+ * ClassName: Graduate
+ * Package: com.anxin_hitsz_06.polymorphism.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:58
+ * @Version 1.0
+ */
+class Graduate extends Student {
+    public String major="IT";
+    public String getInfo()
+    {
+        return  "Name: "+ name + "\nage: "+ age
+                + "\nschool: "+ school+"\nmajor:"+major;
+    }
+}
+
+
+/* InstanceTest.java */
+
+package com.anxin_hitsz_06.polymorphism.exer3;
+
+/**
+ * ClassName: InstanceTest
+ * Package: com.anxin_hitsz_06.polymorphism.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:56
+ * @Version 1.0
+ */
+public class InstanceTest {
+
+    public static void main(String[] args) {
+
+        InstanceTest test = new InstanceTest();
+
+        test.method(new Student());
+
+    }
+
+    public void method(Person e) {
+
+        System.out.println(e.getInfo());
+
+        // 方式 1：
+//        if (e instanceof Graduate) {
+//            System.out.println("a graduated student");
+//            System.out.println("a student");
+//            System.out.println("a person");
+//        } else if (e instanceof Student) {
+//            System.out.println("a student");
+//            System.out.println("a person");
+//        } else {
+//            System.out.println("a person");
+//        }
+        // 方式 2：
+        if (e instanceof Graduate) {
+            System.out.println("a graduated student");
+        }
+
+        if (e instanceof Student) {
+            System.out.println("a student");
+        }
+
+        if (e instanceof Person) {
+            System.out.println("a person");
+        }
+    }
+}
 
 ```
 
-练习 4：
+**练习 4：**
 > 题目：
 >
 > **1. 在包中声明人 `Person`、男人 `Man`、女人 `Woman` 类。**
@@ -3524,5 +4165,1205 @@ e.getInfo();    // 调用 Student 类的 getInfo() 方法
 
 示例代码：
 ```java
+/* Person.java */
+
+package com.anxin_hitsz_06.polymorphism.exer4;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_06.polymorphism.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 18:07
+ * @Version 1.0
+ */
+public class Person {
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void toilet() {
+        System.out.println("人去洗手间");
+    }
+
+}
+
+
+/* Man.java */
+
+package com.anxin_hitsz_06.polymorphism.exer4;
+
+/**
+ * ClassName: Man
+ * Package: com.anxin_hitsz_06.polymorphism.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 18:09
+ * @Version 1.0
+ */
+public class Man extends Person {
+    public void eat() {
+        System.out.println("男人吃饭");
+    }
+
+    public void toilet() {
+        System.out.println("男人去洗手间");
+    }
+
+    public void smoke() {
+        System.out.println("吸烟");
+    }
+
+}
+
+
+/* Woman.java */
+
+package com.anxin_hitsz_06.polymorphism.exer4;
+
+/**
+ * ClassName: Woman
+ * Package: com.anxin_hitsz_06.polymorphism.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 18:10
+ * @Version 1.0
+ */
+public class Woman extends Person {
+    public void eat() {
+        System.out.println("女人吃饭");
+    }
+
+    public void toilet() {
+        System.out.println("女人去洗手间");
+    }
+
+    public void makeup() {
+        System.out.println("化妆");
+    }
+
+}
+
+
+/* Exer4.java */
+
+package com.anxin_hitsz_06.polymorphism.exer4;
+
+/**
+ * ClassName: Exer4
+ * Package: com.anxin_hitsz_06.polymorphism.exer4
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 18:12
+ * @Version 1.0
+ */
+public class Exer4 {
+    public static void main(String[] args) {
+
+        Exer4 exer4 = new Exer4();
+        exer4.meeting(new Man(), new Woman(), new Man());
+
+    }
+
+    public void meeting(Person ... ps) {
+
+        for (int i = 0; i < ps.length; i++) {
+            ps[i].eat();
+            ps[i].toilet();
+
+            if (ps[i] instanceof Woman) {
+
+                Woman woman = (Woman)ps[i];
+                woman.makeup();
+
+            } else if (ps[i] instanceof Man) {
+                Man man = (Man)ps[i];
+                man.smoke();
+            }
+
+//            if (ps[i] instanceof Object) {
+//
+//            }
+
+            // 编译不通过
+//            if (ps[i] instanceof String) {
+//
+//            }
+
+            System.out.println();
+        }
+
+    }
+}
 
 ```
+
+## 八、`Object` 类的使用
+
+### 8.1 如何理解根父类
+
+类 `java.lang.Object` 是类层次结构的根类，即所有其它类的父类。每个类都使用 `Object` 作为超类。因此，`Object` 类称为 Java 类的根父类。
+
+类的继承树关系示例：
+![类的继承树关系示例](./images/image-20220503104750655.png "类的继承树关系示例")
+
+`Object` 类型的变量与除 `Object` 以外的任意引用数据类型的对象都存在多态引用。例如：
+```java
+method(Object obj) { ... }  // 可以接收任何类作为其参数
+
+Person o = new Person();
+method(o);
+```
+即任何一个 Java 类（除 `Object` 类）都直接或间接地继承于 `Object` 类。
+
+`Object` 类中声明的结构（属性、方法等）就具有通用性。
+* `Object` 类中没有声明属性。
+* `Object` 类提供了一个空参的构造器。
+* 重点关注：`Object` 类中声明的方法。
+
+所有对象（包括数组）都实现这个类的方法。
+
+如果一个类没有特别指定父类，那么默认则继承自 `Object` 类。例如：
+```java
+public class Person {
+    ...
+}
+// 等价于：
+public class Person extends Object {
+    ...
+}
+```
+
+### 8.2 `Object` 类的方法
+
+根据 JDK 源代码及 `Object` 类的 API 文档，`Object` 类当中包含的方法有 11 个。
+
+> 注意：
+>
+> Object 类当中包含的方法可以分为以下层级：
+> * 重点方法：`equals()` / `toString()`。
+> * 了解方法：`clone()` / `finalize()`。
+> * 目前不需要关注：`getClass()` / `hashCode()` / `notify()` / `notifyAll()` / `wait(xx)` / `wait(xx, yy)`。
+
+这里我们主要关注其中的 6 个。
+
+#### 8.2.1 （重点）`equals()`
+
+##### 8.2.1.1 `==`
+
+基本类型比较值：只要两个变量的值相等，即为 `true`。例如：
+```java
+int a = 5;
+if (a == 6) {
+    ...
+}
+```
+
+引用类型比较引用（是否指向同一个对象）：只有指向同一个对象时，`==` 才返回 `true`。例如：
+```java
+Person p1 = new Person();
+Person p2 = new Person();
+if (p1 == p2) {
+    ...
+}
+```
+
+> 注意：当使用 “`==`” 进行比较时，符号两边的**数据类型必须兼容**（可自动转换的基本数据类型除外），否则编译出错。
+
+##### 8.2.1.2 `equals()`
+
+任何引用数据类型都可以使用 `equals()`。
+
+所有类都继承了 `Object`，也就获得了 `equals()` 方法；还可以重写。
+
+`equals()` 只能比较引用类型；`Object` 类源码中 `equals()` 的作用与 “`==`” 相同，均为比较是否指向同一个对象。如下图所示：
+![`Object` 类源码中 `equals()` 的作用与 “`==`” 相同](./images/image-20220226101655293.png "`Object` 类源码中 `equals()` 的作用与 “`==`” 相同")
+
+`java.lang.Object` 类中 `equals()` 方法的定义：
+```java
+public boolean equals(Object obj) {
+    return (this == obj);
+}
+```
+
+`equals()` 方法的格式如下：
+```java
+obj1.equals(obj2)
+```
+
+特例：当用 `equals()` 方法进行比较时，对类 `File`、`String`、`Date` 及包装类（`Wrapper Class`）来说，是比较类型及内容而不考虑引用的是否是同一个对象。
+* 原因：在这些类中重写了 `Object` 类的 `equals()` 方法。
+
+> 子类使用说明：
+> * 自定义的类在没有重写 `Object` 类中 `equals()` 方法的情况下，调用的就是 `Object` 类中声明的 `euqals()` 方法，比较两个对象的引用地址是否相同（或比较两个对象是否指向了堆空间中的同一个对象实体）。
+> * 对于像 `String`、`File`、`Date` 和包装类等，它们都重写了 `Object` 类中的 `equals()` 方法，用于比较两个对象的实体内容是否相等。
+
+当自定义使用 `equals()` 时，可以重写；用于比较两个对象的“内容”是否都相等。重写 `equals()` 方法的原则如下：
+* **对称性**：如果 `x.equals(y)` 返回的是 “`true`”，那么 `y.euqals(x)` 也应该返回的是 “`true`”。
+* **自反性**：`x.equals(x)` 必须返回的是 “`true`”；
+* **传递性**：如果 `x.equals(y)` 返回的是 “`true`”，而且 `y.equals(z)` 返回的是 “`true`”，那么 `z.equals(x)` 也应该返回的是 “`true`”。
+* **一致性**：如果 `x.equals(y)` 返回的是 “`true`”，只要 `x` 和 `y` 的内容一直不变，不管重复执行 `x.equals(y)` 多少次，返回的都是 “`true`”。
+* 任何情况下，`x.equals(null)` 永远返回的是 “`false`”，且 `x.equals(和 x 不同类型的对象)` 永远返回的是 “`false`”。
+
+实际开发中，针对于自定义的类，常常会判断两个对象是否 `equals()`，而此时主要是判断两个对象的属性值是否相等。所以，我们要重写 `Object` 类的 `equals()` 方法。如何重写：
+* 手动自己实现。
+* 调用 IDEA 自动实现（推荐）。
+
+> 注意：
+>
+> 在 IDEA 中，通过 `Alt + Insert` 组合键可调出 Generate 面板实现 `equals()` 方法和 `hashCode()` 方法的快速自动重写。
+
+重写举例：
+```java
+/* UserTest.java */
+
+package com.anxin_hitsz_07.object.equals;
+
+import java.io.File;
+import java.util.Objects;
+
+/**
+ * ClassName: UserTest
+ * Package: com.anxin_hitsz_07.object.equals
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 14:34
+ * @Version 1.0
+ */
+public class UserTest {
+    public static void main(String[] args) {
+
+        User u1 = new User("Tom", 12);
+        User u2 = new User("Tom", 12);
+
+        System.out.println(u1.equals(u2));  // false -> true
+
+        String str1 = new String("hello");
+        String str2 = new String("hello");
+
+        System.out.println(str1 == str2);   // false
+        System.out.println(str1.equals(str2));  // true
+
+        File file1 = new File("d:\\abc.txt");
+        File file2 = new File("d:\\abc.txt");
+        System.out.println(file1.equals(file2));    // true
+
+        // 数组上使用 equals()
+        int[] arr = new int[10];
+        System.out.println(arr.equals(new int[10]));    // false
+
+    }
+}
+
+class User {
+    String name;
+    int age;
+
+    public User() {
+    }
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // 重写equals()：手动实现
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (this == obj) {
+//            return true;
+//        }
+//
+//        if (obj instanceof User) {
+//            User user = (User)obj;
+//            // 方式 1：
+////            if (this.age == user.age && this.name.equals(user.name)) {
+////                return true;
+////            } else {
+////                return false;
+////            }
+//            // 方式 2：
+//            return this.age == user.age && this.name.equals(user.name);
+//        }
+//
+//        return false;
+//
+//    }
+
+    // IDEA 自动实现
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+        return age == user.age && Objects.equals(name, user.name);
+    }
+
+}
+
+```
+
+> **高频面试题：**
+> 
+> 区分 `==` 和 `equals()` 的区别？
+> * `==` 既可以比较基本类型也可以比较引用类型：
+>   * 对于基本数据类型变量即判断数据值是否相等：
+>   ```java
+>   int i1 = 10;
+>   int i2 = 10;
+>   sout(i1 == i2); // true
+>   
+>   char c1 = 'A';
+>   int i3 = 65;
+>   sout(c1 == i3); // true
+>   
+>   float f1 = 12.0F;
+>   int i4 = 12;
+>   sout(f1 == i4); // true
+>   ```
+>   * 对于引用数据类型变量即比较两个引用变量的地址值是否相等（或比较两个引用是否指向同一个对象实体）：
+> * `equals()` 是属于 `java.lang.Object` 类里面的方法。
+>   * 使用范围：只能使用在引用数据类型上。
+>   * 具体使用：对于类来说，重写 `equals()` 和不重写 `equals()` 存在区别。如果该方法没有被重写过，则默认也是 `==`；我们可以看到 `String` 等类的 `equals()` 方法是被重写过的，而且 `String` 类在日常开发中用的比较多，久而久之就形成了 `equals()` 是比较值的错误观点。
+> 
+> 因此，具体要看自定义类里有没有重写 `Object` 类的 `equals()` 方法来判断。
+> 
+> 通常情况下，重写 `equals()` 方法，会比较类中的相应属性是否都相等。
+
+##### 8.2.1.3 应用
+
+示例代码：
+```java
+/* Account.java */
+
+package com.anxin_hitsz_07.object.apply;
+
+/**
+ * ClassName: Account
+ * Package: com.anxin_hitsz_07.object.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:18
+ * @Version 1.0
+ */
+public class Account {
+
+    private double balance; // 余额
+
+    public Account() {
+    }
+
+    public Account(double balance) {
+        this.balance = balance;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Account account = (Account) o;
+        return Double.compare(balance, account.balance) == 0;
+    }
+
+}
+
+
+/* Customer.java */
+
+package com.anxin_hitsz_07.object.apply;
+
+import java.util.Objects;
+
+/**
+ * ClassName: Customer
+ * Package: com.anxin_hitsz_07.object.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:18
+ * @Version 1.0
+ */
+public class Customer {
+
+    private String name;
+    private int age;
+    private Account acct;
+
+    public Customer() {
+    }
+
+    public Customer(String name, int age, Account acct) {
+        this.name = name;
+        this.age = age;
+        this.acct = acct;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Account getAcct() {
+        return acct;
+    }
+
+    public void setAcct(Account acct) {
+        this.acct = acct;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Customer customer = (Customer) o;
+        return age == customer.age && Objects.equals(name, customer.name) && Objects.equals(acct, customer.acct);
+    }
+    
+}
+
+
+/* CustomerTest.java */
+
+package com.anxin_hitsz_07.object.apply;
+
+/**
+ * ClassName: CustomerTest
+ * Package: com.anxin_hitsz_07.object.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:19
+ * @Version 1.0
+ */
+public class CustomerTest {
+    public static void main(String[] args) {
+        Customer c1 = new Customer("Tom", 12, new Account(2000));
+        Customer c2 = new Customer("Tom", 12, new Account(2000));
+
+        System.out.println(c1.equals(c2));  // false -> true
+
+    }
+}
+
+```
+
+> 说明：
+>
+> 判断两个 `Customer` 对象是否 `equals()`，除了 `Customer` 类需要重写 `equals()` 之外，其内部的类类型的属性所在的类也需要重写 `equals()`。
+
+##### 8.2.1.4 练习
+
+**练习 1：**
+> 题目：
+>
+> 编写 `Order` 类，包括 `int orderId`、`String orderName` 两个属性及其相应的 `getter()` 和 `setter()` 方法，以及两个参数的构造器。
+> 要求重写父类的 `equals()` 方法：`public boolean equals(Object obj)`。并判断测试类中创建的两个对象是否相等。
+
+示例代码：
+```java
+/* Order.java */
+
+package com.anxin_hitsz_07.object.equals.exer1;
+
+/**
+ * ClassName: Order
+ * Package: com.anxin_hitsz_07.object.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:25
+ * @Version 1.0
+ */
+public class Order {
+    private int orderId;
+    private String orderName;
+
+    public Order() {
+    }
+
+    public Order(int orderId, String orderName) {
+        this.orderId = orderId;
+        this.orderName = orderName;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public String getOrderName() {
+        return orderName;
+    }
+
+    public void setOrderName(String orderName) {
+        this.orderName = orderName;
+    }
+
+    // 手写 equals()：
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof Order) {
+            Order order = (Order)obj;
+            return this.orderId == order.orderId && this.orderName.equals(order.orderName);
+        }
+
+        return false;
+
+    }
+}
+
+
+/* OrderTest.java */
+
+package com.anxin_hitsz_07.object.equals.exer1;
+
+/**
+ * ClassName: OrderTest
+ * Package: com.anxin_hitsz_07.object.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:28
+ * @Version 1.0
+ */
+public class OrderTest {
+    public static void main(String[] args) {
+        Order order1 = new Order(1001, "orderAA");
+        Order order2 = new Order(1001, "orderAA");
+        System.out.println(order1.equals(order2));  // true
+
+        Order order3 = new Order(1002, new String("orderBB"));
+        Order order4 = new Order(1002, new String("orderBB"));
+        System.out.println(order3.equals(order4));  // true
+
+        String str1 = "AA";
+        String str2 = "AA";
+        System.out.println(str1 == str2);   // true
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 请根据以下代码自行定义能满足需要的 `MyDate` 类。
+> ```java
+> public class EqualsTest {
+>     public static void main(String[] args) {
+>         MyDate m1 = new MyDate(14, 3, 1976);
+>         MyDate m2 = new MaDate(14, 3, 1976);
+>         if (m1 == m2) {
+>             System.out.println("m1 == m2");
+>         } else {
+>             System.out.println("m1 != m2"); // m1 != m2
+>         }
+> 
+>         if (m1.equals(m2)) {
+>             System.out.println("m1 is equal to m2");    // m1 is equal to m2
+>         } else {
+>             System.out.println("m1 is not equal to m2");
+>         }
+>     }
+> }
+> ```
+> 
+> 在 `MyDate` 类中覆盖 `equals()` 方法，使其判断当两个 `MyDate` 类型对象的年月日都相同时，结果为 `true`，否则为 `false`。其方法声明为：`public boolean equals(Object o)`。
+
+示例代码：
+```java
+/* MyDate.java */
+
+package com.anxin_hitsz_07.object.equals.exer2;
+
+/**
+ * ClassName: MyDate
+ * Package: com.anxin_hitsz_07.object.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:30
+ * @Version 1.0
+ */
+public class MyDate {
+    private int day;
+    private int month;
+    private int year;
+
+    public MyDate() {
+    }
+
+    public MyDate(int day, int month, int year) {
+        this.day = day;
+        this.month = month;
+        this.year = year;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    // 手写 equals()：
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof MyDate) {
+            MyDate myDate = (MyDate) obj;
+
+            return this.year == myDate.year && this.month == myDate.month &&
+                    this.day == myDate.day;
+        }
+        return false;
+
+    }
+}
+
+
+/* EqualsTest.java */
+
+package com.anxin_hitsz_07.object.equals.exer2;
+
+/**
+ * ClassName: EqualsTest
+ * Package: com.anxin_hitsz_07.object.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 15:31
+ * @Version 1.0
+ */
+public class EqualsTest {
+    public static void main(String[] args) {
+        MyDate m1 = new MyDate(14, 3, 1976);
+        MyDate m2 = new MyDate(14, 3, 1976);
+        if (m1 == m2) {
+            System.out.println("m1==m2");
+        } else {
+            System.out.println("m1!=m2"); // m1 != m2
+        }
+
+        if (m1.equals(m2)) {
+            System.out.println("m1 is equal to m2");// m1 is equal to m2
+        } else {
+            System.out.println("m1 is not equal to m2");
+        }
+    }
+}
+
+```
+
+#### 8.2.2 （重点）`toString()`
+
+##### 8.2.2.1 `toString()` 的定义及使用
+
+方法签名：`public String toString()`。
+
+`Object` 类中 `toString()` 方法的定义：
+```java
+public String toString() {
+    return getClass().getName() + "@" + Integer.toHexString(hashCode());
+}
+```
+
+因此，默认情况下，`toString()` 返回的是 “`对象的运行时类型@对象的 hashCode 值的十六进制形式`”。
+
+在进行 `String` 与其它类型数据的连接操作时，自动调用 `toString()` 方法。示例如下：
+```java
+Date now = new Date();
+System.out.println("now = " + now); // 相当于
+System.out.println("now = " + now.toString());
+```
+
+开发中的使用场景：
+* 平时我们在调用 `System.out.println()` 打印对象引用变量时，其实就调用了对象的 `toString()`。
+
+如果我们直接 `System.out.println(对象)`，默认会自动调用这个对象的 `toString()`。
+> 因为 Java 的引用数据类型的变量中存储的实际上是对象的内存地址，但是 Java 对程序员隐藏内存地址信息，所以不能直接将内存地址显示出来；所以当你打印对象时，JVM 帮你调用了对象的 `toString()`。
+
+子类使用说明：
+* 自定义的类，在没有重写 `Object` 类的 `toString()` 方法的情况下，默认返回的是当前对象的地址值。
+* 像 `String`、`File`、`Date` 或包装类等 `Object` 的子类，它们都重写了 `Object` 类的 `toString()` 方法，在调用 `toString()` 方法时，返回当前对象的实体内容。
+
+开发中使用说明：
+* 习惯上，开发中对于自定义的类在调用 `toString()` 方法时，也希望显示其对象的实体内容，而非地址值；这时候，就需要重写 `Object` 类中的 `toString()`。
+
+可以根据需要在用户自定义类型中重写 `toString()` 方法。
+* 如 `String` 类重写了 `toString()` 方法，返回字符串的值：
+    ```java
+    s1 = "hello";
+    System.out.println(s1); // 相当于 System.out.println(s1.toString());
+    ```
+
+例如自定义的 `Person` 类：
+```java
+public class Person {
+    private String name;
+    private int age;
+
+    @Override
+    public String toString() {
+        return "Person{" + "name='" + name + '\'' + ", age=" + age + '}';
+    }
+}
+```
+
+> 注意：
+>
+> 在 IDAE 中，通过 `Alt + Insert` 组合键可调出 Generate 面板实现 `toString()` 方法的快速自动重写。
+
+重写示例：
+```java
+/* ToStringTest.java */
+
+package com.anxin_hitsz_07.object.toString;
+
+import java.io.File;
+import java.util.Date;
+
+/**
+ * ClassName: ToStringTest
+ * Package: com.anxin_hitsz_07.object.toString
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 16:31
+ * @Version 1.0
+ */
+public class ToStringTest {
+    public static void main(String[] args) {
+        User u1 = new User("Tom", 12);
+        System.out.println(u1.toString());  // com.anxin_hitsz_07.object.toString.User@8efb846
+        System.out.println(u1); // com.anxin_hitsz_07.object.toString.User@8efb846
+
+        String s1 = new String("hello");
+        System.out.println(s1.toString());  // hello
+
+        File file = new File("d:\\abc.txt");
+        System.out.println(file);   // d:\abc.txt
+
+        Date date = new Date();
+        System.out.println(date);   // Wed Jan 28 16:42:38 CST 2026
+
+    }
+}
+
+class User {
+
+    String name;
+    int age;
+
+    public User() {
+    }
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // 手动实现 toString()：
+//    @Override
+//    public String toString() {
+//        return "User{ name = " + name + ", age = " + age + " }";
+//    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+
+```
+
+##### 8.2.2.2 练习
+
+练习：
+> 题目：
+>
+> 定义两个类，父类 `GeometricObject` 代表几何形状，子类 `Circle` 代表圆形。其 UML 图如下所示：
+> ![练习 - UML](./images/toString_exer_UML.png "练习 - UML")
+>
+> 写一个测试类，创建两个 `Circle` 对象，判断其颜色是否相等；利用 `equals()` 方法判断其半径是否相等，并利用 `toString()` 方法输出其半径。
+
+示例代码：
+```java
+/* GeometricObject.java */
+
+package com.anxin_hitsz_07.object.toString.exer;
+
+/**
+ * ClassName: GeometricObject
+ * Package: com.anxin_hitsz_07.object.toString.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 16:50
+ * @Version 1.0
+ */
+public class GeometricObject {
+    protected String color;
+    protected double weight;
+
+    public GeometricObject() {
+        color = "white";
+        weight = 1.0;
+    }
+
+    public GeometricObject(String color, double weight) {
+        this.color = color;
+        this.weight = weight;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+}
+
+
+/* Circle.java */
+
+package com.anxin_hitsz_07.object.toString.exer;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_07.object.toString.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 16:52
+ * @Version 1.0
+ */
+public class Circle extends GeometricObject {
+    private double radius;
+
+    public Circle() {
+//        color = "white";
+//        weight = 1.0;
+        radius = 1.0;
+    }
+
+    public Circle(double radius) {
+//        color = "white";
+//        weight = 1.0;
+        this.radius = radius;
+    }
+
+    public Circle(String color, double weight, double radius) {
+        super(color, weight);
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    // 求圆的面积
+    public double findArea() {
+        return 3.14 * radius * radius;
+    }
+
+    // 重写 equals()
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof Circle) {
+            Circle c = (Circle) obj;
+            return this.radius == c.radius;
+        }
+        return false;
+    }
+
+    // 重写 toString()
+
+    @Override
+    public String toString() {
+        return "Circle[radius = " + radius + "]";
+    }
+}
+
+
+/* CircleTest.java */
+
+package com.anxin_hitsz_07.object.toString.exer;
+
+/**
+ * ClassName: CircleTest
+ * Package: com.anxin_hitsz_07.object.toString.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/28 16:57
+ * @Version 1.0
+ */
+public class CircleTest {
+    public static void main(String[] args) {
+
+        Circle c1 = new Circle(2.3);
+
+        Circle c2 = new Circle("red", 2.0, 3.4);
+
+        System.out.println("颜色是否相等？" + c1.getColor().equals(c2.getColor()));
+
+        System.out.println("半径是否相等？" + c1.equals(c2));
+
+        System.out.println(c1);
+        System.out.println(c1.toString());
+
+    }
+}
+
+```
+
+#### 8.2.3 `clone()`
+
+`clone()` 方法将会创建并返回当前对象的一个“复制品”。
+
+> 注意：
+> 
+> 复制的并不是地址，而是重新造的对象。
+>
+> 即：`x.clone() != x`。
+
+示例代码：
+```java
+/* CloneTest.java */
+
+package com.anxin_hitsz_07.object;
+//Object类的clone()的使用
+public class CloneTest {
+	public static void main(String[] args) {
+		Animal a1 = new Animal("小花");
+		try {
+			Animal a2 = (Animal) a1.clone();
+			a2.setName("毛毛");
+
+			System.out.println("原始对象：" + a1);
+			System.out.println("a1[name = " + a1.getName() + "]");
+			System.out.println("clone之后的对象：" + a2);
+			System.out.println("a2[name = " + a2.getName() + "]");
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+class Animal implements Cloneable{
+	private String name;
+
+	public Animal() {
+		super();
+	}
+
+	public Animal(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+	
+}
+
+```
+
+#### 8.2.4 `finalize()`
+
+当对象被回收时，系统自动调用该对象的 `finalize()` 方法。（不是垃圾回收器调用的，是本类对象调用的。）
+* 永远不要主动调用某个对象的 `finalize()` 方法，应该交给垃圾回收机制调用。
+
+什么时候被回收：当某个对象没有任何引用时，JVM 就认为这个对象是垃圾对象，就会在之后不确定的时间使用垃圾回收机制来销毁该对象；在销毁该对象前，会先调用 `finalize()` 方法。
+
+子类可以重写该方法，目的是在对象被清理之前执行必要的清理操作。比如，在方法内断开相关连接资源。
+* 如果重写该方法，让一个新的引用变量重新引用该对象，则会重新激活对象。
+
+在 JDK 9 中此方法已经被**标记为过时**的。
+
+示例代码：
+```java
+/* FinalizeTest.java */
+
+package com.anxin_hitsz_07.object;
+
+public class FinalizeTest {
+	public static void main(String[] args) {
+		Person p = new Person("Peter", 12);
+		System.out.println(p);
+		p = null;//此时对象实体就是垃圾对象，等待被回收。但时间不确定。
+		System.gc();//强制性释放空间
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+}
+
+class Person{
+	private String name;
+	private int age;
+
+	public Person(String name, int age) {
+		super();
+		this.name = name;
+		this.age = age;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getAge() {
+		return age;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	//此方法调用的时机：当GC要回收此对象时，调用如下的方法：
+	//子类重写此方法，可在释放对象前进行某些操作
+	//finalize()可能导致内部出现循环引用，导致此对象不能被回收。
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("对象被释放--->" + this);
+	}
+}
+
+```
+
+> 面试题：
+> 
+> `final`、`finally`、`finalize` 的区别？
+
+#### 8.2.5 `getClass()`
+
+`public final Class<?> getClass()`：获取对象的运行时类型。
+> 因为 Java 有多态现象，所以一个引用数据类型的变量的编译时类型与运行时类型可能不一致，因此如果需要查看这个变量实际指向的对象的类型，需要用 `getClass()` 方法。
+
+示例代码：
+```java
+public static void main(String[] args) {
+    Object obj = new Person();
+    System.out.println(obj.getClass()); // 运行时类型
+}
+
+```
+
+输出结果：
+```java
+class com.atguigu.java.Person
+```
+
+#### 8.2.6 `hashCode()`
+
+`public int hashCode()`：返回每个对象的 `hash` 值。（后续在集合框架章节重点讲解。）
+
+示例代码：
+```java
+public static void main(String[] args) {
+    System.out.println("AA".hashCode());    // 2080
+    System.out.println("BB".hashCode());    // 2112
+}
+```
+
+### 8.3 `native` 关键字的理解
+
+使用 `native` 关键字说明这个方法是原生函数，也就是这个方法是用 C / C++ 等非 Java 语言实现的，并且**被编译成了 DLL**，由 Java 去调用。
+* 本地方法是有方法体的，用 C 语言编写。由于本地方法的方法体源码没有对我们开源，所以我们看不到方法体。
+* 在 Java 中定义一个 `native` 方法时，并不提供实现体。
+
+**1. 为什么要用 `native` 方法？**
+
+Java 使用起来非常方便，然而有些层次的任务用 Java 实现起来不容易，或者我们对程序的效率很在意时；例如 Java 需要与一些底层操作系统或某些硬件交换信息时的情况。
+
+`native` 方法正式这样一种交流机制：它为我们提供了一个非常简洁的接口，而且我们无需去了解 Java 应用之外的繁琐的细节。
+
+**2. `native` 声明的方法，对于调用者，可以当做和其他 Java 方法一样使用。**
+
+`native method` 的存在并不会对其他类调用这些本地方法产生任何影响；实际上调用这些方法的其他类甚至不知道它所调用的是一个本地方法。JVM 将控制调用本地方法的所有细节。
