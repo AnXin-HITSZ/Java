@@ -1068,5 +1068,509 @@ args[4] = true
 1. 配置运行参数：
 ![1. 配置运行参数 - 1](./images/image-20211228101828718.png "1. 配置运行参数 - 1")
 ![1. 配置运行参数 - 2](./images/image-20211228102022216.png "1. 配置运行参数 - 2")
-1. 运行程序：
+2. 运行程序：
 ![2. 运行程序](./images/image-20211228102059327.png "2. 运行程序")
+
+## 四、类的成员之四：代码块
+
+> 回顾：
+>
+> 类中可以声明的结构：属性、方法、构造器；代码块（或初始化块）、内部类。
+
+如果成员变量想要初始化的值不是一个硬编码的常量值，而是需要通过复杂的计算或读取文件、或读取运行环境信息等方式才能获取的一些值，该怎么办呢？此时，可以考虑代码块（或初始化块）。
+
+代码块（或初始化块）的作用：
+* 对 Java 类或对象进行初始化。
+  * 即：用来初始化类或对象的信息（亦即：初始化类或对象的成员变量）。
+
+代码块（或初始化块）的分类：
+* 一个类中代码块若有修饰符，则只能被 `static` 修饰，称为静态代码块（static block）。
+* 没有使用 `static` 修饰的，为非静态代码块。
+
+### 4.1 静态代码块
+
+如果想要为静态变量初始化，可以直接在静态变量的声明后面直接赋值，也可以使用静态代码块。
+
+#### 4.1.1 语法格式
+
+在代码块的前面加 `static`，就是静态代码块。
+
+语法格式：
+```java
+[修饰符] class 类名 {
+    static {
+        静态代码块
+    }
+}
+```
+
+#### 4.1.2 静态代码块的特点
+
+静态代码块具有以下特点：
+1. 可以有输出语句。
+2. 可以对类的属性、类的声明进行初始化操作。
+3. 不可以对非静态的属性初始化；即：不可以调用非静态的属性和方法。
+4. 若有多个静态的代码块，那么按照从上到下的顺序依次执行。
+5. 静态代码块的执行要先于非静态代码块。
+6. 静态代码块随着类的加载而加载，且只执行一次。
+
+> 静态代码块的具体使用说明：
+> * 随着类的加载而执行（或调用）。
+> * 由于类的加载只会执行一次，进而静态代码块的执行也只会执行一次。
+> * 作用：用来初始化类的信息。
+> * 内部可以声明变量、调用属性或方法、编写输出语句等操作。
+> * 静态代码块的执行要先于非静态代码块的执行。
+> * 如果声明有多个静态代码块，则按照声明的先后顺序执行。
+> * 静态代码块内部只能调用静态的结构（即静态的属性、方法），不能调用非静态的结构（即非静态的属性、方法）。
+
+示例代码：
+```java
+
+```
+
+### 4.2 非静态代码块
+
+#### 4.2.1 语法格式
+
+非静态代码块的语法格式如下所示：
+```java
+[修饰符] class 类名 {
+    {
+        非静态代码块
+    }
+    [修饰符] 构造器名() {
+        // 实例初始化代码
+    }
+    [修饰符] 构造器名(参数列表) {
+        // 实例初始化代码
+    }
+}
+```
+
+#### 4.2.2 非静态代码块的作用
+
+和构造器一样，也是用于实例变量的初始化等操作。
+
+#### 4.2.3 非静态代码块的意义
+
+如果多个重载的构造器有公共代码，并且这些代码都是先于构造器其他代码执行的，那么可以将这部分代码抽取到非静态代码块中，减少冗余代码。
+
+#### 4.2.4 非静态代码块的执行特点
+
+非静态代码块具有以下执行特点：
+1. 可以有输出语句。
+2. 可以对类的属性、类的声明进行初始化操作。
+3. 除了调用非静态的结构外，还可以调用静态的变量或方法。
+4. 若有多个非静态的代码块，那么按照从上到下的顺序依次执行。
+5. 每次创建对象的时候，都会执行一次；且先于构造器执行。
+
+> 非静态代码块的具体使用说明：
+> * 随着对象的创建而执行。
+> * 每创建当前类的一个实例，就会执行一次非静态代码块。
+> * 作用：用来初始化对象的信息。
+> * 内部可以声明变量、调用属性或方法、编写输出语句等操作。
+> * 如果声明有多个非静态代码块，则按照声明的先后顺序执行。
+> * 非静态代码块内部可以调用静态的结构（即静态的属性、方法），也可以调用非静态的结构（即非静态的属性、方法）。
+
+### 4.3 举例
+
+示例代码：
+```java
+/* BlockTest.java */
+
+package com.anxin_hitsz_04.block;
+
+/**
+ * ClassName: BlockTest
+ * Package: com.anxin_hitsz_04.block
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/29 19:34
+ * @Version 1.0
+ */
+public class BlockTest {
+    public static void main(String[] args) {
+        System.out.println(Person.info);
+        System.out.println(Person.info);
+
+
+        Person p1 = new Person();
+        Person p2 = new Person();
+        System.out.println(p1.age);
+//        p1.eat();
+    }
+}
+
+class Person {
+
+    String name;
+    int age;
+
+    static String info = "我是一个人";
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public Person() {}
+
+    // 非静态代码块
+    {
+        System.out.println("非静态代码块 2");
+    }
+    {
+        System.out.println("非静态代码块 1");
+        age = 1;
+        System.out.println("info = " + info);
+    }
+
+    // 静态代码块
+    static {
+        System.out.println("静态代码块 2");
+    }
+    static {
+        System.out.println("静态代码块 1");
+        System.out.println("info = " + info);
+//        System.out.println("age = " + age);
+//        eat();
+    }
+
+}
+
+```
+
+以上示例中代码块的作用可以被构造器代替。而下述情况中，代码块是必须的：
+```java
+private static DataSource dataSource = null;
+
+static {
+    InputStream is = null;
+    try {
+        is = DBCPTest.class.getClassLoader().getResourceAsStream("dbcp.properties");
+        Properties pros = new Properties();
+        pros.load(is);
+        // 调用 BasicDataSourceFactory 的静态方法，获取数据源
+        dataSource = BasicDataSourceFactory.createDataSource(pros);
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+### 4.4 小结：实例变量赋值顺序
+
+实例变量赋值顺序如下：
+![实例变量赋值顺序示意图](./images/image-20220325230208941.png "实例变量赋值顺序示意图")
+
+### 4.5 练习
+
+练习：
+> 题目：
+>
+> 1. 声明 `User` 类：
+> * 包含属性：`userName`（`String` 类型）、`password`（`String` 类型）、`registrationTime`（`long` 类型），且要求私有化。
+> * 包含 `get` / `set` 方法，其中 `registrationTime` 没有 `set` 方法。
+> * 包含无参构造：
+>   * 输出“`新用户注册`”；
+>   * `registrationTime` 赋值为当前系统时间；
+>   * `userName` 默认为当前系统时间值；
+>   * `password` 默认为“`123456`”。
+> * 包含有参构造（即 `(String userName, String password)`）：
+>   * 输出“`新用户注册`”；
+>   * `registrationTime` 赋值为当前系统时间；
+>   * `userName` 和 `password` 由参数赋值。
+> * 包含 `public String getInfo()` 方法，返回：“`用户名：XX，密码：XX，注册时间：XX`”。
+>
+> 2. 编写测试类，测试类 `main()` 方法的代码。
+
+示例代码：
+```java
+/* User.java */
+
+package com.anxin_hitsz_04.block.exer;
+
+/**
+ * ClassName: User
+ * Package: com.anxin_hitsz_04.block.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/29 19:53
+ * @Version 1.0
+ */
+public class User {
+    private String userName;
+    private String password;
+    private long registrationTime;  // 注册时间
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public long getRegistrationTime() {
+        return registrationTime;
+    }
+
+    public User() {
+        System.out.println("新用户注册");
+        registrationTime = System.currentTimeMillis();  // 获取系统当前时间（距离 1970-1-1 00:00:00 到现在的毫秒数）
+        userName = System.currentTimeMillis() + "";
+        password = "123456";
+    }
+
+    public User(String userName, String password) {
+        System.out.println("新用户注册");
+        registrationTime = System.currentTimeMillis();  // 获取系统当前时间（距离 1970-1-1 00:00:00 到现在的毫秒数）
+        this.userName = userName;
+        this.password = password;
+    }
+
+    public String getInfo() {
+        return "用户名：" + userName + "，密码：" + password + "，注册时间：" + registrationTime;
+    }
+}
+
+
+/* User1.java */
+
+package com.anxin_hitsz_04.block.exer;
+
+/**
+ * ClassName: User1
+ * Package: com.anxin_hitsz_04.block.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/29 19:59
+ * @Version 1.0
+ */
+public class User1 {
+    private String userName;
+    private String password;
+    private long registrationTime;  // 注册时间
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public long getRegistrationTime() {
+        return registrationTime;
+    }
+
+    // 代码块的使用
+    {
+        System.out.println("新用户注册");
+        registrationTime = System.currentTimeMillis();  // 获取系统当前时间（距离 1970-1-1 00:00:00 到现在的毫秒数）
+    }
+
+    public User1() {
+        userName = System.currentTimeMillis() + "";
+        password = "123456";
+    }
+
+    public User1(String userName, String password) {
+//        System.out.println("新用户注册");
+//        registrationTime = System.currentTimeMillis();  // 获取系统当前时间（距离 1970-1-1 00:00:00 到现在的毫秒数）
+        this.userName = userName;
+        this.password = password;
+    }
+
+    public String getInfo() {
+        return "用户名：" + userName + "，密码：" + password + "，注册时间：" + registrationTime;
+    }
+}
+
+
+/* UserTest.java */
+
+package com.anxin_hitsz_04.block.exer;
+
+/**
+ * ClassName: UserTest
+ * Package: com.anxin_hitsz_04.block.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/29 19:58
+ * @Version 1.0
+ */
+public class UserTest {
+    public static void main(String[] args) {
+        User u1 = new User();
+        System.out.println(u1.getInfo());
+
+        User u2 = new User("Tom", "654321");
+        System.out.println(u2.getInfo());
+
+        System.out.println();
+        User1 u3 = new User1();
+        System.out.println(u3.getInfo());
+
+    }
+}
+
+```
+
+### 4.6 小结：类中属性赋值的位置及过程
+
+可以给类的非静态的属性（即实例变量）赋值的位置有：
+① 默认初始化；
+② 显式初始化； 或 ⑤ 代码块中初始化；
+③ 构造器中初始化；
+④ 有了对象以后，通过 “`对象.属性`” 或 “`对象.方法`” 的方法进行赋值。
+
+执行的先后顺序：① -> ②/⑤ -> ③ -> ④。
+
+关于字节码文件中的 `<init>` 的简单说明（通过插件 jclasslib bytecode viewer 查看）：
+* `<init>` 方法在字节码文件中可以看到；每个 `<init>` 方法都对应着一个类的构造器。（类中声明了几个构造器就会有几个 `<init>`。）
+* 编写的代码中的构造器在编译以后就会以 `<init>` 方法的方式呈现。
+* `<init>` 方法内部的代码包含了实例变量的显式赋值、代码块中的赋值和构造器中的代码。
+* `<init>` 方法是用来初始化当前创建的对象的信息的。
+
+给实例变量赋值的位置很多，开发中如何选择？
+* 显式赋值：比较适合于每个对象的属性值相同的场景。
+* 构造器中赋值：比较适合于每个对象的属性值不相同的场景。
+
+示例代码：
+```java
+/* FieldTest.java */
+
+package com.anxin_hitsz_05.field;
+
+/**
+ * ClassName: FieldTest
+ * Package: com.anxin_hitsz_05.field
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/29 20:42
+ * @Version 1.0
+ */
+public class FieldTest {
+    public static void main(String[] args) {
+        Order o1 = new Order();
+        System.out.println(o1.orderId); // 1
+    }
+}
+
+class Order {
+
+    int orderId = 1;
+
+    {
+        orderId = 2;
+    }
+
+
+    public Order() {
+        super();
+//        orderId = 3;
+    }
+
+    public Order(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public void eat() {
+        sleep();
+    }
+
+    public void sleep() {
+
+    }
+}
+
+```
+
+技巧：**由父及子，静态先行**。示例代码如下：
+```java
+/* LeafTest.java */
+
+package com.anxin_hitsz_05.field.exer;
+
+//技巧：由父及子，静态先行。
+
+class Root{
+	static{
+		System.out.println("Root的静态初始化块");
+	}
+	{
+		System.out.println("Root的普通初始化块");
+	}
+	public Root(){
+		super();
+		System.out.println("Root的无参数的构造器");
+	}
+}
+class Mid extends Root{
+	static{
+		System.out.println("Mid的静态初始化块");
+	}
+	{
+		System.out.println("Mid的普通初始化块");
+	}
+	public Mid(){
+		System.out.println("Mid的无参数的构造器");
+	}
+	public Mid(String msg){
+		//通过this调用同一类中重载的构造器
+		this();
+		System.out.println("Mid的带参数构造器，其参数值："
+			+ msg);
+	}
+}
+class Leaf extends Mid{
+	static{
+		System.out.println("Leaf的静态初始化块");
+	}
+	{
+		System.out.println("Leaf的普通初始化块");
+	}	
+	public Leaf(){
+		//通过super调用父类中有一个字符串参数的构造器
+		super("尚硅谷");
+		System.out.println("Leaf的构造器");
+	}
+}
+public class LeafTest{
+	public static void main(String[] args){
+		new Leaf(); 
+//		System.out.println();
+//		new Leaf();
+	}
+}
+
+```
