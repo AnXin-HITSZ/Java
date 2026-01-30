@@ -1574,3 +1574,1174 @@ public class LeafTest{
 }
 
 ```
+
+## 五、`final` 关键字
+
+### 5.1 `final` 的意义
+
+final：最终的，不可更改的。
+
+### 5.2 `final` 的使用
+
+`final` 可以用来修饰的结构：类、方法、变量。
+
+`final` 与 `static` 搭配：修饰成员变量时，此成员变量称为**全局常量**。比如 `Math` 类的 `PI`。
+
+#### 5.2.1 `final` 修饰类
+
+`final` 修饰类，表示这个类不能被继承，没有子类。可提高安全性，提高程序的可读性。
+
+例如：`String` 类、`System` 类、`StringBuffer` 类、`StringBuffer` 类。
+
+示例代码：
+```java
+/* FinalTest.java */
+
+package com.anxin_hitsz_06._final;
+
+/**
+ * ClassName: FinalTest
+ * Package: com.anxin_hitsz_06._final
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 14:35
+ * @Version 1.0
+ */
+public class FinalTest {
+}
+
+final class A {
+
+}
+
+//class B extends A {}
+
+//class SubString extends String{}
+
+```
+
+#### 5.2.2 `final` 修饰方法
+
+`final` 修饰方法，表示这个方法不能被子类重写。
+
+例如：`Object` 类中的 `getClass()`。
+
+示例代码：
+```java
+/* FinalTest.java */
+
+package com.anxin_hitsz_06._final;
+
+/**
+ * ClassName: FinalTest
+ * Package: com.anxin_hitsz_06._final
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 14:35
+ * @Version 1.0
+ */
+public class FinalTest {
+}
+
+final class A {
+
+}
+
+//class B extends A {}
+
+//class SubString extends String{}
+
+class C {
+    public final void method() {
+
+    }
+}
+
+class D extends C {
+//    public void method() {
+//
+//    }
+}
+
+```
+
+#### 5.2.3 `final` 修饰变量
+
+`final` 修饰某个变量（成员变量或局部变量），一旦赋值，它的值就不能被修改，即为常量；常量名建议使用大写字母。
+
+例如：
+```java
+final double MY_PI = 3.14;
+```
+
+示例代码：
+```java
+/* FinalTest.java */
+
+package com.anxin_hitsz_06._final;
+
+/**
+ * ClassName: FinalTest
+ * Package: com.anxin_hitsz_06._final
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 14:35
+ * @Version 1.0
+ */
+public class FinalTest {
+    public static void main(String[] args) {
+        E e = new E();
+        System.out.println(e.MIN_SCORE);
+//        e.MIN_SCORE = 1;
+
+        E e1 = new E(10);
+//        e1.LEFT = 11;
+    }
+}
+
+class E {
+    // 成员变量
+    final int MIN_SCORE = 0;
+    final int MAX_SCORE;
+
+    final int LEFT;
+
+//    final int RIGHT;
+
+    {
+//        MIN_SCORE = 1;
+        MAX_SCORE = 100;
+    }
+
+    public E() {
+        LEFT = 2;
+    }
+    public E(int left) {
+        LEFT = left;
+    }
+
+//    public void setRight(int right) {
+//        RIGHT = right;
+//    }
+
+}
+
+class F {
+    public void method() {
+        final int num;
+        num = 10;
+//        num++;
+        System.out.println(num);
+    }
+
+    public void method(final int num) {
+//        num++;
+        System.out.println(num);
+    }
+}
+
+final class A {
+
+}
+
+//class B extends A {}
+
+//class SubString extends String{}
+
+class C {
+    public final void method() {
+
+    }
+}
+
+class D extends C {
+//    public void method() {
+//
+//    }
+}
+
+```
+
+**修饰成员变量：**
+
+> 注意：
+>
+> 如果某个成员变量使用 `final` 修饰后，则不应为其设置 `set` 方法，并且必须将其初始化（可以显式赋值，或在初始化块赋值；实例变量还可以在构造器中赋值）。
+
+示例代码：
+```java
+public final class Test {
+    public static int totalNumber = 5;
+    public final int ID;
+
+    public Test() {
+        ID = ++totalNumber; // 可在构造器中给 final 修饰的“变量”赋值
+    }
+    public static void main(String[] args) {
+        Test t = new Test();
+        System.out.println(t.ID);
+    }
+}
+
+```
+
+**修饰局部变量：**
+
+> 注意：
+>
+> `final` 修饰局部变量，一旦赋值就不能修改。
+> * 方法内声明的局部变量：在调用局部变量之前，一定需要赋值；而且一旦赋值，就不可更改。
+> * 方法的形参：在调用此方法时，给形参进行赋值；而且一旦赋值，就不可更改。
+
+示例代码：
+```java
+public class TestFinal {
+    public static void main(String[] args) {
+        final int MIN_SCORE;
+        MIN_SCORE = 0;
+        final int MAX_SCORE = 100;
+        MAX_SCORE = 200;    // 非法
+    }
+}
+
+```
+
+**错误演示：**
+```java
+class A {
+    private final String INFO = "atguigu";  // 声明常量
+
+    public void print() {
+        // The final field A.INFO cannot be assigned
+        // INFO = "尚硅谷";
+    }
+}
+
+```
+
+## 六、抽象类与抽象方法（或 `abstract` 关键字）
+
+abstract 的概念：抽象的。
+
+### 6.1 由来
+
+**举例 1：**
+
+随着继承层次中一个个新子类的定义，类变得越来越具体，而父类则更一般、更通用。类的设计应该保证父类和子类能够共享特征。有时将一个父类设计得非常抽象，以至于它没有具体的实例，这样的类叫做抽象类。
+
+抽象类的示例：
+![抽象类的示例](./images/image-20220325231608838.png "抽象类的示例")
+
+**举例 2（`GeometricObject`-`Circle`-`Rectangle`）：**
+
+我们声明一些几何图形类，例如圆、矩形、三角形类等，发现这些类都有共同特征，即求面积、求周长。那么这些共同特征应该抽取到一个共同父类——几何图形类中。但是这些方法在父类中又**无法给出具体的实现**，而是应该交给子类各自具体实现。那么父类在声明这些方法时，**就只有方法签名而没有方法体**；我们把没有方法体的方法称为**抽象方法**。Java 语法规定，包含抽象方法的类必须是**抽象类**。
+
+示例代码：
+```java
+abstract class GeometricObject { // 几何图形
+    // 求面积（只能考虑提供方法的声明，而没有办法提供方法体；所以，此方法适合声明为抽象方法）
+
+    // 求周长（只能考虑提供方法的声明，而没有办法提供方法体；所以，此方法适合声明为抽象方法）
+
+}
+
+class Circle extends GeometricObject {
+
+    // 求面积（必须重写（或实现）父类中的抽象方法）
+
+    // 求周长（必须重写（或实现）父类中的抽象方法）
+}
+
+class Rectangle extends GeometricObject {
+
+    // 求面积（必须重写（或实现）父类中的抽象方法）
+
+    // 求周长（必须重写（或实现）父类中的抽象方法）
+}
+```
+
+**举例 3（`Account`-`SavingAccount`-`CheckAccount`）：**
+
+示例代码：
+```java
+abstract class Account {
+
+    double balance; // 余额
+
+    // 取钱（声明为抽象方法）
+
+    // 存钱（声明为抽象方法）
+
+}
+
+class SavingAccount extends Account {   // 储蓄卡
+    // 取钱（需要重写父类中的抽象方法）
+
+    // 存钱（需要重写父类中的抽象方法）
+}
+class CheckAccount extends Account {    // 信用卡
+    // 取钱（需要重写父类中的抽象方法）
+    
+    // 存钱（需要重写父类中的抽象方法）
+}
+// ...
+```
+
+### 6.2 语法格式
+
+`abstract` 可以用来修饰：类、方法。
+
+抽象类与抽象方法：
+* **抽象类**：被 `abstract` 修饰的类。
+  * 此类被称为抽象类。
+  * 抽象类不能实例化。
+  * 抽象类中是包含构造器的，因为子类对象实例化时，需要直接或间接地调用到父类的构造器。
+  * 抽象类中可以没有抽象方法；反之，抽象方法所在的类一定是抽象类。
+* **抽象方法**：被 `abstract` 修饰的没有方法体的方法。
+  * 此方法即为抽象方法。
+  * 抽象方法只有方法的声明，没有方法体。
+  * 抽象方法其功能是确定的（通过方法的声明即可确定），只是不知道如何具体实现（体现为没有方法体）。
+  * 子类必须重写父类中的所有的抽象方法之后，方可实例化；否则，此子类仍然是一个抽象类。
+
+抽象类的语法格式：
+```java
+[权限修饰符] abstract class 类名 {
+
+}
+[权限修饰符] abstract class 类名 extends 父类 {
+
+}
+```
+
+抽象方法的语法格式：
+```java
+[其他修饰符] abstract 返回值类型 方法名([形参列表]);
+```
+> 注意：
+> 
+> 抽象方法没有方法体。
+> ![抽象方法没有方法体](./images/image-20220517204707255.png "抽象方法没有方法体")
+
+示例代码：
+```java
+/* Creature.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: Creature
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:29
+ * @Version 1.0
+ */
+public abstract class Creature { // 生物类
+    public abstract void breath();  // 呼吸
+}
+
+
+/* Person.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:04
+ * @Version 1.0
+ */
+public abstract class Person extends Creature {  // 抽象类
+    String name;
+    int age;
+
+    public Person() {
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public abstract void eat(); // 抽象方法
+
+    public abstract void sleep();   // 抽象方法
+}
+
+
+/* Student.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:05
+ * @Version 1.0
+ */
+public class Student extends Person {
+    String school;
+
+    public Student() {
+    }
+
+    public Student(String name, int age, String school) {
+        super(name, age);
+        this.school = school;
+    }
+
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    public void sleep() {
+        System.out.println("学生睡觉");
+    }
+
+    @Override
+    public void breath() {
+        System.out.println("学生应该多呼吸新鲜空气");
+    }
+}
+
+
+/* Worker.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: Worker
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:27
+ * @Version 1.0
+ */
+public abstract class Worker extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("工人吃饭");
+    }
+
+}
+
+
+/* AbstractTest.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: AbstractTest
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:07
+ * @Version 1.0
+ */
+public class AbstractTest {
+    public static void main(String[] args) {
+
+//        Person p1 = new Person();
+//        p1.eat();
+
+        Student s1 = new Student();
+        s1.eat();
+
+//        Worker w1 = new Worker();
+
+    }
+}
+
+```
+
+此时的方法重写，是子类对父类抽象方法的完成实现，我们将这种方法重写的操作也叫做**实现方法**。
+
+### 6.3 使用说明
+
+抽象类**不能创建对象**，如果创建，则编译无法通过而报错；只能创建其非抽象子类的对象。
+> 理解：假设创建了抽象类的对象，调用抽象的方法，而抽象方法没有具体的方法体，没有意义。
+>
+> 抽象类是用来被继承的，抽象类的子类必须重写父类的抽象方法，并提供方法体。若没有重写全部的抽象方法，仍为抽象类。
+
+抽象类中也有构造方法，是供子类创建对象时初始化父类成员变量使用的。
+> 理解：子类的构造方法中，有默认的 `super()` 或手动的 `super(实参列表)`，需要访问父类构造方法。
+
+抽象类中，不一定包含抽象方法，但是有抽象方法的类必定是抽象类。
+> 理解：未包含抽象方法的抽象类，目的就是不想让调用者创建该类对象，通常用于某些特殊的类结构设计。
+
+抽象类的子类，必须重写抽象父类中所有的抽象方法，否则编译无法通过而报错；除非该子类也是抽象类。
+> 理解：假设不重写所有抽象方法，则类中可能包含抽象方法；那么创建对象后，调用抽象的方法，没有意义。
+
+> 注意：
+>
+> 在 IDEA 中，通过 `Alt + Insert` 组合键可调出 Generate 面板，选择其中的 `Implement Methods...` 选项即可快速实现抽象父类的抽象方法。
+>
+> 或者可以将光标悬停到待实现抽象父类的子类的声明上，通过 `Alt + Enter` 组合键同样可快速实现抽象父类的抽象方法。
+
+### 6.4 注意事项
+
+不能用 `abstract` 修饰变量、属性、代码块、构造器等。
+
+`abstract` 不能与哪些关键字共用？（自洽）
+* 不能用 `abstract` 修饰私有方法、静态方法、`final` 的方法、`final` 的类。
+  * 私有方法不能重写。
+  * 避免静态方法使用类进行调用。
+  * `final` 的方法不能被重写。
+  * `final` 修饰的类不能有子类。
+
+示例代码：
+```java
+/* AbstractTest1.java */
+
+package com.anxin_hitsz_07._abstract;
+
+/**
+ * ClassName: AbstractTest1
+ * Package: com.anxin_hitsz_07._abstract
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 16:40
+ * @Version 1.0
+ */
+public abstract class AbstractTest1 {
+//    private abstract void method();
+
+//    public static abstract void method();
+}
+
+```
+
+### 6.5 应用举例 1
+
+![应用举例 1](./images/image-20220325232847872.png "应用举例 1")
+
+在航运公司系统中，`Vehicle` 类需要定义两个方法分别**计算运输工具的燃料效率**和**行驶距离**。
+
+**问题：** 卡车（`Truck`）和驳船（`RiverBarge`）的燃料效率和行驶距离的计算方法完全不同。`Vehicle` 类不能提供计算方法，但子类可以。
+
+**解决方案：** Java 允许类设计者指定超类声明一个方法但不提供实现，该方法的实现由子类提供；这样的方法称为抽象方法。有一个或更多抽象方法的类称为抽象类。
+
+示例代码：
+```java
+// Vehicle 是一个抽象类，有两个抽象方法
+public abstract class Vehicle {
+    public abstract double calcFuelEfficiency();    // 计算燃料效率的抽象方法
+    public abstract double calcTripDistance();  // 计算行驶距离的抽象方法
+}
+public class Truck extends Vehicle {
+    public double calcFuelEfficiency() {
+        // 写出计算卡车的燃料效率的具体方法
+    }
+    public double calcTripDistance() {
+        // 写出计算卡车行驶距离的具体方法
+    }
+}
+public class RiverBarge extends Vehicle {
+    public double calcFuelEfficiency() {
+        // 写出计算驳船的燃料效率的具体方法
+    }
+    public double calcTripDistance() {
+        // 写出计算驳船行驶距离的具体方法
+    }
+}
+
+```
+
+### 6.6 应用举例 2：模板方法设计模式（TemplateMethod）
+
+抽象类体现的就是一种模板模式的设计，抽象类作为多个子类的通用模板，子类在抽象类的基础上进行扩展、改造，但子类总体上会保留抽象类的行为方式。
+
+**解决的问题：**
+* 当功能内部一部分实现是确定的，另一部分实现是不确定的；这时可以把不确定的部分暴露出去，让子类去实现。
+* 换句话说，在软件开发中实现一个算法时，整体步骤很固定、通用，这些步骤已经在父类中写好了；但是某些部分易变，因此可将易变部分抽象出来，供不同子类实现。这就是一种模板模式。
+
+示例代码：
+```java
+/* TemplateTest.java */
+
+package com.anxin_hitsz_07._abstract.template;
+
+/**
+ * ClassName: TemplateTest
+ * Package: com.anxin_hitsz_07._abstract.template
+ * Description:
+ *      抽象应用案例：模板方法的设计模式
+ * @Author AnXin
+ * @Create 2026/1/30 17:31
+ * @Version 1.0
+ */
+public class TemplateTest {
+    public static void main(String[] args) {
+        PrintPrimeNumber p = new PrintPrimeNumber();
+
+        p.spendTime();
+    }
+}
+
+abstract class Template {
+
+    // 计算某段代码的执行，需要花费的时间
+    public void spendTime() {
+
+        long start = System.currentTimeMillis();
+
+        code();
+
+        long end = System.currentTimeMillis();
+
+        System.out.println("花费的时间为：" + (end - start));
+
+    }
+
+    public abstract void code();
+
+}
+
+class PrintPrimeNumber extends Template {
+
+    @Override
+    public void code() {
+        for (int i = 2; i <= 100000; i++) {
+            boolean isFlag = true;
+            for (int j = 2; j <= Math.sqrt(i); j++) {
+                if (i % j == 0) {
+                    isFlag = false;
+                    break;
+                }
+            }
+            if (isFlag) {
+                System.out.println(i);
+            }
+        }
+
+    }
+}
+
+```
+
+模板方法设计模式是编程中经常用得到的模式，各个框架、类库中都有其影子。比如常见的有：
+* 数据库访问的封装；
+* Junit 单元测试；
+* JavaWeb 的 Servlet 中关于 `doGet` / `doPost` 方法调用；
+* Hibernate 中模板程序；
+* Spring 中 JDBCTemlate、HibernateTemplate 等。
+
+### 6.7 练习
+
+**练习 1：**
+> 题目：
+>
+> 针对多态性的练习 1 中的 `GeometricObject` 等类进行升级，体现抽象的使用。
+>
+> UML 类图如下所示：
+> ![练习 1 - UML](./images/template_exer1_UML.png "练习 1 - UML")
+
+示例代码：
+```java
+/* GeometricObject.java */
+
+package com.anxin_hitsz_07._abstract.exer1;
+
+/**
+ * ClassName: GeometricObject
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:31
+ * @Version 1.0
+ */
+public abstract class GeometricObject {
+    protected String color;
+    protected double weight;
+
+    protected GeometricObject(String color, double weight) {
+        this.color = color;
+        this.weight = weight;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    public abstract double findArea();
+}
+
+
+/* Circle.java */
+
+package com.anxin_hitsz_07._abstract.exer1;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:35
+ * @Version 1.0
+ */
+public class Circle extends GeometricObject {
+
+    private double radius;  // 半径
+
+    public Circle(String color, double weight, double radius) {
+        super(color, weight);
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public double findArea() {
+        return 3.14 * radius * radius;
+    }
+}
+
+
+/* MyRectangle.java */
+
+package com.anxin_hitsz_07._abstract.exer1;
+
+/**
+ * ClassName: MyRectangle
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:37
+ * @Version 1.0
+ */
+public class MyRectangle extends GeometricObject {
+    private double width;   // 宽
+    private double height;  // 高
+
+    public MyRectangle(String color, double weight, double width, double height) {
+        super(color, weight);
+        this.width = width;
+        this.height = height;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    @Override
+    public double findArea() {
+
+        return width * height;
+    }
+}
+
+
+/* GeometricTest.java */
+
+package com.anxin_hitsz_07._abstract.exer1;
+
+/**
+ * ClassName: GeometricTest
+ * Package: com.anxin_hitsz_06.polymorphism.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/27 17:38
+ * @Version 1.0
+ */
+public class GeometricTest {
+    public static void main(String[] args) {
+        GeometricTest test = new GeometricTest();
+
+        Circle c1 = new Circle("red", 1.0, 2.3);
+        Circle c2 = new Circle("red", 1.0, 3.3);
+
+        test.displayGeometricObject(c1);
+        test.displayGeometricObject(c2);
+
+        boolean isEquals = test.equalsArea(c1, c2);
+        if (isEquals) {
+            System.out.println("面积相等");
+        } else {
+            System.out.println("面积不相等");
+        }
+
+        // 使用匿名对象
+        test.displayGeometricObject(new MyRectangle("blue", 1.0, 2.3, 4.5));
+
+    }
+
+    /**
+     * 比较两个几何图形的面积是否相等
+     * @param g1
+     * @param g2
+     * @return true: 表示面积相等；false: 表示面积不相等
+     */
+    public boolean equalsArea(GeometricObject g1, GeometricObject g2) {
+        return g1.findArea() == g2.findArea();
+    }
+
+    /**
+     * 显示几何图形的面积
+     * @param g
+     */
+    public void displayGeometricObject(GeometricObject g) { // GeometricObject g = new Circle("red", 1.0, 2.3);
+        System.out.println("几何图形的面积为：" + g.findArea()); // 动态绑定 <---> 静态绑定
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 编写工资系统，实现不同类型员工（多态）的按月发放工资。如果当月出现某个 `Employee` 对象的生日，则将该雇员的工资增加 100 元。
+>
+> 练习说明：
+> 1. 定义一个 `Employee` 类，该类包含：
+> * `private` 成员变量 `name`、`number`、`birthday`，其中 `birthday` 为 `MyDate` 类的对象。
+> * 提供必要的构造器。
+> * `abstract` 方法 `earnings()`，返回工资数额。
+> * `toString()` 方法输出对象的 `name`、`number` 和 `birthday`。
+> 2. `MyDate` 类包含：
+> * `private` 成员变量 `year`、`month`、`day`。
+> * 提供必要的构造器。
+> * `toDateString()` 方法返回日期对应的字符串：`xxxx年xx月xx日`。
+> 3. 定义 `SalariedEmployee` 类继承 `Employee` 类，实现按月计算工资的员工处理。该类包括：
+> * `private` 成员变量 `monthlySalary`。
+> * 提供必要的构造器。
+> * 实现父类的抽象方法 `earnings()`。该方法返回 `monthlySalary` 值。
+> * `toString()` 方法输出员工类型信息及员工的 `name`、`number`、`birthday`；比如：`SalariedEmployee[name = '', number = , birthday = xxxx年xx月xx日]`。
+> 4. 参照 `SalariedEmployee` 类定义 `HourlyEmployee` 类，实现按小时计算工资的员工处理。该类包括：
+> * `private` 成员变量 `wage` 和 `hour`。
+> * 提供必要的构造器。
+> * 实现父类的抽象方法 `earnings()`，该方法返回 `wage * hour` 值。
+> * `toString()` 方法输出员工类型信息及员工的 `name`、`number`、`birthday`。
+> 5. 定义 `PayrollSystem` 类，创建 `Employee` 变量数组并初始化，该数组存放各类雇员对象的引用。
+> * 利用循环结构遍历数组元素，输出各个对象的类型、`name`、`number`、`birthday`。
+> * 当键盘输入本月月份值时，如果本月是某个 `Employee` 对象的生日，还要输出增加工资信息。
+>
+> 提示：
+> * 定义 `People` 类型的数组 `People[] c1 = new People[10];`。
+> * 数组元素赋值：
+>   ```java
+>   c1[0] = new People("John", "0001", 20);
+>   c1[1] = new People("Bob", "0002",  19);
+>   ```
+> * 若 `People` 有两个子类 `Student` 和 `Officer`，则数组元素赋值时，可以使父类类型的数组元素指向子类：
+>   ```java
+>   c1[0] = new Student("John", "0001", 20, 85.0);
+>   c1[1] = new Officer("Bob", "0002", 19, 90.5);
+>   ```
+>
+> 
+> 以上为题目描述。
+
+示例代码：
+```java
+/* MyDate.java */
+
+package com.anxin_hitsz_07._abstract.exer2;
+
+/**
+ * ClassName: MyDate
+ * Package: com.anxin_hitsz_07._abstract.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 17:46
+ * @Version 1.0
+ */
+public class MyDate {
+    private int year;
+    private int month;
+    private int day;
+
+    public MyDate() {
+    }
+
+    public MyDate(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public String toDateString() {
+        return year + "年" + month + "月" + day + "日";
+    }
+
+}
+
+
+/* Employee.java */
+
+package com.anxin_hitsz_07._abstract.exer2;
+
+/**
+ * ClassName: Employee
+ * Package: com.anxin_hitsz_07._abstract.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 17:45
+ * @Version 1.0
+ */
+public abstract class Employee {
+    private String name;
+    private int number;
+    private MyDate birthday;
+
+    public Employee() {
+    }
+
+    public Employee(String name, int number, MyDate birthday) {
+        this.name = name;
+        this.number = number;
+        this.birthday = birthday;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public MyDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(MyDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public abstract double earnings();
+
+    public String toString() {
+        return "name = " + name + ", number = " + number +
+                ", birthday = " + birthday.toDateString();
+    }
+
+}
+
+
+/* SalariedEmployee.java */
+
+package com.anxin_hitsz_07._abstract.exer2;
+
+/**
+ * ClassName: SalariedEmployee
+ * Package: com.anxin_hitsz_07._abstract.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 17:50
+ * @Version 1.0
+ */
+public class SalariedEmployee extends Employee {
+
+    private double monthlySalary;   // 月工资
+
+    public SalariedEmployee() {
+    }
+
+    @Override
+    public double earnings() {
+        return monthlySalary;
+    }
+
+    public SalariedEmployee(String name, int number, MyDate birthday, double monthlySalary) {
+        super(name, number, birthday);
+        this.monthlySalary = monthlySalary;
+    }
+
+//    public double getMonthlySalary() {
+//        return monthlySalary;
+//    }
+
+    public void setMonthlySalary(double monthlySalary) {
+        this.monthlySalary = monthlySalary;
+    }
+
+    public String toString() {
+        return "SalariedEmployee[" + super.toString() + "]";
+    }
+}
+
+
+/* HourlyEmployee.java */
+
+package com.anxin_hitsz_07._abstract.exer2;
+
+/**
+ * ClassName: HourlyEmployee
+ * Package: com.anxin_hitsz_07._abstract.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 17:53
+ * @Version 1.0
+ */
+public class HourlyEmployee extends Employee {
+
+    private double wage;    // 单位小时的工资
+    private int hour;   // 月工作的小时数
+
+    public HourlyEmployee() {
+    }
+
+    public HourlyEmployee(String name, int number, MyDate birthday, double wage, int hour) {
+        super(name, number, birthday);
+        this.wage = wage;
+        this.hour = hour;
+    }
+
+    public double getWage() {
+        return wage;
+    }
+
+    public void setWage(double wage) {
+        this.wage = wage;
+    }
+
+    public int getHour() {
+        return hour;
+    }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
+
+    @Override
+    public double earnings() {
+        return wage * hour;
+    }
+
+    public String toString() {
+        return "HourlyEmployee[" + super.toString() + "]";
+    }
+
+}
+
+
+/* PayrollSystem.java */
+
+package com.anxin_hitsz_07._abstract.exer2;
+
+import java.util.Scanner;
+
+/**
+ * ClassName: PayrollSystem
+ * Package: com.anxin_hitsz_07._abstract.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 17:55
+ * @Version 1.0
+ */
+public class PayrollSystem {
+    public static void main(String[] args) {
+
+        Scanner scan = new Scanner(System.in);
+
+        Employee[] emps = new Employee[2];
+
+        emps[0] = new SalariedEmployee("Tom", 1001,
+                new MyDate(1992, 12, 21), 18000);
+
+        emps[1] = new HourlyEmployee("Jerry", 1002, new MyDate(1997, 11, 12),
+                240, 100);
+
+        System.out.println("请输入当前的月份：");
+        int month = scan.nextInt();
+
+        for (int i = 0; i < emps.length; i++) {
+            System.out.println(emps[i].toString());
+            System.out.println("工资为：" + emps[i].earnings());
+
+            if (month == emps[i].getBirthday().getMonth()) {
+                System.out.println("生日快乐！加薪 100！");
+            }
+        }
+
+        scan.close();
+
+    }
+}
+
+```
