@@ -2745,3 +2745,759 @@ public class PayrollSystem {
 }
 
 ```
+
+## 七、接口（`interface`）
+
+### 7.1 类比
+
+以 USB 接口为例。
+
+> USB（Universal Serial Bus，通用串行总线）是 Intel 公司开发的总线架构，使得在计算机上添加串行设备（鼠标、键盘、打印机、扫描仪、摄像头、充电器、MP3 机、手机、数码相机、移动硬盘等）非常容易。
+
+其实，不管是电脑上的 USB 插口，还是其他设备上的 USB 插口，都只是**遵循了 USB 规范**的一种具体设备而已。
+
+只要设备遵循 USB 规范的，那么就可以与电脑互联，并正常通信。至于这个设备、电脑是哪个厂家制造的，内部是如何实现的，我们都无需关心。
+
+Java 的软件系统会由很多模块组成，那么各个模块之间也应该采用这种**面向接口**的**低耦合**，为系统提供更好的可扩展性和可维护性。
+
+### 7.2 概述
+
+接口就是规范，定义的是一组规则，体现了现实世界中“如果你是 / 要 …… 则必须能 ……”的思想。继承是一个“是不是”的 `is - a` 关系，而接口实现则是“能不能”的 `has - a` 关系。
+* 例如：电脑都预留了可以插入 USB 设备的 USB 接口，USB 接口具备基本的数据传输的开启功能和关闭功能。能否使用 USB 进行连接、或是否具备 USB 通信功能，就看该设备能否遵循 USB 接口规范。
+    ![USB 作为“接口”](./images/image-20220517211517846.png "USB 作为“接口”")
+* 例如：Java 程序是否能够连接使用某种数据库产品，那么要看该数据库产品能否实现 Java 设计的 JDBC 规范。
+    ![Java 程序通过 JDBC 规范与数据库产品连接并使用](./images/image-20220325235434103.png "Java 程序通过 JDBC 规范与数据库产品连接并使用")
+
+> 接口的本质是契约、标准、规范。
+
+### 7.3 接口定义格式
+
+接口的定义与定义类的方式相似，但是使用 `interface` 关键字。它也会被编译成 `.class` 文件，但一定要明确它并不是类，而是另外一种引用数据类型。
+
+> 引用数据类型：数组、类、枚举、接口、注解。
+
+#### 7.3.1 接口的声明格式
+
+接口的声明格式如下所示：
+```java
+[修饰符] interface 接口名 {
+    // 接口的成员列表
+    //  公共的静态常量
+    //  公共的抽象方法
+
+    //  公共的默认方法（JDK 1.8 以上）
+    //  公共的静态方法（JDK 1.8 以上）
+    //  私有方法（JDK 1.9 以上）
+}
+```
+
+示例代码：
+```java
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 21:34
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+        System.out.println(Flyable.MIN_SPEED);
+
+        System.out.println(Flyable.MAX_SPEED);
+
+//        Flyable.MAX_SPEED = 7800;
+
+    }
+}
+
+interface Flyable { // 接口
+    // 全局常量
+    public static final int MIN_SPEED = 0;
+
+    // 可以省略 public static final
+    int MAX_SPEED = 7900;
+
+    // 方法可以省略 public abstract 声明
+    void fly();
+
+}
+
+interface Attackable {  // 接口
+
+    public abstract void attack();
+
+}
+
+```
+
+#### 7.3.2 接口的成员说明
+
+接口内部结构的说明：
+* 可以声明：
+  * 属性：必须使用 `public static final` 修饰。
+  * 方法：
+    * JDK 8 之前：声明抽象方法，修饰为 `public abstract`。
+    * JDK 8：声明静态方法、默认方法。
+    * JDK 9：声明私有方法。
+* 不可以声明：构造器、代码块等。
+
+**在 JDK 8.0 之前**，接口中只允许出现：
+1. 公共的静态的常量：其中 `public static final` 可以省略。
+2. 公共的抽象的方法：其中 `public abstract` 可以省略。
+
+> 理解：接口是从多个相似类中抽象出来的规范，不需要提供具体实现。
+
+**在 JDK 8.0 时**，接口中允许声明默认方法和静态方法：
+3. 公共的默认的方法：其中 `public` 可以省略，建议保留；但是 `default` 不能省略。
+4. 公共的静态的方法：其中 `public` 可以省略，建议保留；但是 `static` 不能省略。
+
+**在 JDK 9.0 时**，接口又增加了：
+5. 私有方法。
+
+除此之外，接口中没有构造器、没有初始化块，因为接口中没有成员变量需要动态初始化。
+
+### 7.4 接口的使用规则
+
+#### 7.4.1 类实现接口（`implements`）
+
+接口**不能创建对象**，但是可以被类实现（`implements`，类似于被继承）。
+
+类与接口的关系为实现关系，即**类实现接口**，该类可以称为接口的实现类。实现的动作类似继承，格式相仿，只是关键字不同，实现使用 `implements` 关键字。
+
+类实现接口的语法格式：
+```java
+[修饰符] class 实现类名 implements 接口名 {
+    // 重写接口中抽象方法（必须）；当然如果实现类是抽象类，那么可以不重写
+    // 重写接口中默认方法（可选）
+}
+
+[修饰符] class 实现类名 extends 父类名 implements 接口名 {
+    // 重写接口中抽象方法（必须）；当然如果实现类是抽象类，那么可以不重写
+    // 重写接口中默认方法（可选）
+}
+```
+
+格式：
+```java
+class A extends SuperA implements B, C {}
+```
+其中：
+* `A` 相较于 `SuperA` 来讲，叫做子类。
+* `A` 相较于 `B`、`C` 来讲，叫做实现类。
+
+满足此关系之后，说明：
+* 类可以实现多个接口。
+* 类针对于接口的多实现，一定程度上就弥补了类的单继承的局限性。
+* 类必须将实现的接口中的所有的抽象方法都重写（或实现），方可实例化；否则，此实现类必须声明为抽象类。
+
+接口举例：
+![接口举例](./images/image-20220514163212312.png "接口举例")
+
+注意：
+1. 如果接口的实现类是非抽象类，那么必须**重写接口中所有抽象方法**。
+2. 默认方法可以选择保留，也可以重写。
+   * 重写时，`default` 单词就不要再写了，它只用于在接口中表示默认方法，到类中就没有默认方法的概念了。
+3. 接口中的静态方法不能被继承，也不能被重写。
+
+示例代码：
+```java
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 21:34
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+        System.out.println(Flyable.MIN_SPEED);
+
+        System.out.println(Flyable.MAX_SPEED);
+
+//        Flyable.MAX_SPEED = 7800;
+
+    }
+}
+
+interface Flyable { // 接口
+    // 全局常量
+    public static final int MIN_SPEED = 0;
+
+    // 可以省略 public static final
+    int MAX_SPEED = 7900;
+
+    // 方法可以省略 public abstract 声明
+    void fly();
+
+}
+
+interface Attackable {  // 接口
+
+    public abstract void attack();
+
+}
+
+abstract class Plane implements Flyable {
+
+}
+
+class Bullet implements Flyable {
+
+    @Override
+    public void fly() {
+        System.out.println("让子弹飞一会儿");
+    }
+}
+
+```
+
+> 注意：
+>
+> 在 IDEA 中，可以将光标悬停到待实现接口的类的声明上，通过 `Alt + Enter` 组合键打开 `Implement methods` 选项可快速实现指定接口。
+
+#### 7.4.2 接口的多实现（`implements`）
+
+之前提到，在继承体系中，一个类只能继承一个父类。而对于接口而言，一个类是可以实现多个接口的，这叫做接口的**多实现**。并且，一个类能继承一个父类，同时实现多个接口。
+
+实现格式：
+```java
+[修饰符] class 实现类名 implements 接口名1[, 接口名2, 接口名3, ..., 接口名n] {
+    // 重写接口中所有抽象方法（必须）；当然如果实现类是抽象类，那么可以不重写
+    // 重写接口中默认方法（可选）
+}
+
+[修饰符] class 实现类名 extends 父类名 implements 接口名1[, 接口名2, 接口名3, ..., 接口名n] {
+    // 重写接口中所有抽象方法（必须）；当然如果实现类是抽象类，那么可以不重写
+    // 重写接口中默认方法（可选）
+}
+```
+
+> 注意：
+>
+> 接口中，有多个抽象方法时，实现类必须重写所有抽象方法。**如果抽象方法有重名的，只需要重写一次。**
+
+举例：
+* ![接口的多实现 - 示例 1](./images/image-20220514163311418.png "接口的多实现 - 示例 1")
+* ![接口的多实现 - 示例 2](./images/image-20220325235321778.png "接口的多实现 - 示例 2")
+* ![接口的多实现 - 示例 3](./images/1562216188519.png "接口的多实现 - 示例 3")
+
+示例代码：
+```java
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 21:34
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+        System.out.println(Flyable.MIN_SPEED);
+
+        System.out.println(Flyable.MAX_SPEED);
+
+//        Flyable.MAX_SPEED = 7800;
+
+        Bullet b1 = new Bullet();
+        b1.fly();
+        b1.attack();
+
+    }
+}
+
+interface Flyable { // 接口
+    // 全局常量
+    public static final int MIN_SPEED = 0;
+
+    // 可以省略 public static final
+    int MAX_SPEED = 7900;
+
+    // 方法可以省略 public abstract 声明
+    void fly();
+
+}
+
+interface Attackable {  // 接口
+
+    public abstract void attack();
+
+}
+
+abstract class Plane implements Flyable {
+
+}
+
+class Bullet implements Flyable, Attackable {
+
+    @Override
+    public void fly() {
+        System.out.println("让子弹飞一会儿");
+    }
+
+    @Override
+    public void attack() {
+        System.out.println("子弹可以击穿身体");
+    }
+
+}
+
+```
+
+#### 7.4.3 接口的多继承（`extends`）
+
+一个接口能继承另一个或者多个接口，接口的继承也使用 `extends` 关键字，子接口继承父接口的方法。
+
+定义父接口：
+```java
+package com.atguigu.interfacetype;
+
+public interface Chargeable {
+    void charge();
+    void in();
+    void out();
+}
+```
+
+定义子接口：
+```java
+package com.atguigu.interfacetype;
+
+public interface UsbC extends Chargeable, USB3 {
+    void reverse();
+}
+```
+
+定义子接口的实现类：
+```java
+package com.atguigu.interfacetype;
+
+public class TypeCConverter implements UsbC {
+    @Override
+    public void reverse() {
+        System.out.println("正反面都支持");
+    }
+
+    @Override
+    public void charge() {
+        System.out.println("可充电");
+    }
+
+    @Override
+    public void in() {
+        System.out.println("接收数据");
+    }
+
+    @Override
+    public void out() {
+        System.out.println("输出数据");
+    }
+}
+```
+
+> 注意：
+> * 所有父接口的抽象方法都有重写。
+> * 方法签名相同的抽象方法只需要实现一次。
+
+示例代码：
+```java
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 21:34
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+        System.out.println(Flyable.MIN_SPEED);
+
+        System.out.println(Flyable.MAX_SPEED);
+
+//        Flyable.MAX_SPEED = 7800;
+
+        Bullet b1 = new Bullet();
+        b1.fly();
+        b1.attack();
+
+    }
+}
+
+interface Flyable { // 接口
+    // 全局常量
+    public static final int MIN_SPEED = 0;
+
+    // 可以省略 public static final
+    int MAX_SPEED = 7900;
+
+    // 方法可以省略 public abstract 声明
+    void fly();
+
+}
+
+interface Attackable {  // 接口
+
+    public abstract void attack();
+
+}
+
+abstract class Plane implements Flyable {
+
+}
+
+class Bullet implements Flyable, Attackable {
+
+    @Override
+    public void fly() {
+        System.out.println("让子弹飞一会儿");
+    }
+
+    @Override
+    public void attack() {
+        System.out.println("子弹可以击穿身体");
+    }
+
+}
+
+// 测试接口的继承关系
+interface AA {
+    void method1();
+}
+
+interface BB {
+    void method2();
+}
+
+interface CC extends AA, BB {   // 接口可以多继承
+
+}
+
+class DD implements CC {
+
+    @Override
+    public void method1() {
+
+    }
+
+    @Override
+    public void method2() {
+
+    }
+}
+
+```
+
+#### 7.4.4 接口与实现类对象构成多态引用
+
+实现类实现接口，类似于子类继承父类；因此，接口类型的变量与实现类的对象之间也可以构成多态引用。通过接口类型的变量调用方法，最终执行的是 `new` 的实现类对象实现的方法体。
+
+接口的多态性：
+```java
+接口名 变量名 = new 实现类对象;
+```
+
+示例代码：
+```java
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 21:34
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+        System.out.println(Flyable.MIN_SPEED);
+
+        System.out.println(Flyable.MAX_SPEED);
+
+//        Flyable.MAX_SPEED = 7800;
+
+        Bullet b1 = new Bullet();
+        b1.fly();
+        b1.attack();
+
+        // 接口的多态性
+        Flyable f1 = new Bullet();
+        f1.fly();
+
+    }
+}
+
+interface Flyable { // 接口
+    // 全局常量
+    public static final int MIN_SPEED = 0;
+
+    // 可以省略 public static final
+    int MAX_SPEED = 7900;
+
+    // 方法可以省略 public abstract 声明
+    void fly();
+
+}
+
+interface Attackable {  // 接口
+
+    public abstract void attack();
+
+}
+
+abstract class Plane implements Flyable {
+
+}
+
+class Bullet implements Flyable, Attackable {
+
+    @Override
+    public void fly() {
+        System.out.println("让子弹飞一会儿");
+    }
+
+    @Override
+    public void attack() {
+        System.out.println("子弹可以击穿身体");
+    }
+
+}
+
+// 测试接口的继承关系
+interface AA {
+    void method1();
+}
+
+interface BB {
+    void method2();
+}
+
+interface CC extends AA, BB {   // 接口可以多继承
+
+}
+
+class DD implements CC {
+
+    @Override
+    public void method1() {
+
+    }
+
+    @Override
+    public void method2() {
+
+    }
+}
+
+```
+
+#### 7.4.5 使用接口的静态成员
+
+接口不能直接创建对象，但是可以通过接口名直接调用接口的静态方法和静态常量。
+
+示例代码：
+```java
+package com.atguigu.interfacetype;
+
+public class TestUSB3 {
+    public static void main(String[] args) {
+        // 通过 “接口名.” 调用接口的静态方法（JDK 8.0 才能开始使用）
+        USB3.show();
+        // 通过 “接口名.” 直接使用接口的静态常量
+        System.out.println(USB3.MAX_SPEED);
+    }
+}
+```
+
+#### 7.4.6 使用接口的非静态方法
+
+对于接口的静态方法，直接使用 “`接口名.`” 进行调用即可。
+* 也只能使用 “`接口名.`” 进行调用，不能通过实现类的对象进行调用。
+
+对于接口的抽象方法、默认方法，只能通过实现类对象才可以调用。
+* 接口不能直接创建对象，只能创建实现类的对象。
+
+示例代码：
+```java
+package com.atguigu.interfacetype;
+
+public class TestMobileHDD {
+    public static void main(String[] agrs) {
+        //  创建实现类对象
+        MobileHDD b = new MobileHDD();
+
+        // 通过实现类对象调用重写的抽象方法以及接口的默认方法。如果实现类重写了，就执行重写的默认方法；如果没有重写，就执行接口中的默认方法
+        b.start();
+        b.in();
+        b.stop();
+
+        // 通过接口名调用接口的静态方法
+//        MobileHDD.show();
+//        b.show();
+        Usb3.show();
+    }
+}
+```
+
+#### 7.4.7 创建接口实现类的对象
+
+创建接口实现类的对象时，有以下四种方式：
+1. 创建接口实现类的对象。
+2. 创建接口实现类的匿名对象。
+3. 创建接口匿名实现类的对象。
+4. 创建接口匿名实现类的匿名对象。
+
+示例代码：
+```java
+/* USBTest.java */
+
+package com.anxin_hitsz_08._interface.apply;
+
+/**
+ * ClassName: USBTest
+ * Package: com.anxin_hitsz_08._interface.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/30 22:03
+ * @Version 1.0
+ */
+public class USBTest {
+    public static void main(String[] args) {
+
+        // 1. 创建接口实现类的对象
+        Computer computer = new Computer();
+        Printer printer = new Printer();
+
+        computer.transferData(printer);
+
+        // 2. 创建接口实现类的匿名对象
+        computer.transferData(new Camera());
+
+        System.out.println();
+
+        // 3. 创建接口匿名实现类的对象
+        USB usb1 = new USB() {
+            public void start() {
+                System.out.println("U 盘开始工作");
+            }
+            public void stop() {
+                System.out.println("U 盘结束工作");
+            }
+        };
+        computer.transferData(usb1);
+
+        // 4. 创建接口匿名实现类的匿名对象
+        computer.transferData(new USB() {
+            public void start() {
+                System.out.println("扫描仪开始工作");
+            }
+            public void stop() {
+                System.out.println("扫描仪结束工作");
+            }
+        });
+
+    }
+}
+
+class Computer {
+
+    public void transferData(USB usb) { // 多态：USB usb = new Printer();
+        System.out.println("设备连接成功 ……");
+        usb.start();
+        System.out.println("数据传输的细节操作 ……");
+
+        usb.stop();
+
+    }
+
+}
+
+class Camera implements USB {
+
+    @Override
+    public void start() {
+        System.out.println("照相机开始工作");
+    }
+
+    @Override
+    public void stop() {
+        System.out.println("照相机结束工作");
+    }
+}
+
+class Printer implements USB {
+
+    @Override
+    public void start() {
+        System.out.println("打印机开始工作");
+    }
+
+    @Override
+    public void stop() {
+        System.out.println("打印机结束工作");
+    }
+}
+
+interface USB {
+    // 声明常量
+    // USB 的长、宽、高 ……
+
+
+    // 方法
+    public abstract void start();
+    void stop();
+
+}
+
+```
+
+### 7.5 JDK 8 中相关冲突问题
+
+### 7.6 接口的总结与面试题
+
+### 7.7 接口与抽象类之间的对比
+
+接口与抽象类之间的对比如下：
+![接口与抽象类之间的区别点](./images/image-20220328002053452.png "接口与抽象类之间的区别点")
+
+> 面试题：
+>
+> 区分抽象类和接口：
+> * 共性：
+>   * 都可以声明抽象方法。
+>   * 都不能实例化。
+> * 不同：
+>   * 抽象类一定有构造器，而接口没有构造器。
+>   * 类与类之间为继承关系，类与接口之间为实现关系，接口与接口之间为多继承关系。
+
+> 注意：
+>
+> 在开发中，常看到一个类不是去继承一个已经实现好的类；而是要么继承抽象类，要么实现接口。
