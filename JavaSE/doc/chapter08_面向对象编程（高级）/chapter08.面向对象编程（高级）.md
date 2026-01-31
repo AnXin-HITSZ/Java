@@ -2967,6 +2967,8 @@ class Bullet implements Flyable {
 > 注意：
 >
 > 在 IDEA 中，可以将光标悬停到待实现接口的类的声明上，通过 `Alt + Enter` 组合键打开 `Implement methods` 选项可快速实现指定接口。
+>
+> 或者可以将光标悬停到待实现接口的类的声明上，通过 `Ctrl + i` 组合键同样可快速实现指定接口。
 
 #### 7.4.2 接口的多实现（`implements`）
 
@@ -3481,7 +3483,235 @@ interface USB {
 
 ### 7.5 JDK 8 中相关冲突问题
 
+#### 7.5.1 默认方法冲突问题
+
+**1. 类优先原则**
+
+当一个类，既继承一个父类，又实现若干个接口时，父类中的成员方法与接口中的抽象方法重名，子类就近选择执行父类的成员方法。
+
+**2. 接口冲突（左右为难）**
+
+当一个类同时实现了多个父接口，而多个父接口中包含方法签名相同的默认方法时，怎么办呢？
+* 选择保留其中一个，通过 “`接口名.super.方法名()`” 的方法选择保留该接口的默认方法。
+
+当一个子接口同时继承了多个接口，而多个父接口中包含方法签名相同的默认方法时，怎么办呢？
+
+> 注意：
+> * 子接口重写默认方法时，`default` 关键字可以保留。
+> * 子类重写默认方法时，`default` 关键字不可以保留。
+
+#### 7.5.2 常量冲突问题
+
+常量冲突问题：
+* 当子类继承父类又实现父接口，而父类中存在与父接口常量同名的成员变量，并且该成员变量名在子类中仍然可见。
+* 当子类同时实现多个接口，而多个接口存在相同同名常量。
+
+此时在子类中想要引用父类或父接口的同名的常量或成员变量时，就会有冲突问题。
+
+#### 7.5.3 举例
+
+示例代码：
+```java
+/* CompareA.java */
+
+package com.anxin_hitsz_08._interface.jdk8;
+
+/**
+ * ClassName: CompareA
+ * Package: com.anxin_hitsz_08._interface.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 16:28
+ * @Version 1.0
+ */
+public interface CompareA {
+
+    // 属性：声明为 public static final
+    // 方法：JDK 8 之前：只能声明抽象方法
+
+    // 方法：JDK 8 中：静态方法
+    public static void method1() {
+        System.out.println("CompareA: 北京");
+    }
+
+    // 方法：JDK 8：默认方法
+    public default void method2() {
+        System.out.println("CompareA: 上海");
+    }
+
+    public default void method3() {
+        System.out.println("CompareA: 广州");
+    }
+
+    public default void method4() {
+        System.out.println("CompareA: 深圳");
+    }
+
+    // JDK 9 新特性：定义私有方法
+    private void method5() {
+        System.out.println("我是接口中定义的私有方法");
+    }
+}
+
+
+/* CompareB.java */
+
+package com.anxin_hitsz_08._interface.jdk8;
+
+/**
+ * ClassName: CompareB
+ * Package: com.anxin_hitsz_08._interface.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 16:36
+ * @Version 1.0
+ */
+public interface CompareB {
+    public default void method3() {
+        System.out.println("CompareB: 广州");
+    }
+}
+
+
+/* SuperClass.java */
+
+package com.anxin_hitsz_08._interface.jdk8;
+
+/**
+ * ClassName: SuperClass
+ * Package: com.anxin_hitsz_08._interface.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 16:41
+ * @Version 1.0
+ */
+public class SuperClass {
+    public void method4() {
+        System.out.println("SuperClass: 深圳");
+    }
+}
+
+
+/* SubClass.java */
+
+package com.anxin_hitsz_08._interface.jdk8;
+
+/**
+ * ClassName: SubClassTest
+ * Package: com.anxin_hitsz_08._interface.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 16:30
+ * @Version 1.0
+ */
+public class SubClassTest {
+    public static void main(String[] args) {
+        // 知识点 1：接口中声明的静态方法只能被接口来调用，不能使用其实现类进行调用
+        CompareA.method1();
+//        SubCLass.method1();
+
+        // 知识点 2：接口中声明的默认方法可以被实现类继承，实现类在没有重写此方法的情况下，默认调用接口中声明的
+        //          默认方法；如果实现类重写了此方法，则调用的是自己重写的方法
+        SubClass  s1 = new SubClass();
+        s1.method2();
+
+        // 知识点 3：类实现了两个接口，而两个接口中定义了同名同参数的默认方法；则实现类在没有重写此两个接口
+        //          默认方法的情况下，会报错。 -> 接口冲突
+        // 要求：此时实现类必须要重写接口中定义的同名同参数的方法
+        s1.method3();
+
+        // 知识点 4：子类（或实现类）继承了父类并实现了接口；父类和接口中声明了同名同参数的方法（其中 ，接口中的方法
+        //          是默认方法）。默认情况下，子类（或实现类）在没有重写此方法的情况下，调用的是父类中的方法。 -> 类优先原则
+        s1.method4();
+
+    }
+}
+
+
+/* SubClassTest.java */
+
+package com.anxin_hitsz_08._interface.jdk8;
+
+/**
+ * ClassName: SubClass
+ * Package: com.anxin_hitsz_08._interface.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 16:29
+ * @Version 1.0
+ */
+public class SubClass extends SuperClass implements  CompareA, CompareB {
+
+    @Override
+    public void method2() {
+        System.out.println("SubClass: 上海");
+    }
+
+    public void method3() {
+        System.out.println("SubClass: 广州");
+    }
+
+    public void method4() {
+        System.out.println("SubClass: 深圳");
+    }
+
+    public void method() {
+        // 知识点 5：如果在子类（或实现类）中调用父类或接口中被重写的方法
+        method4();  // 调用自己类中的方法
+
+        super.method4();    // 调用父类中的方法
+
+        method3();  // 调用自己类中的方法
+
+        CompareA.super.method3();   // 调用接口 CompareA 中的默认方法
+        CompareB.super.method3();   // 调用接口 CompareB 中的默认方法
+
+    }
+}
+
+```
+
 ### 7.6 接口的总结与面试题
+
+接口本身不能创建对象，只能创建接口的实现类对象，接口类型的变量可以与实现类对象构成多态引用。
+
+声明接口使用关键字 `interface`，接口的成员声明有限制：
+1. 公共的静态常量。
+2. 公共的抽象方法。
+3. 公共的默认方法（JDK 8.0 及以上）。
+4. 公共的静态方法（JDK 8.0 及以上）。
+5. 私有方法（JDK 9.0 及以上）。
+
+类可以实现接口，关键字是 `implements`，而且支持多实现。如果实现类不是抽象类，就必须实现接口中所有的抽象方法。如果实现类既要继承父类又要实现父接口，那么继承（`extends`）在前，实现（`implements`）在后。
+
+接口可以继承接口，关键字是 `extends`，而且支持多继承。
+
+接口的默认方法可以选择重写或不重写。如果有冲突问题，另行处理。子类重写父接口的默认方法，要去掉 `default`；子接口重写父接口的默认方法，不要去掉 `default`。
+
+接口的静态方法不能被继承，也不能被重写。接口的静态方法只能通过 “`接口名.静态方法名()`” 进行调用。
+
+> 面试题：
+>
+> **1. 为什么接口中只能声明公共的静态的常量？**
+> 
+> 因为接口是标准规范，那么在规范中需要声明一些底线边界值，当实现者在实现这些规范时，不能去随意修改和触碰这些底线，否则就有“危险”。
+>
+> **2. 为什么 JDK 8.0  之后允许接口定义静态方法和默认方法呢？能否认为它违反了接口作为一个抽象标准定义的概念？**
+>
+> **静态方法**：因为之前的标准类库设计中，有很多 `Collection` / `Collections` 或者 `Path` / `Paths` 这样成对的接口和类，后面的类中都是静态方法，而这些静态方法都是为前面的接口服务的，那么这样设计一对 API，不如把静态方法直接定义到接口中使用和维护更方便。
+>
+> **默认方法**：
+> 1. 我们要在已有的老版接口中提供新方法时，如果添加抽象方法，就会涉及到远来使用这些接口的类就会有问题，那么为了保持与旧版本代码的兼容性，只能允许在接口中定义默认方法实现。比如：Java 8 中对 `Collection`、`List`、`Comparator` 等 接口提供了丰富的默认方法。
+> 2. 当我们接口的某个抽象方法在很多实现类中的实现代码是一样的时，此时将这个抽象方法设计为默认方法更为合适；那么实现类就可以选择重写，也可以选择不重写。
+>
+> **3. 为什么 JDK 1.9 要允许接口定义私有方法呢？因为我们说接口是规范，规范是需要公开让大家遵守的。**
+> 
+> **私有方法**：因为有了默认方法和静态方法这样具有具体实现的方法，那么就可能出现多个方法有共同的代码可以抽取，而这些共同的代码抽取出来的方法又只希望在接口内部使用，所以就增加了私有方法。
 
 ### 7.7 接口与抽象类之间的对比
 
@@ -3501,3 +3731,976 @@ interface USB {
 > 注意：
 >
 > 在开发中，常看到一个类不是去继承一个已经实现好的类；而是要么继承抽象类，要么实现接口。
+
+### 7.8 练习
+
+**练习 1：**
+> 题目：
+>
+> 1. 声明接口 `Eatable`，包含抽象方法 `public abstract void eat()`。
+> 2. 声明实现类中国人 `Chinese`，重写抽象方法，打印“`用筷子吃饭`”。
+> 3. 声明实现类美国人 `American`，重写抽象方法，打印“`用刀叉吃饭`”。
+> 4. 声明实现类印度人 `Indian`，重写抽象方法，打印“`用手抓饭`”。
+> 5. 声明测试类 `EatableTest`，创建 `Eatable` 数组，存储各国人对象，并遍历数组，调用 `eat()` 方法。
+
+示例代码：
+```java
+/* Eatable.java */
+
+package com.anxin_hitsz_08._interface.exer1;
+
+/**
+ * ClassName: Eatable
+ * Package: com.anxin_hitsz_08._interface.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 14:53
+ * @Version 1.0
+ */
+public interface Eatable {
+    void eat();
+}
+
+
+/* Chinese.java */
+
+package com.anxin_hitsz_08._interface.exer1;
+
+/**
+ * ClassName: Chinese
+ * Package: com.anxin_hitsz_08._interface.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 14:54
+ * @Version 1.0
+ */
+public class Chinese implements Eatable {
+    @Override
+    public void eat() {
+        System.out.println("中国人使用筷子吃饭");
+    }
+}
+
+
+/* American.java */
+
+package com.anxin_hitsz_08._interface.exer1;
+
+/**
+ * ClassName: American
+ * Package: com.anxin_hitsz_08._interface.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 14:55
+ * @Version 1.0
+ */
+public class American implements Eatable {
+    @Override
+    public void eat() {
+        System.out.println("美国人使用刀叉吃饭");
+    }
+}
+
+
+/* Indian.java */
+
+package com.anxin_hitsz_08._interface.exer1;
+
+/**
+ * ClassName: Indian
+ * Package: com.anxin_hitsz_08._interface.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 14:56
+ * @Version 1.0
+ */
+public class Indian implements Eatable {
+    @Override
+    public void eat() {
+        System.out.println("印度人使用手抓饭");
+    }
+}
+
+
+/* EatableTest.java */
+
+package com.anxin_hitsz_08._interface.exer1;
+
+/**
+ * ClassName: EatableTest
+ * Package: com.anxin_hitsz_08._interface.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 14:57
+ * @Version 1.0
+ */
+public class EatableTest {
+    public static void main(String[] args) {
+        Eatable[] eatables = new Eatable[3];
+
+        eatables[0] = new Chinese();    // 多态性
+        eatables[1] = new American();
+        eatables[2] = new Indian();
+
+        for (int i = 0; i < eatables.length; i++) {
+            eatables[i].eat();
+        }
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 定义一个接口用来实现两个对象的比较：
+> ```java
+> interface CompareObject {
+>     // 若返回值是 0，代表相等；若为正数，代表当前对象大；若为负数，代表当前对象小
+>     public int compareTo(Object o);
+> }
+> ```
+>
+> 定义一个 `Circle` 类，声明 `radius` 属性，提供 `getter` 和 `setter` 方法。
+>
+> 定义一个 `ComparableCircle` 类，继承 `Circle` 类并且实现 `CompareObject` 接口。在 `ComparableCircle` 类中给出接口中方法 `compareTo()` 的实现体，用来比较两个圆的半径大小。
+>
+> 定义一个测试类 `InterfaceTest`，创建两个 `ComparableCircle` 对象，调用 `compareTo()` 方法比较两个类的半径大小。
+>
+> 拓展：参照上述做法定义矩形类 `Rectangle` 和 `ComparableRectangle` 类，在 `ComparableRectangle` 类中给出 `compareTo()` 方法的实现，比较两个矩形的面积大小。
+
+示例代码：
+```java
+/* CompareObject.java */
+
+package com.anxin_hitsz_08._interface.exer2;
+
+/**
+ * ClassName: CompareObject
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:01
+ * @Version 1.0
+ */
+public interface CompareObject {
+    // 若返回值是 0，代表相等；若为正数，代表当前对象大；若为负数，代表当前对象小
+    public int compareTo(Object o);
+}
+
+
+/* Circle.java */
+
+package com.anxin_hitsz_08._interface.exer2;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:02
+ * @Version 1.0
+ */
+public class Circle {
+    private double radius;  // 半径
+
+    public Circle() {
+    }
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public String toString() {
+        return "Circle{" +
+                "radius=" + radius +
+                '}';
+    }
+
+}
+
+
+/* ComparableCircle.java */
+
+package com.anxin_hitsz_08._interface.exer2;
+
+/**
+ * ClassName: ComparableCircle
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:03
+ * @Version 1.0
+ */
+public class ComparableCircle extends Circle implements CompareObject {
+    public ComparableCircle() {
+    }
+
+    public ComparableCircle(double radius) {
+        super(radius);
+    }
+
+    // 根据对象的半径的大小，比较对象的大小
+    @Override
+    public int compareTo(Object o) {
+        if (this == o) {
+            return 0;
+        }
+
+        if (o instanceof ComparableCircle) {
+            ComparableCircle c = (ComparableCircle) o;
+            // 错误的：
+//            return (int) (this.getRadius() - c.getRadius());
+            // 正确的写法 1：
+//            if (this.getRadius() > c.getRadius()) {
+//                return 1;
+//            } else if (this.getRadius() < c.getRadius()) {
+//                return -1;
+//            } else {
+//                return 0;
+//            }
+            // 正确的写法 2：
+            return Double.compare(this.getRadius(), c.getRadius());
+        } else {
+            return 2;   // 如果输入的类型不匹配，则返回 2
+//            throw new RuntimeException("输入的类型不匹配");
+        }
+    }
+}
+
+
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_08._interface.exer2;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:10
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+
+        ComparableCircle c1 = new ComparableCircle(2.3);
+        ComparableCircle c2 = new ComparableCircle(5.3);
+
+        int compareValue = c1.compareTo(c2);
+        if (compareValue > 0) {
+            System.out.println("c1 对象大");
+        } else if (compareValue < 0) {
+            System.out.println("c2 对象大");
+        } else {
+            System.out.println("c1 和 c2 一样大");
+        }
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> 某公司的一个工程师 `Developer`，结构如下图所示：
+> ![练习 3 - UML - Developer](./images/interface_exer3_UML_Developer.png "练习 3 - UML - Developer")
+>
+> 其中，有一个乘坐交通工具的方法 `takingVehicle()`，在此方法中调用交通工具的 `run()`。
+> 为了出行方便，他买了一辆捷安特自行车、一辆雅迪电动车和一辆奔驰轿车；这里涉及到的相关类及接口关系如下图所示。
+> ![练习 3 - UML - Vehicle](./images/interface_exer3_UML_Vehicle.png "练习 3 - UML - Vehicle")
+>
+> 其中，电动车增加动力的方式是充电，轿车增加动力的方式是加油。在具体交通工具的 `run()` 中调用其所在类的相关属性信息。
+>
+> 请编写相关代码，并测试。
+>
+> 提示：创建 `Vehicle[]` 数组，保存该工程师的三辆交通工具，并分别在工程师的 `takingVehicle()` 中调用。
+
+示例代码：
+```java
+/* Developer.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: Developer
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:15
+ * @Version 1.0
+ */
+public class Developer {
+    private String name;
+    private int age;
+
+    public Developer() {
+    }
+
+    public Developer(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void takingVehicle(Vehicle vehicle) {
+        vehicle.run();
+    }
+}
+
+
+/* IPower.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: IPower
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:23
+ * @Version 1.0
+ */
+public interface IPower {
+    void power();
+}
+
+
+/* Vehicle.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: Vehicle
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:17
+ * @Version 1.0
+ */
+public abstract class Vehicle {
+    private String brand;   // 品牌
+    private String color;   // 颜色
+
+    public Vehicle() {
+    }
+
+    public Vehicle(String brand, String color) {
+        this.brand = brand;
+        this.color = color;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public abstract void run();
+}
+
+
+/* Bicycle.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: Bicycle
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:18
+ * @Version 1.0
+ */
+public class Bicycle extends Vehicle {
+
+    public Bicycle() {
+    }
+
+    public Bicycle(String brand, String color) {
+        super(brand, color);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("自行车通过人力脚蹬行驶");
+    }
+}
+
+
+/* ElectricVehicle.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: ElectricVehicle
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:20
+ * @Version 1.0
+ */
+public class ElectricVehicle extends Vehicle implements IPower {
+
+    public ElectricVehicle() {
+    }
+
+    public ElectricVehicle(String brand, String color) {
+        super(brand, color);
+    }
+
+    @Override
+    public void run() {
+        System.out.println("电动车通过电机驱动行驶");
+    }
+
+    @Override
+    public void power() {
+        System.out.println("电动车使用电力提供动力");
+    }
+}
+
+
+/* Car.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: Car
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:21
+ * @Version 1.0
+ */
+public class Car extends Vehicle implements IPower {
+
+    private String carNumber;
+
+    public Car() {
+    }
+
+    public Car(String brand, String color, String carNumber) {
+        super(brand, color);
+        this.carNumber = carNumber;
+    }
+
+    public String getCarNumber() {
+        return carNumber;
+    }
+
+    public void setCarNumber(String carNumber) {
+        this.carNumber = carNumber;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("汽车通过内燃机驱动行驶");
+    }
+
+    @Override
+    public void power() {
+        System.out.println("汽车通过汽油提供动力");
+    }
+}
+
+
+/* VehicleTest.java */
+
+package com.anxin_hitsz_08._interface.exer3;
+
+/**
+ * ClassName: VehicleTest
+ * Package: com.anxin_hitsz_08._interface.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:26
+ * @Version 1.0
+ */
+public class VehicleTest {
+    public static void main(String[] args) {
+
+        Developer developer = new Developer();
+
+        // 创建三个交通工具，保存在数组中
+        Vehicle[] vehicles = new Vehicle[3];
+        vehicles[0] = new Bicycle("捷安特", "红色");
+        vehicles[1] = new ElectricVehicle("雅迪", "蓝色");
+        vehicles[2] = new Car("奔驰", "黑色", "沪Au888");
+
+        for (int i = 0; i < vehicles.length; i++) {
+            developer.takingVehicle(vehicles[i]);
+
+            if (vehicles[i] instanceof IPower) {
+                ((IPower) vehicles[i]).power();
+            }
+        }
+
+    }
+}
+
+```
+
+## 八、内部类（InnerClass）
+
+> 知识点梳理：
+> * 成员内部类的理解。
+> * 如何创建成员内部类的实例。
+> * 如何在成员内部类中调用外部类的结构。
+> * 局部内部类的基本使用。
+
+### 8.1 概述
+
+#### 8.1.1 什么是内部类？
+
+将一个类 `A` 定义在另一个类 `B` 里面，里面的那个类 `A` 就称为**内部类（InnerClass）**，类 `B` 则称为**外部类（OuterClass）**。
+
+#### 8.1.2 为什么要声明内部类呢？
+
+具体来说，当一个事物 `A` 的内部，还有一个部分需要一个完整的结构 `B` 进行描述，而这个内部的完整的结构 `B` 又只为外部事物 `A` 提供服务，不在其他地方单独使用，那么整个内部的完整结构 `B` 最好使用内部类。
+
+总的来说，遵循**高内聚、低耦合**的面向对象开发原则。
+
+内部类使用举例：
+* `Thread` 类内部声明了 `State` 类，表示线程的生命周期。
+* `HashMap` 类中声明了 `Node` 类，表示封装的 `key` 和 `value`。
+
+#### 8.1.3 内部类的分类
+
+根据内部类声明的位置（如同变量的分类），我们可以分为：
+![内部类的分类（根据内部类声明的位置）](./images/image-20221124223912529.png "内部类的分类（根据内部类声明的位置）")
+
+即内部类的分类：（参考变量的分类）
+* 成员内部类：直接声明在外部类的里面。
+  * 使用 `static` 修饰的：静态的成员内部类。
+  * 不使用 `static` 修饰的：非静态的成员内部类。
+* 局部内部类：声明在方法内、构造器内、代码块内的内部类。
+  * 匿名的局部内部类。
+  * 非匿名的局部内部类。
+
+### 8.2 成员内部类
+
+#### 8.2.1 概述
+
+如果成员内部类中不使用外部类的非静态成员，那么通常将内部类声明为静态内部类，否则声明为非静态内部类。
+
+**语法格式：**
+```java
+[修饰符] class 外部类名 {
+    [其他修饰符] [static] class 内部类名 {
+
+    }
+}
+```
+
+**成员内部类的使用特征，概括来讲有如下两种角色：**
+* 成员内部类作为**类的成员的角色**：
+  * 和外部类不同，Inner class 还可以声明为 `private` 或 `protected`；
+  * 可以调用外部类的结构（注意：在静态内部类中不能使用外部类的非静态成员）；
+  * Inner class 可以声明为 `static` 的，但此时就不能再使用外层类的非 `static` 的成员变量。
+* 成员内部类作为**类的角色**：
+  * 可以在内部定义属性、方法、构造器等结构；
+  * 可以继承自己的想要继承的父类，实现自己想要实现的父接口们，和外部类的父类和父接口无关；
+  * 可以声明为 `abstract` 类，因此可以被其它的内部类继承；
+  * 可以声明为 `final` 的，表示不能被继承；
+  * 编译以后生成 `OuterClass$InnerClass.class` 字节码文件（也适用于局部内部类）。
+
+注意点：
+1. 外部类访问成员内部类的成员，需要使用 “`内部类.成员`” 或 “`内部类对象.成员`” 的方式。
+2. 成员内部类可以直接使用 外部类的所有成员，包括私有的数据。
+3. 当想要在外部类的静态成员部分使用内部类时，可以考虑将内部类声明为静态的。
+
+> 关于成员内部类的理解：
+> * 从类的角度看：
+>   * 内部可以声明属性、方法、构造器、代码块、内部类等结构。
+>   * 此内部类可以声明父类，可以实现接口。
+>   * 可以使用 `final` 修饰。
+>   * 可以使用 `abstract` 修饰。
+> * 从外部类的成员的角度看：
+>   * 在内部可以调用外部类的结构；比如：属性、方法等。
+>   * 除了使用 `public`、`缺省` 权限修饰之外，还可以使用 `private`、`protected` 修饰。
+>   * 可以使用 `static` 修饰。
+
+#### 8.2.2 创建成员内部类对象
+
+实例化静态内部类：
+```java
+外部类名.静态内部类名 变量 = 外部类名.静态内部类名();
+变量.非静态方法();
+```
+
+实例化非静态内部类：
+```java
+外部类名 变量1 = new 外部类();
+外部类名.非静态内部类名 变量2 = 变量1.new 非静态内部类名();
+变量2.非静态方法();
+```
+
+### 8.3 局部内部类
+
+#### 8.3.1 非匿名局部内部类
+
+语法格式：
+```java
+[修饰符] class 外部类 {
+    [修饰符] 返回值类型 方法名(形参列表) {
+        [final / abstract] class 内部类 {
+
+        }
+    }
+}
+```
+
+编译后有自己的独立的字节码文件，只不过在内部类名前面冠以外部类名、`$` 符号、编号。
+* 这里有编号是因为同一个外部类中，不同的方法中存在相同名称的局部内部类。
+
+注意：
+* 和成员内部类不同的是，它前面不能有权限修饰符等。
+* 局部内部类如果局部变量一样，有作用域。
+* 局部内部类中是否能访问外部类的非静态的成员，取决于所在的方法。
+
+示例代码：
+```java
+
+```
+
+#### 8.3.2 匿名内部类
+
+因为考虑到这个子类或实现类是一次性的，那么我们“费尽心机”地给它取名字就显得多余。那么我们完全可以使用匿名内部类的方式来实现，避免给类命名的问题。
+
+语法格式 1：
+```java
+new 父类([实参列表]) {
+    重写方法 ...
+}
+```
+
+语法格式 2：
+```java
+new 父接口() {
+    重写方法 ...
+}
+```
+
+示例代码：
+```java
+
+```
+
+### 8.4 举例
+
+#### 8.4.1 内部类举例
+
+示例代码：
+```java
+/* OuterClassTest.java */
+
+package com.anxin_hitsz_09.inner;
+
+/**
+ * ClassName: OuterClassTest
+ * Package: com.anxin_hitsz_09.inner
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 18:07
+ * @Version 1.0
+ */
+public class OuterClassTest {
+    public static void main(String[] args) {
+
+        // 1. 创建 Person 的静态的成员内部类的实例
+        Person.Dog dog = new Person.Dog();
+        dog.eat();
+
+
+        // 2. 创建 Person 的非静态的成员内部类的实例
+//        Person.Bird bird = new Person.Bird(); // 报错
+
+        Person p1 = new Person();
+        Person.Bird bird = p1.new Bird();   // 正确的
+        bird.eat();
+        bird.show("黄鹂");
+
+        bird.show1();
+
+    }
+}
+
+class Person {  //  外部类
+    String name = "Tom";
+    int age = 1;
+
+    // 静态的成员内部类
+    static class Dog {
+        public void eat() {
+            System.out.println("狗吃骨头");
+        }
+    }
+
+    // 非静态的成员内部类
+    class Bird {
+        String name = "啄木鸟";
+        public void eat() {
+            System.out.println("鸟吃虫子");
+        }
+
+        public void show(String name) {
+            System.out.println("age = " + age); // 省略了 Person.this.
+            System.out.println("name = " + name);
+            System.out.println("name = " + this.name);
+            System.out.println("name = " + Person.this.name);
+        }
+
+        public void show1() {
+            eat();
+            this.eat();
+            Person.this.eat();
+        }
+    }
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+
+    public void method() {
+
+        // 局部内部类
+        class InnerClass1 {
+
+        }
+
+    }
+
+    public Person() {
+        // 局部内部类
+        class InnerClass1 {
+
+        }
+    }
+
+    {
+        // 局部内部类
+        class InnerClass1 {
+
+        }
+    }
+
+}
+
+```
+
+#### 8.4.2 不同的类的对象的提供方式举例
+
+示例代码：
+```java
+/* OuterClassTest2.java */
+
+package com.anxin_hitsz_09.inner;
+
+/**
+ * ClassName: OuterClassTest2
+ * Package: com.anxin_hitsz_09.inner
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 18:51
+ * @Version 1.0
+ */
+public class OuterClassTest2 {
+    public static void main(String[] args) {
+
+        SubA a = new SubA();
+        a.method();
+
+        // 举例 1：提供接口匿名实现类的对象
+        A a1 = new A() {
+            public void method() {
+                System.out.println("匿名实现类重写的方法 method()");
+            }
+        };
+
+        a1.method();
+
+        // 举例 2：提供接口匿名实现类的匿名对象
+        new A() {
+            public void method() {
+                System.out.println("匿名实现类重写的方法 method()");
+            }
+        }.method();
+
+        // 举例 3：
+        SubB s1 = new SubB();
+        s1.method1();
+
+        // 举例 4：提供了继承于抽象类的匿名子类的对象
+        B b = new B() {
+            public void method1() {
+                System.out.println("继承于抽象类的子类调用的方法");
+            }
+        };
+
+        b.method1();
+        System.out.println(b.getClass());
+        System.out.println(b.getClass().getSuperclass());
+
+        // 举例 5：
+        new B() {
+            public void method1() {
+                System.out.println("继承于抽象类的子类调用的方法 1");
+            }
+        }.method1();
+
+        // 举例 6：
+        C c = new C();
+        c.method2();
+
+        // 举例 7：提供了一个继承于 C 的匿名子类的对象
+        C c1 = new C() {};
+        c1.method2();
+        System.out.println(c1.getClass());
+        System.out.println(c1.getClass().getSuperclass());
+
+
+        C c2 = new C() {
+            public void method2() {
+                System.out.println("SubC");
+            }
+        };
+        c2.method2();
+
+    }
+}
+
+interface A {
+    public void method();
+}
+
+class SubA implements A {
+    @Override
+    public void method() {
+        System.out.println("SubA");
+    }
+}
+
+abstract class B {
+
+    public abstract void method1();
+
+}
+
+class SubB extends B {
+
+    @Override
+    public void method1() {
+        System.out.println("SubB");
+    }
+}
+
+
+class C {
+    public void method2() {
+        System.out.println("C");
+    }
+}
+
+```
+
+### 8.4 练习
+
+练习：
+> 题目：
+>
+> 编写一个匿名内部类，它继承 `Object`，并在匿名内部类中声明一个方法 `public void test()` 打印“`尚硅谷`”。
+>
+> 请编写代码调用这个方法。
+
+示例代码：
+```java
+/* ObjectTest.java */
+
+package com.anxin_hitsz_09.inner.exer;
+
+/**
+ * ClassName: ObjectTest
+ * Package: com.anxin_hitsz_09.inner.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 18:46
+ * @Version 1.0
+ */
+public class ObjectTest {
+    public static void main(String[] args) {
+//        SubObject sub1 = new SubObject();
+//        sub1.test();
+
+
+        // 提供一个继承于 Object 的匿名子类的匿名对象
+        new Object() {
+            public void test() {
+                System.out.println("尚硅谷");
+            }
+        }.test();
+        
+    }
+}
+
+class SubObject extends Object {
+    public void test() {
+        System.out.println("尚硅谷");
+    }
+}
+
+```
