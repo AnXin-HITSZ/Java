@@ -4704,3 +4704,1726 @@ class SubObject extends Object {
 }
 
 ```
+
+## 九、枚举类
+
+### 9.1 概述
+
+枚举类型本质上也是一种类，只不过这个类的对象是有限的、固定的几个，不能让用户随意创建。
+
+枚举类的例子举不胜举：
+* 星期：Monday（星期一）、……、Sunday（星期天）。
+* 性别：Man（男）、……、Woman（女）。
+* 月份：January（1 月）、……、December（12 月）。
+* 季节：Spring（春节）、……、Winter（冬天）。
+* 三原色：red（红色）、green（绿色）、blue（蓝色）。
+* 支付方式：Cash（现金）、WeChatPay（微信）、Alipay（支付宝）、BankCard（银行卡）、CreditCard（信用卡）。
+* 就职状态：Busy（忙碌）、Free（空闲）、Vocation（休假）、Dimission（离职）。
+* 订单状态：Nonpayment（未付款）、Paid（已付款）、Fulfilled（已配货）、Delivered（已发货）、Checked（已确认收货）、Return（退货）、Exchange（换货）、Cancel（取消）。
+* 线程状态：创建、就绪、运行、阻塞、死亡。
+
+**若枚举只有一个对象，则可以作为一种单例模式的是实现方式。**
+
+> 开发中的建议：
+> * 开发中，如果针对于某个类，其实例是确定个数的，则推荐将此类声明为枚举类。
+> * 如果枚举类的实例只有一个，则可以看做是单例的实现方式。
+
+枚举类的实现：
+* 在 JDK 5.0 之前，需要程序员自定义枚举类型。
+* 在 JDK 5.0 之后，Java 支持 `enum` 关键字来快速定义枚举类型。
+
+### 9.2 定义枚举类（JDK 5.0 之前）
+
+在 JDK 5.0 之前如何声明枚举类呢？
+* **私有化**类的构造器，保证不能在类的外部创建其对象。
+* 在类的内部创建枚举类的实例，声明为 `public static final`，对外暴露这些常量对象。
+* 对象如果有**实例变量**，应该声明为 `private final`（建议，不是必须），并在构造器中初始化。
+
+示例代码：
+```java
+/* SeasonTest.java */
+
+package com.anxin_hitsz_10._enum;
+
+/**
+ * ClassName: SeasonTest
+ * Package: com.anxin_hitsz_10._enum
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 13:40
+ * @Version 1.0
+ */
+public class SeasonTest {
+    public static void main(String[] args) {
+//        Season.SPRING = null;
+
+        System.out.println(Season.SPRING);
+
+        System.out.println(Season.SUMMER.getSeasonName());
+        System.out.println(Season.SUMMER.getSeasonDesc());
+
+    }
+}
+
+// jdk 5.0 之前定义枚举类的方式
+class Season {
+    // 2. 声明当前类的对象的实例变量，使用 private final 修饰
+    private final String seasonName;  // 季节的名称
+    private final String seasonDesc;  // 季节的描述
+
+    // 1. 私有化类的构造器
+    private Season(String seasonName, String seasonDesc) {
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 3. 提供实例变量的 get 方法
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    //  4. 创建当前类的实例，需要使用 public static final 修饰
+    public static final Season SPRING = new Season("春天", "春暖花开");
+    public static final Season SUMMER = new Season("夏天", "夏日炎炎");
+    public static final Season AUTUMN = new Season("秋天", "秋高气爽");
+    public static final Season WINTER = new Season("冬天", "白雪皑皑");
+
+    @Override
+    public String toString() {
+        return "Season{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+
+}
+
+```
+
+### 9.3 定义枚举类（JDK 5.0 之后）
+
+#### 9.3.1 enum 关键字声明枚举
+
+语法格式：
+```java
+[修饰符] enum 枚举类名 {
+    常量对象列表;
+}
+
+[修饰符] enum 枚举类名 {
+    常量对象列表;
+
+    对象的实例变量列表;
+}
+```
+
+示例代码：
+```java
+/* SeasonTest1.java */
+
+package com.anxin_hitsz_10._enum;
+
+/**
+ * ClassName: SeasonTest1
+ * Package: com.anxin_hitsz_10._enum
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 13:50
+ * @Version 1.0
+ */
+public class SeasonTest1 {
+    public static void main(String[] args) {
+//        System.out.println(Season1.SPRING.getClass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass().getSuperclass());
+
+        // 测试方法
+        // 1. toString()
+        System.out.println(Season1.SPRING);
+        System.out.println(Season1.AUTUMN);
+
+        // 2. name()
+        System.out.println(Season1.SPRING.name());
+
+        // 3. values()
+        Season1[] values = Season1.values();
+        for (int i = 0; i < values.length; i++) {
+            System.out.println(values[i]);
+        }
+
+        // 4. valueOf(String objName)：返回当前枚举类中名称为 objName 的枚举类对象。
+        //                             如果枚举类中不存在 objName 名称的对象，则报错。
+        String objName = "WINTER";
+//        objName = "WINTER1";
+        Season1 season1 = Season1.valueOf(objName);
+        System.out.println(season1);
+
+        // 5. ordinal()
+        System.out.println(Season1.AUTUMN.ordinal());
+
+        // 通过枚举类的对象调用重写接口中的方法
+        Season1.SUMMER.show();
+
+    }
+}
+
+interface Info {
+    void show();
+}
+
+// jdk 5.0 中使用 enum 关键字定义枚举类
+enum Season1 implements Info {
+    //  1. 必须在枚举类的开头声明多个对象，对象之间使用 “,” 隔开
+    SPRING("春天", "春暖花开"),
+    SUMMER("夏天", "夏日炎炎"),
+    AUTUMN("秋天", "秋高气爽"),
+    WINTER("冬天", "白雪皑皑");
+
+    // 2. 声明当前类的对象的实例变量，使用 private final 修饰
+    private final String seasonName;  // 季节的名称
+    private final String seasonDesc;  // 季节的描述
+
+    // 3. 私有化类的构造器
+    private Season1(String seasonName, String seasonDesc) {
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 3. 提供实例变量的 get 方法
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    @Override
+    public String toString() {
+        return "Season1{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+
+    @Override
+    public void show() {
+        System.out.println("这是一个季节");
+    }
+
+}
+
+```
+
+#### 9.3.2 `enum` 方式定义的要求和特点
+
+枚举类的常量对象列表必须在枚举类的首行；因为是常量，所以建议大写。
+
+列出的实例系统会自动添加 `public static final` 修饰。
+
+如果常量对象列表后面没有其他代码，那么 “`;`” 可以省略；否则不可以省略 “`;`”。
+
+编译器给枚举类默认提供的是 `private` 的无参构造；如果枚举类需要的是无参构造，则不需要声明，写常量对象列表时也不用加参数。
+
+如果枚举类需要的是有参构造，则需要手动定义；有参构造的 `private` 可以省略，调用有参构造的方法就是在常量对象名后面加 `(实参列表)` 就可以。
+
+使用 `enum` 关键字定义的枚举类，默认其父类是 `java.lang.Enum` 类，因此不能再继承其他的类型。
+
+使用 `enum` 关键字定义的枚举类，不要再显式地定义其父类，否则报错。
+
+JDK 5.0 之后，`switch` 提供支持枚举类型，`case` 后面可以写枚举常量名，无需添加枚举类作为限定。
+
+示例代码：
+```java
+
+```
+
+> 经验之谈：
+>
+> 开发中，当需要定义一组常量时，强烈建议使用枚举类。
+
+### 9.4 `Enum` 类中常用方法
+
+`String toString()`：
+* 默认返回的是常量名（对象名），可以继续手动重写该方法！
+
+（关注）`static 枚举类型[] values()`：
+* 返回枚举类型的对象数组。
+* 该方法可以很方便地遍历所有的枚举值，是一个静态方法。
+
+（关注）`static 枚举类型 valueOf(String name)`：
+* 可以把一个字符串转为对应的枚举类对象。
+* 要求字符串必须是枚举类对象的“名字”；如不是，则会有运行时异常 `IllegalArgumentException`。
+
+`String name()`：
+* 得到当前枚举常量的名称。
+* 建议优先使用 `toString()`。
+
+`int ordinal()`：
+* 返回当前枚举常量的次序号，默认从 `0` 开始。
+
+示例代码：
+```java
+/* SeasonTest1.java */
+
+package com.anxin_hitsz_10._enum;
+
+/**
+ * ClassName: SeasonTest1
+ * Package: com.anxin_hitsz_10._enum
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 13:50
+ * @Version 1.0
+ */
+public class SeasonTest1 {
+    public static void main(String[] args) {
+//        System.out.println(Season1.SPRING.getClass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass().getSuperclass());
+
+        // 测试方法
+        // 1. toString()
+        System.out.println(Season1.SPRING);
+        System.out.println(Season1.AUTUMN);
+
+        // 2. name()
+        System.out.println(Season1.SPRING.name());
+
+        // 3. values()
+        Season1[] values = Season1.values();
+        for (int i = 0; i < values.length; i++) {
+            System.out.println(values[i]);
+        }
+
+        // 4. valueOf(String objName)：返回当前枚举类中名称为 objName 的枚举类对象。
+        //                             如果枚举类中不存在 objName 名称的对象，则报错。
+        String objName = "WINTER";
+//        objName = "WINTER1";
+        Season1 season1 = Season1.valueOf(objName);
+        System.out.println(season1);
+
+        // 5. ordinal()
+        System.out.println(Season1.AUTUMN.ordinal());
+
+        // 通过枚举类的对象调用重写接口中的方法
+        Season1.SUMMER.show();
+
+    }
+}
+
+interface Info {
+    void show();
+}
+
+// jdk 5.0 中使用 enum 关键字定义枚举类
+enum Season1 implements Info {
+    //  1. 必须在枚举类的开头声明多个对象，对象之间使用 “,” 隔开
+    SPRING("春天", "春暖花开"),
+    SUMMER("夏天", "夏日炎炎"),
+    AUTUMN("秋天", "秋高气爽"),
+    WINTER("冬天", "白雪皑皑");
+
+    // 2. 声明当前类的对象的实例变量，使用 private final 修饰
+    private final String seasonName;  // 季节的名称
+    private final String seasonDesc;  // 季节的描述
+
+    // 3. 私有化类的构造器
+    private Season1(String seasonName, String seasonDesc) {
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 3. 提供实例变量的 get 方法
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    @Override
+    public String toString() {
+        return "Season1{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+
+    @Override
+    public void show() {
+        System.out.println("这是一个季节");
+    }
+
+}
+
+```
+
+### 9.5 实现接口的枚举类
+
+和普通 Java 类一样，枚举类可以实现一个或多个接口。
+
+若每个枚举值在调用实现的接口方法时呈现相同的行为方式，则只要统一实现该方法即可。
+
+若需要每个枚举值在调用实现的接口方法时呈现出不同的行为方式，则可以让每个枚举值分别来实现该方法。
+
+> 枚举类实现接口的操作：
+> * 情况 1：枚举类实现接口，在枚举类中重写接口中的抽象方法；当通过不同的枚举类对象调用此方法时，执行的是同一个方法。
+> * 情况 2：让枚举类的每一个对象重写接口中的抽象方法；当通过不同的枚举类对象调用此方法时，执行的是不同的实现的方法。
+
+语法格式：
+```java
+// 1. 枚举类可以像普通的类一样实现接口，并且可以实现多个，但要求必须实现里面所有的抽象方法！
+enum A implements 接口1, 接口2 {
+    // 抽象方法的实现
+}
+
+// 2. 如果枚举类的常量可以继续重写抽象方法！
+enum A implements 接口1, 接口2 {
+    常量名1(参数) {
+        // 抽象方法的实现或重写
+    },
+    常量名2(参数) {
+        // 抽象方法的实现或重写
+    },
+    // ...
+}
+```
+
+示例代码：
+```java
+/* SeasonTest1.java */
+
+package com.anxin_hitsz_10._enum;
+
+/**
+ * ClassName: SeasonTest1
+ * Package: com.anxin_hitsz_10._enum
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 13:50
+ * @Version 1.0
+ */
+public class SeasonTest1 {
+    public static void main(String[] args) {
+//        System.out.println(Season1.SPRING.getClass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass());
+//        System.out.println(Season1.SPRING.getClass().getSuperclass().getSuperclass());
+
+        // 测试方法
+        // 1. toString()
+        System.out.println(Season1.SPRING);
+        System.out.println(Season1.AUTUMN);
+
+        // 2. name()
+        System.out.println(Season1.SPRING.name());
+
+        // 3. values()
+        Season1[] values = Season1.values();
+        for (int i = 0; i < values.length; i++) {
+            System.out.println(values[i]);
+        }
+
+        // 4. valueOf(String objName)：返回当前枚举类中名称为 objName 的枚举类对象。
+        //                             如果枚举类中不存在 objName 名称的对象，则报错。
+        String objName = "WINTER";
+//        objName = "WINTER1";
+        Season1 season1 = Season1.valueOf(objName);
+        System.out.println(season1);
+
+        // 5. ordinal()
+        System.out.println(Season1.AUTUMN.ordinal());
+
+        // 通过枚举类的对象调用重写接口中的方法
+        Season1.SUMMER.show();
+
+    }
+}
+
+interface Info {
+    void show();
+}
+
+// jdk 5.0 中使用 enum 关键字定义枚举类
+enum Season1 implements Info {
+    //  1. 必须在枚举类的开头声明多个对象，对象之间使用 “,” 隔开
+    SPRING("春天", "春暖花开"),
+    SUMMER("夏天", "夏日炎炎"),
+    AUTUMN("秋天", "秋高气爽"),
+    WINTER("冬天", "白雪皑皑");
+
+    // 2. 声明当前类的对象的实例变量，使用 private final 修饰
+    private final String seasonName;  // 季节的名称
+    private final String seasonDesc;  // 季节的描述
+
+    // 3. 私有化类的构造器
+    private Season1(String seasonName, String seasonDesc) {
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 3. 提供实例变量的 get 方法
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    @Override
+    public String toString() {
+        return "Season1{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+
+    @Override
+    public void show() {
+        System.out.println("这是一个季节");
+    }
+
+}
+
+
+/* SeasonTest2.java */
+
+package com.anxin_hitsz_10._enum;
+
+/**
+ * ClassName: SeasonTest2
+ * Package: com.anxin_hitsz_10._enum
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:14
+ * @Version 1.0
+ */
+public class SeasonTest2 {
+    public static void main(String[] args) {
+
+        Season2[] values = Season2.values();
+        for (int i = 0; i < values.length; i++) {
+            values[i].show();
+        }
+
+    }
+}
+
+interface Info1 {
+    void show();
+}
+
+// jdk 5.0 中使用 enum 关键字定义枚举类
+enum Season2 implements Info {
+    //  1. 必须在枚举类的开头声明多个对象，对象之间使用 “,” 隔开
+    SPRING("春天", "春暖花开") {
+        public void show() {
+            System.out.println("春天");
+        }
+    },
+    SUMMER("夏天", "夏日炎炎") {
+        public void show() {
+            System.out.println("夏天");
+        }
+    },
+    AUTUMN("秋天", "秋高气爽") {
+        public void show() {
+            System.out.println("秋天");
+        }
+    },
+    WINTER("冬天", "白雪皑皑") {
+        public void show() {
+            System.out.println("冬天");
+        }
+    };
+
+    // 2. 声明当前类的对象的实例变量，使用 private final 修饰
+    private final String seasonName;  // 季节的名称
+    private final String seasonDesc;  // 季节的描述
+
+    // 3. 私有化类的构造器
+    private Season2(String seasonName, String seasonDesc) {
+        this.seasonName = seasonName;
+        this.seasonDesc = seasonDesc;
+    }
+
+    // 3. 提供实例变量的 get 方法
+    public String getSeasonName() {
+        return seasonName;
+    }
+
+    public String getSeasonDesc() {
+        return seasonDesc;
+    }
+
+    @Override
+    public String toString() {
+        return "Season2{" +
+                "seasonName='" + seasonName + '\'' +
+                ", seasonDesc='" + seasonDesc + '\'' +
+                '}';
+    }
+
+}
+
+```
+
+### 9.6 应用
+
+示例代码：
+```java
+/* Status.java */
+
+package com.anxin_hitsz_10._enum.apply;
+
+/**
+ * ClassName: Status
+ * Package: com.anxin_hitsz_10._enum.apply
+ * Description:
+ *  定义公司中员工的状态
+ * @Author AnXin
+ * @Create 2026/2/2 14:29
+ * @Version 1.0
+ */
+public enum Status {
+
+    BUSY, FREE, VOCATION, DIMISSION;
+
+}
+
+
+/* Employee.java */
+
+package com.anxin_hitsz_10._enum.apply;
+
+/**
+ * ClassName: Employee
+ * Package: com.anxin_hitsz_10._enum.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:35
+ * @Version 1.0
+ */
+public class Employee {
+
+    private String name;
+    private int age;
+    private Status status;
+
+    public Employee() {
+    }
+
+    public Employee(String name, int age, Status status) {
+        this.name = name;
+        this.age = age;
+        this.status = status;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", status=" + status +
+                '}';
+    }
+
+}
+
+
+/* EmployeeTest.java */
+
+package com.anxin_hitsz_10._enum.apply;
+
+/**
+ * ClassName: EmployeeTest
+ * Package: com.anxin_hitsz_10._enum.apply
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:32
+ * @Version 1.0
+ */
+public class EmployeeTest {
+    public static void main(String[] args) {
+
+        Employee e1 = new Employee("Tom", 21, Status.BUSY);
+        System.out.println(e1);
+
+    }
+}
+
+```
+
+### 9.6 练习
+
+**练习 1：**
+> 题目：
+>
+> 使用枚举类实现单例模式。
+
+示例代码：
+```java
+/* BankTest1.java */
+
+package com.anxin_hitsz_10._enum.exer1;
+
+/**
+ * ClassName: BankTest1
+ * Package: com.anxin_hitsz_10._enum.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:37
+ * @Version 1.0
+ */
+public class BankTest1 {
+    public static void main(String[] args) {
+//        Bank1.instance = null;
+
+        System.out.println(Person.PERSON);
+    }
+}
+
+// jdk 5.0 之前的使用枚举类定义单例模式
+class Bank1 {
+
+    private Bank1() {}
+
+    public static final Bank1 instance = new Bank1();
+
+
+
+}
+
+// jdk 5.0 使用 enum 关键字定义枚举类的方式定义单例模式
+enum Bank2 {
+    CPB;
+}
+
+enum Person {
+
+    PERSON(20);
+
+    private final int age;
+
+    private Person(int age) {
+        this.age = age;
+    }
+
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 颜色枚举类 `Color`（使用 `enum` 声明）：
+> 1. 声明颜色枚举类：7 个常量对象 `RED`、`ORANGE`、`YELLOW`、`GREEN`、`CYAN`、`BLUE`、`PURPLE`。
+> 2. 在测试类中，使用枚举类，获取绿色对象，并打印对象。
+
+示例代码：
+```java
+/* Color.java */
+
+package com.anxin_hitsz_10._enum.exer2;
+
+/**
+ * ClassName: Color
+ * Package: com.anxin_hitsz_10._enum.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:44
+ * @Version 1.0
+ */
+public enum Color {
+    RED, ORABGE, YELLOW, GREEN, CYAN, BLUE, PURPLE;
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> 案例拓展 - 颜色枚举类 `Color`（使用 `enum` 声明）：
+> 1. 声明颜色枚举类 `Color`：
+> * 声明 `final` 修饰的 `int` 类型的属性 `red`、`green`、`blue`。
+> * 声明 `final` 修饰的 `String` 类型的属性 `description`。
+> * 声明有参构造器 `Color(int red, int greed, int blue, String description)`。
+> * 创建 7 个常量对象：红、橙、黄、绿、青、蓝、紫。
+> * 重写 `toString()` 方法；例如：`RED(255, 0, 0) -> 红色`。
+> 2. 在测试类中，使用枚举类，获取绿色对象，并打印对象。
+>
+> 提示：
+> * 7 个常量对象的 RGB 值如下：
+>   * 红：`(255, 0, 0)`；
+>   * 橙：`(255, 128, 0)`；
+>   * 黄：`(255, 255, 0)`；
+>   * 绿：`(0, 255, 0)`；
+>   * 青：`(0, 255, 255)`。
+>   * 蓝：`(0, 0, 255)`；
+>   * 紫：`(128, 0, 255)`。
+> * 7 个常量对象名如下：
+>   * `RED`、`ORABGE`、`YELLOW`、`GREEN`、`CYAN`、`BLUE`、`PURPLE`。
+
+示例代码：
+```java
+/* ColorTest.java */
+
+package com.anxin_hitsz_10._enum.exer3;
+
+/**
+ * ClassName: ColorTest
+ * Package: com.anxin_hitsz_10._enum.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 14:47
+ * @Version 1.0
+ */
+public class ColorTest {
+    public static void main(String[] args) {
+        System.out.println(Color.GREEN);
+    }
+}
+
+enum Color {
+    RED(255, 0, 0, "红色"),
+    ORABGE(255, 128, 0, "橙色"),
+    YELLOW(255, 255, 0, "黄色"),
+    GREEN(0, 255, 0, "绿色"),
+    CYAN(0, 255, 255, "青色"),
+    BLUE(0, 0, 255, "蓝色"),
+    PURPLE(128, 0, 255, "紫色");
+
+    private final int red;
+    private final int greed;
+    private final int blue;
+    private final String description;   // 颜色的描述
+
+    Color(int red, int greed, int blue, String description) {
+        this.red = red;
+        this.greed = greed;
+        this.blue = blue;
+        this.description = description;
+    }
+
+    public int getRed() {
+        return red;
+    }
+
+    public int getGreed() {
+        return greed;
+    }
+
+    public int getBlue() {
+        return blue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String toString() {
+//        return name() + "(" + red + ", " + greed + ", " + blue + ") -> " + description;
+        return super.toString() + "(" + red + ", " + greed + ", " + blue + ") -> " + description;
+    }
+}
+
+```
+
+## 十、注解（Annotation）
+
+###  10.1 注解概述
+
+#### 10.1.1 什么是注解？
+
+注解（Annotation）是从 JDK 5.0 开始引入，以 “`@注解名`” 在代码中存在。例如：
+```java
+@Override
+...
+
+
+@Deprecated
+...
+
+
+@SuppressWarnings(value="unchecked")
+...
+
+```
+
+Annotation 可以像修饰符一样被使用，可用于修饰包、类、构造器、方法、成员变量、参数、局部变量的声明；还可以添加一些参数值，这些信息被保存在  Annotation 的 “`name=value`” 对中。
+
+注解可以在类编译、运行时进行加载，体现不同的功能。
+
+#### 10.1.2 注解与注释
+
+注解也可以看做是一种注释，通过使用 Annotation，程序员可以在不改变原有逻辑的情况下，在源文件中嵌入一些补充信息。但是，注解不同于单行注释和多行注释：
+* 对于单行注释和多行注释是给程序员看的。
+* 而注解是可以被编译器或其他程序读取的；程序还可以根据注解的不同，做出相应的处理。
+
+#### 10.1.3  注解的重要性
+
+在 JavaSE 中，注解的使用目的比较简单，例如标记过时的功能、忽略警告等。在 **JavaEE / Android 中，注解占据了更重要的角色**，例如用来配置应用程序的任何切面、代替 JavaEE 旧版中所遗留的**繁冗代码**和 **XML 配置**等。
+
+未来的开发模式都是基于注解的：JPA 是基于注解的，Spring 2.5 以上都是基于注解的，Hibernate 3.x 以后也是基于注解的，Struts 2 有一部分也是基于注解的了。**注解是一种趋势**，一定程度上可以说：**框架 = 注解 + 反射 + 设计模式**。
+
+### 10.2 常见的 Annotation 作用
+
+**示例 1：生成文档相关的注解**
+
+```java
+@author 标明开发该模块的作者，多个作者之间使用 “,” 分割
+@version 标明该类模块的版本
+@see 参考转向，也就是相关主题
+@since 从哪个版本开始增加的
+@param 对方法中某参数的说明，如果没有参数就不能写
+@return 对方法返回值的说明，如果方法的返回值类型是 void 就不能写
+@exception 对方法可能抛出的异常进行说明，如果方法没有用 throws 显式抛出的异常就不能写
+```
+
+**示例 2：在编译时进行格式检查（JDK 内置的三个基本注解）**
+
+`@Override`：限定重写父类方法，该注解只能用于方法。
+
+`@Deprecated`：用于表示所修饰的元素（类、方法等）已过时；通常是因为所修饰的结构危险或存在更好的选择。
+
+`@SuppressWarnings`：抑制编译器警告。
+
+**示例 3：跟踪代码依赖性，实现替代配置文件功能**
+
+Servlet 3.0 提供了注解（annotation），使得不再需要在 `web.xml` 文件中进行 Servlet 的部署。
+
+Spring 框架中关于“事务”的管理。
+
+### 10.3 三个最基本的注解
+
+#### 10.3.1 `@Override`
+
+用于检测被标记的方法为有效的重写方法；如果不是，则报编译错误！
+
+只能标记在方法上。
+
+它会被编译器程序读取。
+
+示例代码：
+```java
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+    }
+}
+
+class Person {
+    String name;
+    int age;
+
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+#### 10.3.2 `@Deprecated`
+
+用于表示被标记的数据已经过时，不推荐使用。
+
+可以用于修饰属性、方法、构造、类、包、局部变量、参数。
+
+它会被编译器程序读取。
+
+示例代码：
+```java
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.util.Date;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+
+        Date date = new Date();
+        System.out.println(date);
+
+        Date date1 = new Date(2026, 2, 2);
+        System.out.println(date1);
+
+        Person p2 = new Person();
+        Person p3 = new Person("Tom");
+        System.out.println(p3);
+
+    }
+}
+
+class Person {
+    String name;
+    int age;
+
+    public Person() {}
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Deprecated
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+#### 10.3.3 `@SuppressWarnings`
+
+抑制编译警告。当我们不希望看到警告信息的时候，可以使用 `SuppressWarnings` 注解来抑制警告信息。
+
+可以用于修饰类、属性、方法、构造、局部变量、参数。
+
+它会被编译器程序读取。
+
+（了解）可以指定的警告类型有：
+* `all`：抑制所有警告。
+* `unchecked`：抑制与未检查的作业相关的警告。
+* `unused`：抑制与未用的程式码及停用的程式码相关的警告。
+* `deprecation`：抑制与淘汰相关的警告。
+* `nls`：抑制与非 `nls` 字串文字相关的警告。
+* `null`：抑制与空值分析相关的警告。
+* `rawtypes`：抑制与使用 `raw` 类型相关的警告。
+* `static-access`：抑制与静态存取不正确相关的警告。
+* `static-method`：抑制与可能宣告为 `static` 的方法相关的警告。
+* `super`：抑制与置换方法相关但不含 `super` 呼叫的警告。
+* ……
+
+示例代码：
+```java
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.util.Date;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+
+        Date date = new Date();
+        System.out.println(date);
+
+        Date date1 = new Date(2026, 2, 2);
+        System.out.println(date1);
+
+        Person p2 = new Person();
+        Person p3 = new Person("Tom");
+        System.out.println(p3);
+
+
+        @SuppressWarnings("unused") int num = 10;
+
+    }
+}
+
+class Person {
+    String name;
+    int age;
+
+    public Person() {}
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Deprecated
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+### 10.4 元注解
+
+元注解：对现有的注解进行解释说明的注解。
+
+JDK 1.5 在 java.lang.annotation 包定义了 4 个标准的 `meta-annotation` 类型，它们被用来提供对其它 `annotation` 类型作说明。
+
+**1. `@Target`：用来描述注解的使用范围。**
+
+* 可以通过枚举类型 `ElementType` 的 10 个常量对象来指定。
+* `TYPE`、`METHOD`、`CONSTRUCTOR`、`PACKAGE` ……
+
+**2. `@Retention`：用于描述注解的生命周期。**
+
+* 可以通过枚举类型 `RetentionPolicy` 的 3 个常量对象来指定。
+* `SOURCE`（源代码）、`CLASS`（字节码）、`RUNTIME`（运行时）。
+* **唯有 RUNTIME 阶段才能被反射读取到。**
+
+**3. `@Documented`：表明这个注解应该被 javadoc 工具记录。**
+
+**4. `@Inherited`：允许子类继承父类中的注解。**
+
+示例代码：
+```java
+/* MyAnnotation.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
+
+/**
+ * ClassName: MyAnnotation
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 17:05
+ * @Version 1.0
+ */
+@Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MyAnnotation {
+    String value() default "hello";
+}
+
+
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.util.Date;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+
+        Date date = new Date();
+        System.out.println(date);
+
+        Date date1 = new Date(2026, 2, 2);
+        System.out.println(date1);
+
+        Person p2 = new Person();
+        @SuppressWarnings({"RedundantExplicitVariableType"}) Person p3 = new Person("Tom");
+        System.out.println(p3);
+
+
+        @SuppressWarnings("unused") int num = 10;
+
+    }
+}
+
+@MyAnnotation(value="class")
+class Person {
+    String name;
+    int age;
+
+    @MyAnnotation()
+    public Person() {}
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Deprecated
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+### 10.5 自定义注解的使用
+
+一个完整的注解应该包含三个部分：
+1. 声明；
+2. 使用；
+3. 读取。
+
+#### 10.5.1 声明自定义注解
+
+语法格式：
+```java
+[元注解]
+[修饰符] @interface 注解名 {
+    [成员列表]
+}
+```
+
+自定义注解可以通过四个元注解 `@Retention`、`@Target`、`@Inherited`、`@Documented` 分别说明它的生命周期、使用位置、是否被继承、是否被生成到 API 文档中。
+
+Annotation 的成员在 Annotation 定义中以无参数有返回值的抽象方法的形式来声明，我们又称为配置参数。返回值类型只能是八种基本数据类型、`String` 类型、`Class` 类型、`Enum` 类型、`Annotation` 类型、以上所有类型的数组。
+
+可以使用 `default` 关键字为抽象方法指定默认返回值。
+
+如果定义的注解含有抽象方法，那么使用时必须指定返回值，除非它有默认值，格式为 “`方法名 = 返回值`”。如果只有一个抽象方法需要赋值，且方法名为 `value`，可以省略 “`value=`”；所以如果注解只有一个抽象方法成员，建议使用方法名 `value`。
+
+#### 10.5.2 使用自定义注解
+
+示例代码：
+```java
+/* MyAnnotation.java */
+
+package com.anxin_hitsz_11.annotation;
+
+/**
+ * ClassName: MyAnnotation
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 17:05
+ * @Version 1.0
+ */
+public @interface MyAnnotation {
+    String value() default "hello";
+}
+
+
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.util.Date;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+
+        Date date = new Date();
+        System.out.println(date);
+
+        Date date1 = new Date(2026, 2, 2);
+        System.out.println(date1);
+
+        Person p2 = new Person();
+        @SuppressWarnings({"RedundantExplicitVariableType"}) Person p3 = new Person("Tom");
+        System.out.println(p3);
+
+
+        @SuppressWarnings("unused") int num = 10;
+
+    }
+}
+
+@MyAnnotation(value="class")
+class Person {
+    String name;
+    int age;
+
+    @MyAnnotation()
+    public Person() {}
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Deprecated
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+#### 10.5.3 读取和处理自定义注解
+
+自定义注解必须配上注解的信息处理流程才有意义。
+
+我们自己定义的注解，只能使用反射的代码读取。所以自定义注解的生命周期必须是 `RetentionPolicy.RUNTIME`。
+
+具体的使用见《第十七章：反射机制》。
+
+#### 10.5.4 自定义注解举例
+
+以 `@SuppressWarnings` 为参照，进行定义即可。
+
+示例代码：
+```java
+/* MyAnnotation.java */
+
+package com.anxin_hitsz_11.annotation;
+
+/**
+ * ClassName: MyAnnotation
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 17:05
+ * @Version 1.0
+ */
+public @interface MyAnnotation {
+    String value() default "hello";
+}
+
+
+/* AnnotationTest.java */
+
+package com.anxin_hitsz_11.annotation;
+
+import java.util.Date;
+
+/**
+ * ClassName: AnnotationTest
+ * Package: com.anxin_hitsz_11.annotation
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 16:51
+ * @Version 1.0
+ */
+public class AnnotationTest {
+    public static void main(String[] args) {
+        Person p1 = new Student();
+        p1.walk();
+
+        Date date = new Date();
+        System.out.println(date);
+
+        Date date1 = new Date(2026, 2, 2);
+        System.out.println(date1);
+
+        Person p2 = new Person();
+        @SuppressWarnings({"RedundantExplicitVariableType"}) Person p3 = new Person("Tom");
+        System.out.println(p3);
+
+
+        @SuppressWarnings("unused") int num = 10;
+
+    }
+}
+
+@MyAnnotation(value="class")
+class Person {
+    String name;
+    int age;
+
+    @MyAnnotation()
+    public Person() {}
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Deprecated
+    public void eat() {
+        System.out.println("人吃饭");
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    public void walk() {
+        System.out.println("人走路");
+    }
+}
+
+class Student extends Person {
+
+    @Override
+    public void eat() {
+        System.out.println("学生吃饭");
+    }
+
+    @Override
+    public void walk() {
+        System.out.println("学生走路");
+    }
+
+}
+
+```
+
+### 10.6 JUnit 单元测试
+
+#### 10.6.1 测试分类
+
+**黑盒测试**：不需要写代码，给输入值，看程序是否能够输出期望的值。
+
+**白盒测试**：需要写代码，关注程序具体的执行流程。
+
+黑盒测试与白盒测试示例：
+![黑盒测试与白盒测试示例](./images/image-20220511181800694.png "黑盒测试与白盒测试示例")
+
+黑盒测试与白盒测试工作流程示例：
+![黑盒测试与白盒测试工作流程示例](./images/image-20220524102038600.png "黑盒测试与白盒测试工作流程示例")
+
+#### 10.6.2 JUnit 单元测试介绍
+
+JUnit 是由 Erich Gamma 和 Kent Beck 编写的一个测试框架（regression testing framework），供 Java 开发人员编写单元测试之用。
+
+**JUnit 测试是程序员测试，即所谓白盒测试，因为程序员直到被测试的软件如何（How）完成功能和完成什么样（What）的功能。**
+
+要使用 JUnit，必须在项目的编译路径中引入 JUnit 的库，即相关的 `.class` 文件组成的 jar 包。jar 就是一压缩包，压缩包都是开发好的第三方（Oracle 公司第一方，我们自己第二方，其他都是第三方）工具类，都是以 `.class` 文件形式存在的。
+
+需要导入的 jar 包：
+* junit-4.12.jar。
+* hamcrest-core-1.3.jar。
+
+#### 10.6.3 引入本地 JUnit.jar
+
+第 1 步 - 在项目中 File - Project Structure 中操作：添加 Libraries 库。
+
+![第 1 步 - 1](./images/image-20211228180938922.png "第 1 步 - 1")
+
+![第 1 步 - 2](./images/image-20221002195547325.png "第 1 步 - 2")
+
+其中，junit-libs 包内容如下：
+![junit-libs 包内容](./images/image-20220813005206452.png "junit-libs 包内容")
+
+第 2 步：选择要在哪些 module 中应用 JUnit 库。
+
+![第 2 步](./images/image-20220813005511062.png "第 2 步")
+
+第 3 步：检查是否应用成功。
+![第 3 步](./images/image-20220813005729233.png "第 3 步")
+
+> **注意：Scope 需要选择 Compile，否则编译时无法使用 JUnit。**
+
+第 4 步：下次如果有新的模块要使用该 libs 库，按照以下步骤操作即可。
+
+![第 4 步 - 1](./images/image-20220813005944022.png "第 4 步 - 1")
+![第 4 步 - 2](./images/image-20220813010018152.png "第 4 步 - 2")
+![第 4 步 - 3](./images/image-20220813010055217.png "第 4 步 - 3")
+![第 4 步 - 4](./images/image-20220813010124381.png "第 4 步 - 4")
+
+#### 10.6.4 编写和运行 `@Test` 单元测试方法
+
+JUnit 4 版本，要求 `@Test` 标记的方法必须满足如下要求：
+* 所在的类必须是 `public` 的、非抽象的，包含唯一的无参构造器。
+* `@Test` 标记的方法本身必须是 `public`、非抽象的、非静态的，`void` 无返回值、`()` 无参数的。
+
+示例代码：
+```java
+/* JUnitTest.java */
+
+package com.anxin_hitsz_11.annotation.junit;
+
+import org.junit.Test;
+
+import java.util.Scanner;
+
+/**
+ * ClassName: JUnitTest
+ * Package: com.anxin_hitsz_11.annotation.junit
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 17:33
+ * @Version 1.0
+ */
+public class JUnitTest {    // 单元测试类
+
+    public static void main(String[] args) {
+        JUnitTest test = new JUnitTest();
+        System.out.println(test.number);
+        test.method();
+    }
+
+    int number = 10;
+
+    @Test
+    public void test1() {   //  单元测试方法
+        System.out.println("hello");
+    }
+
+    @Test
+    public void test2() {
+        System.out.println("hello1");
+        System.out.println("number = " + number);
+
+        method();
+
+        int num = showInfo("China");
+        System.out.println(num);
+    }
+
+
+    public void method() {
+        System.out.println("method() ...");
+    }
+
+    public int showInfo(String info) {
+        System.out.println(info);
+        return 10;
+    }
+
+    @Test
+    public void test3() {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("请输入一个数值：");
+        int num = scan.nextInt();
+        System.out.println(num);
+    }
+
+    @Test
+    public void test4() {
+        System.out.println("hello");
+    }
+
+    @Test
+    public void test5() {
+        System.out.println("hello");
+    }
+
+}
+
+```
+
+#### 10.6.5 设置执行 JUnit 用例时支持控制台输入
+
+**1. 设置数据：**
+
+默认情况下，在单元测试方法中使用 `Scanner` 时，并不能实现控制台数据的输入，需要做如下设置。
+
+在 idea64.exe.vmptions 配置文件中加入下面一行设置：
+```properties
+-Deditable.java.test.console=true
+```
+
+重启 IDEA 后生效。
+
+**2. 配置文件位置**
+
+![配置文件位置 - 1](./images/image-20220813011625546.png "配置文件位置 - 1")
+![配置文件位置 - 2](./images/image-20220813011642180.png "配置文件位置 - 2")
+
+添加完成后，重启 IDEA 即可。
+
+**3. 如果上述位置设置不成功，需要继续修改如下位置**
+
+修改位置 1：IDEA 安装目录的 bin 目录（例如：D:\develop_tools\IDEA\IntelliJ IDEA 2022.1.2\bin）下的 idea64.exe.vmoptions 文件。
+
+修改位置 2：C 盘的用户目录 C:\Users\用户名\AppData\Roaming\JetBrains\IntelliJIdea2022.1 下的 idea64.exe.vmoptions 文件。
+
+#### 10.6.6 定义 test 测试方法模板
+
+选中自定义的模板组，点击 “+”（1. Live Template）来定义模板。
+
+![定义模板](./images/image-20211229100040505.png "定义模板")
