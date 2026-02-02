@@ -6429,3 +6429,270 @@ public class JUnitTest {    // 单元测试类
 选中自定义的模板组，点击 “+”（1. Live Template）来定义模板。
 
 ![定义模板](./images/image-20211229100040505.png "定义模板")
+
+## 十一、包装类
+
+### 11.1 为什么需要包装类
+
+Java 提供了两个类型系统 —— **基本数据类型**与**引用数据类型**。使用基本数据类型在于效率；然而当要使用只针对对象设计的 API 或新特性（例如泛型），怎么办呢？例如：
+```java
+// 情况 1：方法形参
+Object 类的 equals(Object obj)
+
+// 情况 2：方法形参
+ArrayList 类的 add(Object obj)
+// 没有如下的方法：
+add(int number)
+add(double d)
+add(boolean b)
+
+// 情况 3：泛型
+Set<T>
+List<T>
+Collection<T>
+Map<K, V>
+```
+
+为了使得基本数据类型的变量具备引用数据类型变量的相关特征（比如：封装性、继承性、多态性），我们给各个基本数据类型的变量都提供了对应的包装类。
+
+### 11.2 有哪些包装类？
+
+Java 针对八种基本数据类型定义了相应的引用类型：包装类（封装类）。有了类的特点，就可以调用类中的方法，Java 才是真正的面向对象。
+
+![基本数据类型与对应的包装类](./images/image-20220329001912486.png "基本数据类型与对应的包装类")
+
+封装以后的，内存结构对比：
+```java
+public static void main(String[] args) {
+    int num = 520;
+    Integer obj = new Integer(520);
+}
+
+```
+封装前后的内存结构图：
+![封装前后的内存结构图](./images/image-20220514163725830.png "封装前后的内存结构图")
+
+### 11.3 自定义包装类
+
+示例代码：
+```java
+public class MyInteger {
+    int value;
+
+    public MyInteger() {
+    }
+
+    public MyInteger(int value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+}
+
+```
+
+### 11.4 包装类与基本数据类型间的转换
+
+为什么需要转换？
+* 一方面，在有些场景下，需要使用基本数据类型对应的包装类的对象；此时就需要将基本数据类型的变量转换为包装类的对象。
+  * 比如：`ArrayList` 的 `add(Object obj)`，`Object` 类的 `equals(Object obj)`。
+* 对于包装类来讲，既然我们使用的是对象，那么对象是不能进行 “`+`”、“`-`”、“`*`”、“`/`” 等运算的。为了能够进行这些运算，就需要将包装类的对象转换为基本数据类型的变量。
+
+示例代码：
+```java
+/* WrapperTest.java */
+
+package com.anxin_hitsz_12.wrapper;
+
+import org.junit.Test;
+
+/**
+ * ClassName: WrapperTest
+ * Package: com.anxin_hitsz_12.wrapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/2 21:17
+ * @Version 1.0
+ */
+public class WrapperTest {
+
+    /*
+    * 基本数据类型 -> 包装类：
+    *   1. 使用包装类的构造器
+    *   2. （建议）调用包装类的 valueOf(xxx xx)
+    *
+    * 包装类 -> 基本数据类型：
+    *   * 调用包装类的 xxxValue()
+    * */
+
+    /*
+    * jdk 5.0 新特性：自动装箱、自动拆箱
+    * */
+    @Test
+    public void test4() {
+        // 自动装箱：    基本数据类型 -> 包装类
+        int i1 = 10;
+        Integer ii1 = i1;   // 自动装箱
+        System.out.println(ii1.toString());
+
+        Integer ii2 = i1 + 1;   // 自动装箱
+
+        Boolean bb1 = true; // 自动装箱
+
+        Float f1 = 12.3F;   // 自动装箱
+
+        // 自动拆箱：    包装类 -> 基本数据类型
+
+        int i2 = ii1;   // 自动拆箱
+
+        boolean b1 = bb1;   // 自动拆箱
+
+    }
+
+    @Test
+    public void test3() {
+        Account account = new Account();
+        System.out.println(account.isFlag1);    // false
+        System.out.println(account.isFlag2);    // null
+
+        System.out.println(account.balance1);   // 0.0
+        System.out.println(account.balance2);   // null
+
+    }
+
+    // 包装类 -> 基本数据类型：
+    //      调用包装类的 xxxValue()
+    @Test
+    public void test2() {
+        Integer ii1 = new Integer(10);
+        int i1 = ii1.intValue();
+        i1 = i1 + 1;
+
+
+        Float ff1 = new Float(12.3F);
+        float f1 = ff1.floatValue();
+        
+        
+        Boolean bb1 = Boolean.valueOf(true);
+        boolean b1 = bb1.booleanValue();
+
+    }
+
+    // 基本数据类型 -> 包装类：
+    //      1. 使用包装类的构造器
+    //      2. （建议）调用包装类的 valueOf(xxx xx)
+    @Test
+    public void test1() {
+        int i1  = 10;
+        Integer ii1 = new Integer(i1);
+        System.out.println(ii1.toString());
+
+        float f1 = 12.3F;
+        f1 = 32.2f;
+        Float ff1  = new Float(f1);
+        System.out.println(ff1.toString());
+
+        String s1 = "32.1";
+        Float ff2 = new Float(s1);
+
+//        s1 = "abc";
+//        Float ff3 = new Float(s1);  // 报异常：NumberFormatException
+
+        boolean b1 = true;
+        Boolean bb1 = new Boolean(b1);
+        System.out.println(bb1);
+
+        String s2 = "false";
+        s2 = "FaLse123";
+        s2 = "TrUe";
+        Boolean bb2 = new Boolean(s2);
+        System.out.println(bb2);    // false -> true
+        
+        // 推荐使用：
+        int i2 = 10;
+        Integer ii2 = Integer.valueOf(i2);
+
+        Boolean b2 = Boolean.valueOf(true);
+
+        Float f2 = Float.valueOf(12.3f);
+
+    }
+
+}
+
+class Account  {
+    boolean isFlag1;
+    Boolean isFlag2;
+
+    double balance1;    // 0.0
+    Double balance2;    // null     0.0
+}
+
+```
+
+> 注意：原来使用基本数据类型变量的位置，改成包装类以后，对于成员变量来说，其默认值变化了！
+
+#### 11.4.1 装箱
+
+**装箱：把基本数据类型转为包装类对象。**
+
+> 转为包装类的对象，是为了使用专门为对象设计的 API 和特性。
+
+（装箱）基本数据类型 -> 包装类：
+1. 使用包装类的构造器。
+2. （建议）调用包装类的 `valueOf(xxx xx)`。
+
+示例代码：
+```java
+Integer obj1 = new Integer(4);  // 使用构造函数
+Float f = new Float("4.56");
+Long l = new Long("asdf");  // NumberFormatException
+
+Integer obj2 = Integer.valueOf(4);  // 使用包装类中的 valueOf 方法
+```
+
+> 注意：
+>
+> 在 IDEA 中，通过 `Alt + Enter` 组合键可快速实现包装类的自动补全。
+
+#### 11.4.2 拆箱
+
+**拆箱：把包装类对象拆为基本数据类型。**
+
+> 转为基本数据类型，一般是因为需要运算；Java 中的大多数运算符是为基本数据类型设计的，例如比较、算术等。
+
+（拆箱）包装类 -> 基本数据类型：
+* 调用包装类的 `xxxValue()`。
+
+示例代码：
+```java
+Integer obj = new Integer(4);
+int num1 = obj.intValue();
+```
+
+> 注意：
+>
+> 在 IDEA 中，通过 `Alt + Enter` 组合键可快速实现包装类的自动补全。
+
+#### 11.4.3 自动装箱与自动拆箱
+
+由于我们经常要做基本类型与包装类之间的转换，从 JDK 5.0 开始，基本类型与包装类的装箱、拆箱动作可以自动完成。例如：
+```java
+Integer i = 4;  // 自动装箱；相当于 Integer i = Integer.valueOf(4);
+i = i + 5;  // 等号右边：将 i 对象转成基本数值（自动拆箱）；即：i.intValue() + 5;
+// 加法运算完成后，再次装箱，把基本数值转成对象。
+```
+
+> 注意：只能与自己对应的类型之间才能实现自动装箱与拆箱。
+>
+> 例如：
+> ```java
+> Integer i = 1;
+> Double d = 1;   // 错误的，1 是 int 类型
+> ```
+>
+> 因此，自动装箱与拆箱只能与自己对应的类型之间才能实现。
