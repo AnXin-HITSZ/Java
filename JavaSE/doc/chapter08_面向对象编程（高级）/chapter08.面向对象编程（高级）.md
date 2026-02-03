@@ -6696,3 +6696,360 @@ i = i + 5;  // 等号右边：将 i 对象转成基本数值（自动拆箱）�
 > ```
 >
 > 因此，自动装箱与拆箱只能与自己对应的类型之间才能实现。
+
+### 11.5 基本数据类型、包装类与字符串间的转换
+
+#### 11.5.1 基本数据类型或包装类转为字符串
+
+**方式 1** - 调用字符串重载的静态方法 `valueOf(xxx xx)` 方法：
+```java
+int a = 10;
+// String str = a;  // 错误的
+
+String str = String.valueOf(a);
+```
+
+**方式 2** - `基本数据类型的变量 + ""`：
+```java
+int a = 10;
+
+String str = a +  "";
+```
+
+#### 11.5.2 字符串转为基本数据类型或包装类
+
+**方式 1** - 除了 `Character` 类之外，其他所有包装类都具有 `parseXxx()` 静态方法可以将字符串转换为对应的基本类型。例如：
+* `public static int parseInt(String s)`：将字符串参数转换为对应的 `int` 基本类型。
+* `public static long parseLong(String s)`：将字符串参数转换为对应的 `long` 基本类型。
+* `public static double parseDouble(String s)`：将字符串参数转换为对应的 `double` 基本类型。
+
+**方式 2** - 字符串转为包装类，然后可以自动拆箱为基本数据类型。例如：
+* `public static Integer valueOf(String s)`：将字符串参数转换为对应的 `Integer` 包装类，然后可以自动拆箱为 `int` 基本类型。
+* `public static Long valueOf(String s)`：将字符串参数转换为对应的 `Long` 包装类，然后可以自动拆箱为 `long` 基本类型。
+* `public static Double valueOf(String s)`：将字符串参数转换为对应的 `Double` 包装类，然后可以自动拆箱为 `double` 基本类型。
+
+> 注意：如果字符串参数的内容无法正确转换为对应的基本类型，则会抛出 `java.lang.NumberFormatException` 异常。
+
+**方式 3** - 通过包装类的构造器实现：
+```java
+int a = Integer.parseInt("整数的字符串");
+double d = Double.parseDouble("小数的字符串");
+boolean b = Boolean.parseBoolean("true 或 false");
+
+int a = Integer.valueOf("整数的字符串");
+double d = Double.valueOf("小数的字符串");
+boolean b = Boolean.valueOf("true 或 false");
+
+int i = new Integer("12");
+
+```
+
+其他方式小结：
+![其他方式小结](./images/image-20220813012801907.png "其他方式小结")
+
+### 11.6 包装类的其它 API
+
+#### 11.6.1 数据类型的最大最小值
+
+```java
+Integer.MAX_VALUE  和 Integer.MIN_VALUE
+
+Long.MAX_VALUE 和 Long.MIN_VALUE
+
+Double.MAX_VALUE 和 Double.MIN_VALUE
+```
+
+#### 11.6.2 字符转大小写
+
+```java
+Character.toUpperCase('x');
+
+Character.toLowerCase('X');
+```
+
+#### 11.6.3 整数转进制
+
+```java
+Integer.toBinaryString(int i);
+
+Integer.toHexString(int i);
+
+Integer.toOctalString(int i);
+```
+
+#### 11.6.4 比较的方法
+
+```java
+Double.compare(double d1, double d2);
+
+Integer.compare(int x, int y);
+```
+
+### 11.7 包装类对象的特点
+
+#### 11.7.1 包装类缓存对象
+
+| 包装类 | 缓存对象 |
+| :--: | :--: |
+| Byte | -128 ~ 127 |
+| Short | -128 ~ 127 |
+| Integer | -128 ~ 127 |
+| Long | -128 ~ 127 |
+| Float | 没有 |
+| Double | 没有 |
+| Character | 0 ~ 127 |
+| Boolean | true 和 false |
+
+示例代码 1：
+```java
+Integer a = 1;
+Integer b = 1;
+System.out.println(a == b); //  true
+
+Integer i = 128;
+Integer j = 128;
+System.out.println(i == j); // false
+
+Integer m = new Integer(1); // 新 new 的在堆中
+Integer n = 1;  // 这个用的是缓冲的常量对象，在方法区
+System.out.println(m == n); // false
+
+Integer x = new Integer(1); // 新 new 的在堆中
+Integer y = new Integer(1); // 另一个新 new 的在堆中
+System.out.println(x == y); // false
+```
+
+示例代码 2：
+```java
+Double d1 = 1.0;
+Double d2 = 1.0;
+System.out.println(d1 == d2);   // false -> 比较地址，没有缓存对象，每一个都是新 new 的
+```
+
+#### 11.7.2 类型转换问题
+
+问题 1：
+```java
+Integer i = 1000;
+double j = 1000;
+System.out.println(i == j); // true -> 会先将 i 自动拆箱为 int，然后根据基本数据类型“自动类型转换”规则，转为 double 比较
+```
+
+问题 2：
+```java
+Integer i = 1000;
+int j = 1000;
+System.out.println(i == j); // true -> 会自动拆箱，按照基本数据类型进行比较
+```
+
+问题 3：
+```java
+Integer i = 1;
+Double d = 1.0;
+System.out.println(i == d); // 编译报错 -> 使用 “==” 对两个类的对象进行比较时，两个类的对象必须为同类或互为子父类关系
+```
+
+#### 11.7.3 包装类对象不可变
+
+示例代码：
+```java
+
+```
+
+### 11.8 练习
+
+练习：
+> 题目：
+>
+> 利用 `Vector` 代替数组处理：从键盘读入学生成绩（以负数代表输入结束），找出最高分，并输出学生成绩等级。
+>
+> 提示：数组一旦创建，长度就固定不变，所以在创建数组前就需要知道它的长度；而向量类 `java.util.Vector` 可以根据需要动态伸缩。
+>
+> 1. 创建 `Vector` 对象：`Vector v = new Vector();`。
+> 2. 给向量添加元素：`v.addElement(Object obj);  // obj 必须是对象`。
+> 3. 取出向量中的元素：`Obejct obj = v.elementAt(0);`；注意第一个元素的下标是 `0`，返回值是 `Object` 类型的。
+> 4. 计算向量的长度：`v.size();`。
+> 5. 若与最高分相差 10 分内即为 A 等，20 分内即为 B 等，30 分内即为 C 等，其它即为 D 等。
+
+示例代码：
+```java
+/* ScoreTest.java */
+
+package com.anxin_hitsz_12.wrapper.exer1;
+
+import java.util.Scanner;
+import java.util.Vector;
+
+/**
+ * ClassName: ScoreTest
+ * Package: com.anxin_hitsz_12.wrapper.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/3 15:26
+ * @Version 1.0
+ */
+public class ScoreTest {
+    public static void main(String[] args) {
+
+        // 1. 创建 Vector 对象：Vector v = new Vector();
+        Vector v = new Vector();
+
+        // 2. 从键盘获取多个学生成绩，存放到 v 中（以负数代表输入结束）
+
+        Scanner scanner = new Scanner(System.in);
+
+        int maxScore = 0;   // 记录最高分
+
+        while (true) {  // for (;;)
+            System.out.print("请输入学生成绩（以负数代表输入结束）：");
+            int intScore =  scanner.nextInt();
+
+            if (intScore < 0) {
+                break;
+            }
+
+//            // 装箱：int -> Integer
+//            Integer score = Integer.valueOf(intScore);
+//            // 添加学生成绩到容器 v 中
+//            v.addElement(score);
+
+            // jdk 5.0 之后：自动装箱
+            v.addElement(intScore);
+
+            // 3. 获取学生成绩的最大值
+            if (maxScore < intScore) {
+                maxScore = intScore;
+            }
+
+        }
+
+        System.out.println("最高分：" + maxScore);
+
+        // 4. 依次获取 v 中的每个学生成绩，与最高分进行比较，获取学生等级，并输出
+        for (int i = 0; i < v.size(); i++) {
+            Object objScore = v.elementAt(i);
+            // 方式 1：
+//            Integer integerScore = (Integer)objScore;
+//            // 拆箱
+//            int score = integerScore.intValue();
+
+            // 方式 2：自动拆箱
+            int score = (Integer)objScore;
+            char grade = ' ';
+            if (maxScore - score <= 10) {
+                grade = 'A';
+            } else if (maxScore - score <= 20) {
+                grade = 'B';
+            } else if (maxScore - score <= 30) {
+                grade = 'C';
+            } else {
+                grade = 'D';
+            }
+
+            System.out.println("student " + i + " score is " + score + " grade is " + grade);
+
+        }
+
+        scanner.close();
+    }
+}
+
+```
+
+## 十二、IDEA 中快捷键的使用和修改
+
+### 12.1 第 1 组：通用型
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 复制代码 - copy | `Ctrl + x` |
+| 粘贴 - paste | `Ctrl + v` |
+| 剪切 - cut | `Ctrl + x` |
+| 撤销 - undo | `Ctrl + z` |
+| 反撤销 - redo | `Ctrl + Shift + z` |
+| 保存 - save all | `Ctrl + s` |
+| 全选 - select all | `Ctrl + a` |
+
+### 12.2 第 2 组：提高编写速度（上）
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 智能提示 - edit | `Alt + Enter` |
+| 提示代码模板 - insert live template | `Ctrl +  j` |
+| 使用 xx 块环绕 - surround with ... | `Ctrl + Alt + t` |
+| 调出生成 getter / setter / 构造器等结构 - generate  ... | `Alt + Insert` |
+| 自动生成返回值变量 - introduce variable | `Ctrl + Alt + v` |
+| 复制指定行的代码 - duplicate line or selection | `Ctrl + d` |
+| 删除指定行的代码 - delete line | `Ctrl + y` |
+| 切换到下一行代码空位 - start new line | `Shift + Enter` |
+| 切换到上一行代码空位 - start new line before current | `Ctrl + Alt + Enter` |
+| 向上移动代码 - move statement up | `Ctrl + Shift + ↑` |
+| 向下移动代码 - move statement down | `Ctrl + Shift + ↓` |
+| 向上移动一行 - move line up | `Alt + Shift + ↑` |
+| 向下移动一行 - move line down | `Alt + Shift + ↓` |
+| 方法的形参列表提醒 - parameter info | `Ctrl + p` |
+
+### 12.3 第 3 组：提高编写速度（下）
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 批量修改指定的变量名、方法名、类名等 - rename | `Shift + f6` |
+| 抽取代码重构方法 - extract method ... | `Ctrl + Alt + m` |
+| 重写父类的方法 - override  methods ... | `Ctrl + o` |
+| 实现接口的方法 - implements methods ... | `Ctrl + i` |
+| 选中的结构的大小写的切换 - toggle case | `Ctrl + Shift + u` |
+| 批量导包 - optimize imports | `Ctrl + Alt + o` |
+
+### 12.4 第 4 组：类结构、查找和查看源码
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 如何查看源码 - go to class... | `Ctrl + 选中指定的结构 或 Ctrl + n` |
+| 显示当前类结构，支持搜索指定的方法、属性等 - file structure | `Ctrl + f12` |
+| 退回到前一个编辑的页面 - back | `Ctrl  + Alt + ←` |
+| 进入到下一个编辑的页面 - forward | `Ctrl + Alt + →` |
+| 打开的类文件之间切换 - select previous / next tab | `Alt + ← / →` |
+| 光标选中指定的类，查看继承树结构 - Type Hierarchy | `Ctrl + h` |
+| 查看方法文档 - quick documentation | `Ctrl + q` |
+| 类的 UML 关系图 - show uml popup | `Ctrl  + Alt + u` |
+| 定位某行 - go to line / column | `Ctrl + g` |
+| 回溯变量或方法的来源 - go to implementation(s) | `Ctrl + Alt + b` |
+| 折叠方法实现 - collapse all | `Ctrl + Shift + -` |
+| 展开方法实现 - expand all | `Ctrl + Shift + +` |
+
+### 12.5 第 5 组：查找、替换与关闭
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 查找指定的结构 | `Ctrl + f` |
+| 查找与替换 - replace | `Ctrl + r` |
+| 直接定位到当前行的首位 - move caret to line start | `Home` |
+| 直接定位到当前行的末位 - move caret to line end | `End` |
+| 全项目搜索文本 - fine in path ... | `Ctrl + Shift + f` |
+
+### 12.6 第 6 组：调整格式
+
+| 说明 | 快捷键 |
+| :--: | :--: |
+| 格式化代码 - reformat code | `Ctrl + Alt + l` |
+| 使用单行注释 - comment with line comment | `Ctrl + /` |
+| 使用 / 取消多行注释 - comment with block comment | `Ctrl + Shift + /` |
+| 选中数行，整体往后移动 - tab | `Tab` |
+| 选中数行，整体往前移动 - prev tab | `Shift + Tab` |
+
+## 十三、IDEA 如何调试程序？
+
+### 13.1 为什么需要 Debug？
+
+编写好的程序在执行过程中如果出现错误，该如何查找或定位错误呢？
+
+简单的代码直接就可以看出来，但如果代码比较复杂，就需要借助程序调试工具（Debug）来查找错误了。
+
+### 13.2 Debug 的步骤
+
+Debug 的步骤如下：
+1. 添加断点；
+2. 启动调试；
+3. 单步执行；
+4. 观察变量和执行流程，找到并解决问题。
