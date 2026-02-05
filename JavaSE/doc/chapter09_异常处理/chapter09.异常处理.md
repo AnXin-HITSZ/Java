@@ -695,3 +695,841 @@ public class FinallyTest {
 ![异常的抛出机制](./images/image-20220331112000671.png "异常的抛出机制")
 
 具体方式：在方法声明中用 `throws` 语句可以声明抛出异常的列表，`throws` 后面的异常类型可以是方法中产生的异常类型，也可以是它的父类。
+
+#### 4.3.1 `throws` 基本格式
+
+声明异常格式：
+```java
+修饰符 返回值类型 方法名(参数) throws 异常类名1, 异常类名2, ... {
+    // 可能存在编译时异常
+    ...
+}
+```
+
+在 `throws` 后面可以写多个异常类型，用逗号隔开。
+
+示例代码：
+```java
+public void readFile(String file) throws FileNotFoundException, IOException {
+    ...
+    // 读文件的操作可能产生 FileNotFoundException 或 IOException 类型的异常
+    FileInputStream fis = new FileInputStream(file);
+    // ...
+}
+
+```
+
+> `throws` 是否真正处理了异常？
+>
+> 从编译是否能通过的角度看，看成是给出了异常万一要是出现时候的解决方案，此方案就是继续向上抛出（`throws`）。
+> 
+> 但是，此 `throws` 的方式，仅是将可能出现的异常抛给了此方法的调用者；此调用者仍然需要考虑如何处理相关异常。从这个角度来看，`throws` 的方式不算是真正意义上处理了异常。
+
+#### 4.3.2 `throws` 使用举例
+
+##### 4.3.2.1 针对编译时异常
+
+示例代码：
+```java
+/* ThrowsTest.java */
+
+package com.anxin_hitsz_03._throws;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+/**
+ * ClassName: ThrowsTest
+ * Package: com.anxin_hitsz_03._throws
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 15:44
+ * @Version 1.0
+ */
+public class ThrowsTest {
+
+    public static void main(String[] args) {
+        method3();
+
+        try {
+            method2();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public static void method3() {
+        try {
+            method2();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void method2() throws FileNotFoundException, IOException {
+
+        method1();
+
+    }
+
+    public static void method1() throws FileNotFoundException, IOException {
+        File file = new File("D:\\hello.txt");
+
+        FileInputStream fis = new FileInputStream(file);    // 可能报 FileNotFoundException
+
+        int data = fis.read();  // 可能报 IOException
+        while (data != -1) {
+            System.out.println((char)data);
+            data = fis.read();  // 可能报 IOException
+        }
+
+        fis.close();    // 可能报 IOException
+
+    }
+}
+
+```
+
+##### 4.3.2.2 针对运行时异常
+
+`throws` 后面也可以写运行时异常类型，只是运行时异常类型写或不写对于编译器和程序执行来说都没有任何区别。如果写了，唯一的区别就是调用者调用该方法后，使用 `try ... catch` 结构时，IDEA 可以获得更多的信息，需要添加哪种 `catch` 分支。
+
+#### 4.3.3 方法重写中 `throws` 的要求
+
+方法重写时，对于方法签名是有严格要求的。
+
+> 方法重写 - 复习：
+> 1. 方法名必须相同。
+> 2. 形参列表必须相同。
+> 3. 返回值类型：
+>   * 基本数据类型和 `void`：必须相同。
+>   * 引用数据类型：`<=`。
+> 4. 权限修饰符：`>=`，而且要求父类被重写方法在子类中是可见的。
+> 5. 不能是 `static`、`final` 修饰的方法。
+
+此外，对于 `throws` 异常列表要求：
+* 如果父类被重写方法的方法签名后面没有 “`throws 编译时异常类型`”，那么重写方法时，方法签名后面也不能出现 “`throws 编译时异常类型`”。
+* 如果父类被重写方法的方法签名后面有 “`throws 编译时异常类型`”，那么重写方法时，`throws` 的编译时异常类型必须 <= 被重写方法 `throws` 的编译时异常类型，或者不 `throws` 编译时异常。
+* 方法重写，对于 “`throws 运行时异常类型`” 没有要求。
+
+> 即：只针对于编译时异常而言，子类重写的方法抛出的异常类型可以与父类被重写的方法抛出的异常类型相同，或是父类被重写的方法抛出的异常类型的子类。
+
+示例代码：
+```java
+/* OverrideTest.java */
+
+package com.anxin_hitsz_03._throws;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+/**
+ * ClassName: OverrideTest
+ * Package: com.anxin_hitsz_03._throws
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 15:55
+ * @Version 1.0
+ */
+public class OverrideTest {
+    public static void main(String[] args) {
+
+        Father f = new Son();
+
+        try {
+            f.method1();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Number n = f.method4();
+
+
+    }
+}
+
+class Father {
+    public void method1() throws IOException {
+
+    }
+
+    public void method2() {
+
+    }
+
+    public void method3() {
+
+    }
+
+    public Number method4() {
+        return null;
+    }
+
+}
+
+class Son extends Father {
+    public void method1() throws FileNotFoundException {
+
+    }
+
+//    public void method2() throws FileNotFoundException {
+//
+//    }
+
+    public void method3() throws RuntimeException {
+
+    }
+
+    public Integer method4() {
+        return null;
+    }
+
+}
+
+```
+
+### 4.4 两种异常处理方式的选择
+
+前提：对于异常，使用相应的处理方式；此时的异常，主要指的是编译时异常。
+
+* 如果程序代码中涉及到资源的调用（流、数据库连接、网络连接等），则必须考虑使用 `try - catch - finally` 来处理，保证不出现内存泄漏。
+* （只针对于编译时异常）如果父类被重写的方法没有 `throws` 异常类型，则子类重写的方法中如果出现异常，只能考虑使用 `try - catch - finally` 进行处理，不能 `throws`。
+* 开发中，方法 `a` 中依次调用了方法 `b`、`c`、`d` 等方法，方法 `b`、`c`、`d` 之间是递进关系；此时，如果方法 `b`、`c`、`d` 中有异常，我们通常选择使用 `throws`，而方法 `a` 中通常选择使用 `try - catch - finally`。
+
+## 五、手动抛出异常对象：`throw`
+
+> 为什么需要手动抛出异常对象？
+>
+> 在实际开发中，如果出现不满足具体场景的代码问题，我们就有必要手动抛出一个指定类型的异常对象。
+
+> 如何理解“自动 vs 手动”抛出异常对象？
+> * 过程 1 - “抛”：
+>   * “自动抛”：程序在执行的过程当中，一旦出现异常，就会在出现异常的代码处，自动生成对应异常类的对象，并将此对象抛出。
+>   * “手动抛”：程序在执行的过程当中，不满足指定条件的情况下，我们主动地使用 “`throw + 异常类的对象`” 方式抛出异常对象。
+> * 过程 2 - “抓”：
+> * 狭义上讲：`try - catch` 的方式捕获异常，并处理。
+> * 广义上讲：把“抓”理解为“处理”，则此时对应着异常处理的两种方式，即 `try - catch - finally` 和 `throws`。
+
+Java 中异常对象的生成有两种方式：
+* 由虚拟机**自动生成**：程序运行过程中，虚拟机检测到程序发生了问题，那么针对当前代码，就会在后台自动创建一个对应异常类的实例对象并抛出。
+* 由开发人员手动创建：`new 异常类型([实参列表]);`。如果创建好的异常对象不抛出对程序没有任何影响，那么和创建一个普通对象一样；但是一旦 `throw` 抛出，就会对程序运行产生影响了。
+
+### 5.1 使用格式
+
+如何实现手动抛出异常？
+* 在方法内部，满足指定条件的条件下，使用 “`throw 异常类的对象`” 的方式抛出。
+
+语法格式：
+```java
+throw new 异常类名(参数);
+```
+
+`throw` 语句抛出的异常对象，和 JVM 自动创建和抛出的异常对象一样。
+* 如果是编译时异常类型的对象，同样需要使用 `throws` 或者 `try ... catch` 处理，否则编译不通过。
+* 如果是运行时异常类型的对象，编译器不提示。
+* 可以抛出的异常必须是 `Throwable` 或其子类的实例。下面的语句在编译时将会产生语法错误：
+    ```java
+    throw new String("want to throw");
+    ```
+
+### 5.2 使用注意点
+
+无论是编译时异常类型的对象，还是运行时异常类型的对象，如果没有被 `try ... catch` 合理地处理，都会导致程序崩溃。
+
+`throw` 语句会导致程序执行流程被改变，`throw` 语句是明确抛出一个异常对象，因此它下面的代码将不会执行，编译不通过。
+
+如果当前方法没有 `try ... catch` 处理这个异常对象，`throw` 语句就会代替 `return` 语句提前终止当前方法的执行，并返回一个异常对象给调用者。
+
+> 面试题：
+>
+> `throw` 和 `throws` 的区别？
+> * “上游排污，下游治污”。
+
+示例代码：
+```java
+/* ThrowTest.java */
+
+package com.anxin_hitsz_04._throw;
+
+/**
+ * ClassName: ThrowTest
+ * Package: com.anxin_hitsz_04._throw
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 16:35
+ * @Version 1.0
+ */
+public class ThrowTest {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        try {
+            s1.regist(10);
+            s1.regist(-10);
+            System.out.println(s1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+class Student {
+    int id;
+
+//    public void regist(int id) {
+//        if (id > 0) {
+//            this.id = id;
+//        } else {
+////            System.out.println("输入的 id 非法");
+//            // 手动抛出异常类的对象
+////            throw new RuntimeException("输入的 id 非法");
+//        }
+//    }
+
+    public void regist(int id) throws Exception {
+        if (id > 0) {
+            this.id = id;
+        } else {
+//            System.out.println("输入的 id 非法");
+            // 手动抛出异常类的对象
+//            throw new RuntimeException("输入的 id 非法");
+
+            throw new Exception("输入的 id 非法");
+
+//            System.out.println("此语句不能被执行");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                '}';
+    }
+}
+
+```
+
+## 六、自定义异常
+
+### 6.1 为什么需要自定义异常类？
+
+Java 中不同的异常类，分别表示着某一种具体的异常情况。那么在开发中总是有些异常情况是核心类库中没有定义好的，此时我们需要根据自己业务的异常情况来定义异常类。例如年龄负数问题、考试成绩负数问题、某员工已在团队中等。
+
+> 我们其实更关心的是，通过异常的名称就能直接判断此异常出现的原因。既然如此，我们就有必要在实际开发场景中，不满足我们指定的条件时，指明我们自己特有的异常类。通过此异常类的名称，就能判断出具体出现的问题。
+
+### 6.2 如何自定义异常类？
+
+首先，要继承一个异常类型。
+* 自定义一个编译时异常类型：自定义类继承 `java.lang.Exception`。
+* 自定义一个运行时异常类型：自定义类继承 `java.lang.RuntimeException`。
+
+通常提供数个重载的构造器，建议大家提供至少两个构造器，一个是无参构造，一个是 `(String message)` 构造器。
+
+自定义异常需要一个全局常量，声明为 `static final long serialVersionUID;`。
+
+### 6.3 注意点
+
+> 如何使用自定义异常类？
+>
+> * 在具体的代码中，满足指定条件的情况下，需要手动地使用 “`throw + 自定义异常类的对象`” 的方式，将异常对象抛出。
+> * 如果自定义异常类是非运行时异常，则必须考虑如何处理此异常类的对象（具体地：1. `try - catch - finally`；2. `throws`）。
+
+自定义的异常只能通过 `throw` 抛出。
+
+自定义异常最重要的是异常类的名字和 `message` 属性。当异常出现时，可以根据名字判断异常类型。比如：`TeamException("成员已满，无法添加");`、`TeamException("该成员已是某团队成员");`。
+
+自定义异常对象只能手动抛出，抛出后由 `try ... catch` 处理，也可以通过 `throws` 抛给调用者处理。
+
+### 6.4 举例
+
+示例代码：
+```java
+/* BelowZeroException.java */
+
+package com.anxin_hitsz_04._throw;
+
+/**
+ * ClassName: BelowZeroException
+ * Package: com.anxin_hitsz_04._throw
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 17:51
+ * @Version 1.0
+ */
+public class BelowZeroException extends Exception {
+    static final long serialVersionUID = -3387516999948L;
+
+    public BelowZeroException() {
+
+    }
+
+    public BelowZeroException(String name) {
+        super(name);
+    }
+
+    public BelowZeroException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+
+/* ThrowTest.java */
+
+package com.anxin_hitsz_04._throw;
+
+/**
+ * ClassName: ThrowTest
+ * Package: com.anxin_hitsz_04._throw
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 16:35
+ * @Version 1.0
+ */
+public class ThrowTest {
+    public static void main(String[] args) {
+        Student s1 = new Student();
+        try {
+            s1.regist(10);
+            s1.regist(-10);
+            System.out.println(s1);
+        } catch (Exception e) {
+            e.printStackTrace();
+//            System.out.println(e.getMessage());
+        }
+
+    }
+}
+
+class Student {
+    int id;
+
+//    public void regist(int id) {
+//        if (id > 0) {
+//            this.id = id;
+//        } else {
+////            System.out.println("输入的 id 非法");
+//            // 手动抛出异常类的对象
+////            throw new RuntimeException("输入的 id 非法");
+//        }
+//    }
+
+    public void regist(int id) throws Exception {
+        if (id > 0) {
+            this.id = id;
+        } else {
+//            System.out.println("输入的 id 非法");
+            // 手动抛出异常类的对象
+//            throw new RuntimeException("输入的 id 非法");
+
+//            throw new Exception("输入的 id 非法"); // 非法
+
+            throw new BelowZeroException("输入的 id 非法");
+
+//            System.out.println("此语句不能被执行");
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                '}';
+    }
+}
+
+```
+
+## 七、练习
+
+**练习 1：**
+> 题目：
+>
+> 修改 chapter08_oop3 中接口部分的 exer2，在 `ComparableCircle` 接口 `compareTo()` 中抛出异常。
+
+示例代码：
+```java
+/* CompareObject.java */
+
+package com.anxin_hitsz_05.exer.exer1;
+
+/**
+ * ClassName: CompareObject
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:01
+ * @Version 1.0
+ */
+public interface CompareObject {
+    // 若返回值是 0，代表相等；若为正数，代表当前对象大；若为负数，代表当前对象小
+    public int compareTo(Object o) throws Exception;
+}
+
+
+/* Circle.java */
+
+package com.anxin_hitsz_05.exer.exer1;
+
+/**
+ * ClassName: Circle
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:02
+ * @Version 1.0
+ */
+public class Circle {
+    private double radius;  // 半径
+
+    public Circle() {
+    }
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public String toString() {
+        return "Circle{" +
+                "radius=" + radius +
+                '}';
+    }
+
+}
+
+
+/* ComparableCircle.java */
+
+package com.anxin_hitsz_05.exer.exer1;
+
+/**
+ * ClassName: ComparableCircle
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:03
+ * @Version 1.0
+ */
+public class ComparableCircle extends Circle implements CompareObject {
+    public ComparableCircle() {
+    }
+
+    public ComparableCircle(double radius) {
+        super(radius);
+    }
+
+    // 根据对象的半径的大小，比较对象的大小
+    @Override
+    public int compareTo(Object o) throws Exception {
+        if (this == o) {
+            return 0;
+        }
+
+        if (o instanceof ComparableCircle) {
+            ComparableCircle c = (ComparableCircle) o;
+            return Double.compare(this.getRadius(), c.getRadius());
+        } else {
+//            throw new RuntimeException("输入的类型不匹配");
+
+            throw new Exception("输入的类型不匹配");
+        }
+    }
+}
+
+
+/* InterfaceTest.java */
+
+package com.anxin_hitsz_05.exer.exer1;
+
+import com.anxin_hitsz_08._interface.exer2.ComparableCircle;
+
+/**
+ * ClassName: InterfaceTest
+ * Package: com.anxin_hitsz_08._interface.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/1/31 15:10
+ * @Version 1.0
+ */
+public class InterfaceTest {
+    public static void main(String[] args) {
+
+        ComparableCircle c1 = new ComparableCircle(2.3);
+        ComparableCircle c2 = new ComparableCircle(5.3);
+
+        try {
+            int compareValue = c1.compareTo(c2);
+            if (compareValue > 0) {
+                System.out.println("c1 对象大");
+            } else if (compareValue < 0) {
+                System.out.println("c2 对象大");
+            } else {
+                System.out.println("c1 和 c2 一样大");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+```
+
+**练习 2：**
+> 题目 - 游戏角色：
+>
+> 在一款角色扮演游戏中，每一个人都会有名字和生命值，角色的生命值不能为负数。
+>
+> 要求：当一个人物的生命值为负数的时候需要抛出自定义的异常。
+>
+> 操作步骤描述：
+> 1. 自定义异常类 `NoLifeValueException` 继承 `RuntimeException`。
+>   * 提供空参和有参构造。
+>   * 在有参构造中，需要调用父类的有参构造，把异常信息传入。
+> 2. 定义 `Person` 类。
+>   * 属性：名称（`name`）和生命值（`lifeValue`）。
+>   * 提供 `setter` 和 `getter` 方法：在 `setLifeValue(int lifeValue)` 方法中，首先判断，如果 `lifeValue` 为负数，就抛出 `NoLifeValueException`，异常信息为“`生命值不能为负数：xx`”；然后再给成员 `lifeValue` 赋值。
+>   * 提供空参构造。
+>   * 提供有参构造：使用 `setXxx()` 方法给 `name` 和 `lifeValue` 赋值。
+> 3. 定义测试类 `Exer2`。
+>   * 使用满参构造方法创建 `Person` 对象，生命值传入一个负数；由于一旦遇到异常，后面的代码将不再执行，所以需要注释掉上面的代码。
+>   * 使用空参构造创建 `Person` 对象。
+>       * 调用 `setLifeValue(int lifeValue)` 方法，传入一个正数，运行程序。
+>       * 调用 `setLifeValue(int lifeValue)` 方法，传入一个负数，运行程序。
+>   * 分别对以上两种构造方法处理异常和不处理异常进行运行，查看效果。
+
+示例代码：
+```java
+/* NoLifeValueException.java */
+
+package com.anxin_hitsz_05.exer.exer2;
+
+/**
+ * ClassName: NoLifeValueException
+ * Package: com.anxin_hitsz_05.exer.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 18:08
+ * @Version 1.0
+ */
+public class NoLifeValueException extends RuntimeException {
+
+    static final long serialVersionUID = -7034897190939L;
+
+    public NoLifeValueException() {
+
+    }
+
+    public NoLifeValueException(String message) {
+        super(message);
+    }
+}
+
+
+/* Person.java */
+
+package com.anxin_hitsz_05.exer.exer2;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_05.exer.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 18:10
+ * @Version 1.0
+ */
+public class Person {
+    private String name;
+    private int lifeValue;
+
+    public Person() {
+    }
+
+    public Person(String name, int lifeValue) {
+//        this.name = name;
+        setName(name);
+        setLifeValue(lifeValue);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getLifeValue() {
+        return lifeValue;
+    }
+
+    public void setLifeValue(int lifeValue) {
+        if (lifeValue < 0) {
+            throw new NoLifeValueException("生命值不能为负数：" + lifeValue);
+        }
+
+        this.lifeValue = lifeValue;
+
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", lifeValue=" + lifeValue +
+                '}';
+    }
+
+}
+
+
+/* Exer2.java */
+
+package com.anxin_hitsz_05.exer.exer2;
+
+/**
+ * ClassName: Exer2
+ * Package: com.anxin_hitsz_05.exer.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 18:13
+ * @Version 1.0
+ */
+public class Exer2 {
+    public static void main(String[] args) {
+        // 1. 使用有参的构造器
+        try {
+//            Person p1 = new Person("Tom", 10);
+            Person p1 = new Person("Tom", -10);
+            System.out.println(p1);
+
+        } catch (NoLifeValueException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // 2. 使用空参的构造器
+        Person p2 = new Person();
+        p2.setName("Jerry");
+        p2.setLifeValue(10);
+//        p2.setLifeValue(-10);
+
+        System.out.println(p2);
+    }
+}
+
+```
+
+**练习 3：**
+> 题目：
+>
+> 编写应用 `DivisionDemo.java`，接收命令行的两个参数，要求不能输入负数，计算两数相除。对数据类型不一致（`NumberFormatException`）、缺少命令行参数（`ArrayIndexOutOfBoundsException`）、除 0（`ArithmeticException`）及输入负数（`BelowZeroException`，自定义的异常）进行异常处理。
+>
+> 提示：
+> 1. 在主类（`DevisionDemo`）中定义异常方法（`divide`）完成两数相除功能。
+> 2. 在 `main()` 方法中调用 `divide` 方法，使用异常处理语句进行异常处理。
+> 3. 在程序中，自定义对应输入负数的异常类（`BelowZeroException`）。
+> 4. 运行时接受参数 `java DivisionDemo 20 10 // args[0]="20", args[1]="10"`。
+> 5. `Integer` 类的 `static` 方法 `parseInt(String s)` 将 `s` 转换成对应的 `int` 值。如：`int a = Integer.parseInt("314"); // a=314`。
+
+示例代码：
+```java
+/* BelowZeroException.java */
+
+package com.anxin_hitsz_05.exer.exer3;
+
+/**
+ * ClassName: BelowZeroException
+ * Package: com.anxin_hitsz_05.exer.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 18:21
+ * @Version 1.0
+ */
+public class BelowZeroException extends Exception {
+    static final long serialVersionUID = -33875169939948L;
+
+    public BelowZeroException() {
+    }
+
+    public BelowZeroException(String message) {
+        super(message);
+    }
+}
+
+
+/* DivisionTest.java */
+
+package com.anxin_hitsz_05.exer.exer3;
+
+/**
+ * ClassName: DivisionDemo
+ * Package: com.anxin_hitsz_05.exer.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/5 18:18
+ * @Version 1.0
+ */
+public class DivisionDemo {
+    public static void main(String[] args) {
+
+        try {
+            int m = Integer.parseInt(args[0]);
+            int n = Integer.parseInt(args[1]);
+
+            int result = divide(m, n);
+            System.out.println("结果为：" + result);
+        } catch (BelowZeroException e) {
+            System.out.println(e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("数据类型不一致");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("缺少命令行参数");
+        } catch (ArithmeticException e) {
+            System.out.println("除 0");
+        }
+
+    }
+
+    public static int divide(int m, int n) throws BelowZeroException {
+        if (m < 0 || n < 0) {
+            // 手动抛出异常类的对象
+            throw new BelowZeroException("输入负数了");
+        }
+
+        return m / n;
+    }
+}
+
+```
