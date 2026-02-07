@@ -12,6 +12,7 @@ package com.anxin_hitsz_01.create.thread;
 
 // 1. 创建一个继承于 Thread 类的子类
 class PrintNumber extends Thread {
+//    private double money = 1000;
     // 2. 重写 Thread 类的 run() -> 将此线程要执行的操作，声明在此方法体中
     @Override
     public void run() {
