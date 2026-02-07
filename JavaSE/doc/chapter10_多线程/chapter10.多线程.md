@@ -744,3 +744,660 @@ public enum State {
 > 这种带参的方法，其实是一种倒计时操作，相当于我们生活中的小闹钟，我们设定好时间，到时通知；可是如果提前得到（唤醒）通知，那么设定好时间再通知也就显得多此一举了。
 > 
 > 那么这种设计方案其实是一举两得：如果没有得到（唤醒）通知，那么线程就处于 `Time Waiting` 状态，直到倒计时完毕自动醒来；如果在倒计时期间得到（唤醒）通知，那么线程从 `Time Waiting` 状态立刻唤醒。
+
+### 4.3 练习
+
+练习：
+> 题目 - 新年倒计时：
+>
+> 模拟新年倒计时，每隔 1 秒输出一个数字，依次输出 10、9、8、……、1，最后输出：新年快乐！
+
+示例代码：
+```java
+/* HappyNewYear.java */
+
+package com.anxin_hitsz_02.method_lifecycle.exer;
+
+/**
+ * ClassName: HappyNewYear
+ * Package: com.anxin_hitsz_02.method_lifecycle.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/7 22:07
+ * @Version 1.0
+ */
+public class HappyNewYear {
+    public static void main(String[] args) {
+
+        for (int i = 10; i >= 0; i--) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (i > 0) {
+                System.out.println(i);
+            } else {
+                System.out.println("Happy New Year!");
+            }
+
+        }
+
+    }
+}
+
+```
+
+## 五、线程安全问题及解决
+
+当我们使用多个线程访问**同一资源**（可以是同一个变量、同一个文件、同一条记录等）的时候，若多个线程**只有读操作**，那么不会发生线程安全问题；但是如果多个线程中对资源有**读和写**的操作，就容易出现线程安全问题。
+
+### 5.1 同一个资源问题和线程安全问题
+
+例题：开启三个窗口售票，总票数为 100 张。
+
+使用实现 `Runnable` 接口的方式，实现卖票：
+```java
+/* WindowTest.java */
+
+package com.anxin_hitsz_03.notsafe;
+
+/**
+ * ClassName: WindowTest
+ * Package: com.anxin_hitsz_03.notsafe
+ * Description:
+ *      使用实现 Runnable 接口的方式，实现卖票
+ * @Author AnXin
+ * @Create 2026/2/7 20:31
+ * @Version 1.0
+ */
+
+class SaleTicket implements Runnable {
+    int ticket = 100;
+
+    @Override
+    public void run() {
+        while (true) {
+            if (ticket > 0) {
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+                ticket--;
+            } else {
+                break;
+            }
+        }
+
+    }
+
+}
+
+public class WindowTest {
+    public static void main(String[] args) {
+        SaleTicket s = new SaleTicket();
+
+        Thread t1 = new Thread(s);
+        Thread t2 = new Thread(s);
+        Thread t3 = new Thread(s);
+
+        t1.setName("窗口 1");
+        t2.setName("窗口 2");
+        t3.setName("窗口 3");
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+    }
+}
+
+```
+
+使用继承 `Thread` 类的方式，实现卖票：
+```java
+/* WindowTest1.java */
+
+package com.anxin_hitsz_03.notsafe;
+
+/**
+ * ClassName: WindowTest1
+ * Package: com.anxin_hitsz_03.notsafe
+ * Description:
+ *      使用继承 Thread 类的方式，实现卖票
+ * @Author AnXin
+ * @Create 2026/2/7 20:37
+ * @Version 1.0
+ */
+
+class Window extends Thread {
+    static int ticket = 100;
+    @Override
+    public void run() {
+        while (true) {
+            if (ticket > 0) {
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+                ticket--;
+            } else {
+                break;
+            }
+        }
+
+    }
+}
+
+public class WindowTest1 {
+    public static void main(String[] args) {
+        Window w1 = new Window();
+        Window w2 = new Window();
+        Window w3 = new Window();
+
+        w1.setName("窗口 1");
+        w2.setName("窗口 2");
+        w3.setName("窗口 3");
+
+        w1.start();
+        w2.start();
+        w3.start();
+
+    }
+
+
+}
+
+```
+
+出现了重票和错票！
+
+什么原因导致的 ？
+* 线程 `1` 操作 `ticket` 的过程中，**尚未结束**的情况下，其他线程也参与进来，对 `ticket` 进行操作。
+
+如何解决？
+* 必须保证一个线程 `A` 在操作 `ticket` 的过程中，其它线程必须等待，直到线程 `A` 操作 `ticket` 结束以后，其它线程才可以进来继续操作 `ticket`。
+
+### 5.2 同步机制解决线程安全问题
+
+要解决多线程并发访问一个资源的安全性问题，Java 中提供了同步机制（synchronized）来解决：
+![同步机制（synchronized）解决多线程并发访问一个资源的安全性问题](./images/1563372934332.png "同步机制（synchronized）解决多线程并发访问一个资源的安全性问题")
+
+为了保证每个线程都能正常执行原子操作，Java 引入了线程同步机制。
+
+> 注意：
+>
+> 在任何时候，最多允许一个线程拥有同步锁，谁拿到锁就进入代码块，其他的线程只能在外等着（`BLOCKED`）。
+
+#### 5.2.1 同步机制解决线程安全问题的原理
+
+同步机制的原理，其实就相当于给某段代码加“锁”；任何线程想要执行这段代码，都要先获得“锁”，我们称它为同步锁。因为 Java 对象在堆中的数据分为对象头、实例变量、空白的填充，而对象头中包含：
+* Mark Word：记录了和当前对象有关的 GC、锁标记等信息。
+* 指向类的指针：每一个对象需要记录它是由哪个类创建出来的。
+* 数组长度（只有数组对象才有）。
+
+哪个线程获得了“同步锁”对象之后，“同步锁”对象就会记录这个线程的 ID，这样其他线程就只能等待了；除非这个线程“释放”了锁对象，其他线程才能重新获得 / 占用“同步锁”对象。
+
+#### 5.2.2 同步代码块和同步方法
+
+##### 5.2.2.1 同步代码块
+
+`synchronized` 关键字可以用于某个区块前面，表示只对这个区块的资源实行互斥访问。
+
+语法格式：
+```java
+synchronized(同步锁 /* 即：同步监视器 */) {
+    需要被同步操作的代码
+}
+```
+
+> 说明：
+> * 需要被同步的代码，即为操作共享数据的代码。
+> * 共享数据：即多个线程都需要操作的数据；比如 `ticket`。
+> * 需要被同步的代码，在被 `synchronized` 包裹以后，就使得一个线程在操作这些代码的过程中，其它线程必须等待。
+> * 同步监视器，俗称“锁”；哪个线程获取了锁，哪个线程就能执行需要被同步的代码。
+> * 同步监视器可以使用任何一个类的对象充当；但是，多个线程必须共用同一个同步监视器。
+
+> 注意：
+> * 在实现 `Runnable` 接口的方式中，同步监视器可以考虑使用 `this`。
+> * 在继承 `Thread` 类的方式中，同步监视器要慎用 `this`，可以考虑使用 `当前类.class`。
+
+使用实现 `Runnable` 接口的方式 - 示例代码：
+```java
+/* WindowTest.java */
+
+package com.anxin_hitsz_03.runnablesafe;
+
+/**
+ * ClassName: WindowTest
+ * Package: com.anxin_hitsz_03.notsafe
+ * Description:
+ *      使用实现 Runnable 接口的方式，实现卖票 -> 存在线程安全问题的
+ *      使用同步代码块解决上述卖票中的线程安全问题
+ * @Author AnXin
+ * @Create 2026/2/7 20:31
+ * @Version 1.0
+ */
+
+class SaleTicket implements Runnable {
+    int ticket = 100;
+    Object obj = new Object();
+    Dog dog = new Dog();
+
+    @Override
+    public void run() {
+//        synchronized (this) {
+        while (true) {
+
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+//            synchronized (obj) {    // obj：是唯一的？yes
+//            synchronized (dog) {    // dog：是唯一的？yes
+            synchronized (this) {    // this：是唯一的？yes，就是题目中的 s
+                if (ticket > 0) {
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+                    ticket--;
+                } else {
+                    break;
+                }
+            }
+
+        }
+
+    }
+
+}
+
+public class WindowTest {
+    public static void main(String[] args) {
+        SaleTicket s = new SaleTicket();
+
+        Thread t1 = new Thread(s);
+        Thread t2 = new Thread(s);
+        Thread t3 = new Thread(s);
+
+        t1.setName("窗口 1");
+        t2.setName("窗口 2");
+        t3.setName("窗口 3");
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+    }
+}
+
+class Dog {
+
+}
+
+```
+
+使用继承 `Thread` 类的方式 - 示例代码：
+```java
+/* WindowTest.java */
+
+package com.anxin_hitsz_03.threadsafe;
+
+/**
+ * ClassName: WindowTest
+ * Package: com.anxin_hitsz_03.notsafe
+ * Description:
+ *      使用继承 Thread 类的方式，实现卖票
+ *      使用同步代码块的方式解决线程安全问题
+ * @Author AnXin
+ * @Create 2026/2/7 20:37
+ * @Version 1.0
+ */
+
+class Window extends Thread {
+    static int ticket = 100;
+    static Object obj = new Object();
+    @Override
+    public void run() {
+
+        while (true) {
+//            synchronized (this) {   // this：此时表示 w1、w2、w3，不能保证锁的唯一性
+//            synchronized (obj) {   // obj：使用 static 修饰以后，就能保证其唯一性
+            synchronized (Window.class) {   // 结构：Class clz = Window.class，是唯一的
+                if (ticket > 0) {
+
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+                    ticket--;
+                } else {
+                    break;
+                }
+            }
+        }
+
+    }
+}
+
+public class WindowTest {
+    public static void main(String[] args) {
+        Window w1 = new Window();
+        Window w2 = new Window();
+        Window w3 = new Window();
+
+        w1.setName("窗口 1");
+        w2.setName("窗口 2");
+        w3.setName("窗口 3");
+
+        w1.start();
+        w2.start();
+        w3.start();
+
+    }
+
+
+}
+
+```
+
+##### 5.2.2.2 同步方法
+
+如果操作共享数据的代码完整地声明在了一个方法中，那么我们就可以将此方法声明为同步方法即可。
+
+`synchronized` 关键字直接修饰方法，表示同一时刻只有一个线程能进入这个方法，其他线程在外面等着。
+
+语法格式：
+```java
+public synchronized void method() {
+    可能会产生线程安全问题的代码
+}
+```
+
+> 说明：
+> * 非静态的同步方法，默认同步监视器是 `this`。
+> * 静态的同步方法，默认同步监视器是当前类本身。
+
+使用实现 `Runnable` 接口的方式 - 示例代码：
+```java
+/* WindowTest1.java */
+
+package com.anxin_hitsz_03.runnablesafe;
+
+/**
+ * ClassName: WindowTest1
+ * Package: com.anxin_hitsz_03.runnablesafe
+ * Description:
+ *      使用同步方法解决实现 Runnable 接口的线程安全问题
+ * @Author AnXin
+ * @Create 2026/2/7 21:39
+ * @Version 1.0
+ */
+
+class SaleTicket1 implements Runnable {
+    int ticket = 100;
+    boolean isFlag = true;
+
+    @Override
+    public void run() {
+        while (isFlag) {
+            show();
+        }
+
+    }
+
+    public synchronized void show() {   // 此时的同步监视器是：this；此题目中即为 s，是唯一的
+        if (ticket > 0) {
+
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+            ticket--;
+        } else {
+            isFlag = false;
+        }
+    }
+
+}
+
+public class WindowTest1 {
+    public static void main(String[] args) {
+        SaleTicket1 s = new SaleTicket1();
+
+        Thread t1 = new Thread(s);
+        Thread t2 = new Thread(s);
+        Thread t3 = new Thread(s);
+
+        t1.setName("窗口 1");
+        t2.setName("窗口 2");
+        t3.setName("窗口 3");
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+    }
+}
+
+```
+
+使用继承 `Thread` 类的方式 - 示例代码：
+```java
+/* WindowTest1.java */
+
+package com.anxin_hitsz_03.threadsafe;
+
+/**
+ * ClassName: WindowTest1
+ * Package: com.anxin_hitsz_03.threadsafe
+ * Description:
+ *      使用同步方法解决继承 Thread 类中的线程安全问题
+ * @Author AnXin
+ * @Create 2026/2/7 21:46
+ * @Version 1.0
+ */
+
+class Window1 extends Thread {
+    static int ticket = 100;
+    static Object obj = new Object();
+    static boolean isFlag = true;
+
+    @Override
+    public void run() {
+
+        while (isFlag) {
+            show();
+        }
+
+    }
+
+//    public synchronized void show() {    // 此时同步监视器：this；此题目中 this 为 w1、w2、w3，仍然是线程不安全的
+    public static synchronized void show() {    // 此时同步监视器：当前类本身，即为 Window1.class，是唯一的
+        if (ticket > 0) {
+
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println(Thread.currentThread().getName() + "售票，票号为：" + ticket);
+            ticket--;
+        } else {
+            isFlag = false;
+        }
+    }
+}
+
+public class WindowTest1 {
+    public static void main(String[] args) {
+        Window1 w1 = new Window1();
+        Window1 w2 = new Window1();
+        Window1 w3 = new Window1();
+
+        w1.setName("窗口 1");
+        w2.setName("窗口 2");
+        w3.setName("窗口 3");
+
+        w1.start();
+        w2.start();
+        w3.start();
+
+    }
+
+
+}
+
+```
+
+#### 5.2.3 同步锁机制
+
+在《Thinking in Java》中，是这么说的：对于并发工作，你需要某种方式来防止两个任务访问相同的资源（其实就是共享资源竞争）。防止这种冲突的方法就是当资源被一个任务使用时，在其上加锁。第一个访问某项资源的任务必须锁定这项资源，使其他任务在其被解锁之前，就无法访问它了，而在其被解锁之时，另一个任务就可以锁定并使用它了。
+
+#### 5.2.4 `synchronized` 的锁是什么？
+
+同步锁对象可以是任意类型，但是必须保证竞争“同一个共享资源”的多个线程必须使用同一个“同步锁对象”。
+
+对于同步代码块来说，同步锁对象是由程序员手动指定的（很多时候也是指定为 `this` 或 `类名.class`），但是对于同步方法来说，同步锁对象只能是默认的：
+* 静态方法：当前类的 `Class 对象`（`类名.class`）。
+* 非静态方法：`this`。
+
+`synchronized` 的好处：解决了线程的安全问题。
+`synchronized` 的弊端：在操作共享数据时，多线程其实是串行执行的，意味着性能低。
+
+#### 5.2.5 同步操作的思考顺序
+
+**1. 如何找问题，即代码是否存在线程安全？（非常重要）**
+
+1. 明确哪些代码是多线程运行的代码；
+2. 明确多个线程是否有共享数据；
+3. 明确多线程运行代码中是否有多条语句操作共享数据。
+
+**2. 如何解决呢？（非常重要）**
+
+对多条操作共享数据的语句，只能让一个线程都执行完；在执行过程中，其他线程不可以参与执行。
+
+即所有操作共享数据的这些语句都要放在同步范围中。
+
+> 注意：
+> * 范围太小：不能解决安全问题。
+> * 范围太大：因为一旦某个线程抢到锁，其他线程就只能等待；所以范围太大，效率会降低，不能合理利用 CPU 资源。
+
+### 5.3 练习
+
+**练习：**
+> 题目：
+>
+> 银行有一个账户。有两个储户分别向同一个账户存 3000 元，每次存 1000元，存 3 次；每次存完打印账户余额。
+>
+> 问题：该程序是否有安全问题？如果有，如何解决？
+>
+> 提示：
+> 1. 明确哪些代码是多线程运行代码，须写入 `run()` 方法。
+> 2. 明确什么是共享数据。
+> 3. 明确多线程运行代码中哪些语句是操作共享数据的。
+
+示例代码：
+```java
+/* AccountTest.java */
+
+package com.anxin_hitsz_03.exer;
+
+/**
+ * ClassName: AccountTest
+ * Package: com.anxin_hitsz_03.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/7 22:15
+ * @Version 1.0
+ */
+public class AccountTest {
+    public static void main(String[] args) {
+
+        Account acct = new Account();
+
+        Customer customer1 = new Customer(acct, "甲");
+        Customer customer2 = new Customer(acct, "乙");
+
+        customer1.start();
+        customer2.start();
+
+
+    }
+}
+
+class Account { // 账户
+    private double balance; // 余额
+
+    public synchronized void deposit(double amt) {  // this：是否唯一？即为 acct，是唯一的
+        if (amt > 0) {
+            balance += amt;
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(Thread.currentThread().getName() + "存钱 1000 元，余额为：" + balance);
+    }
+
+}
+
+class Customer extends Thread {
+    Account account;
+
+    public Customer(Account acct) {
+        this.account = acct;
+    }
+
+    public Customer(Account acct, String name) {
+        super(name);
+        this.account = acct;
+    }
+
+    @Override
+    public void run() {
+
+        for (int i = 0; i < 3; i++) {
+
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            account.deposit(1000);
+
+        }
+
+    }
+
+}
+
+```

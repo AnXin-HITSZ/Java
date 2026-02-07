@@ -1,4 +1,4 @@
-package com.anxin_hitsz_01.method_lifecycle;
+package com.anxin_hitsz_02.method_lifecycle;
 
 /**
  * ClassName: EvenNumberTest
