@@ -945,6 +945,110 @@ public class StringMethodTest1 {
 
 示例代码：
 ```java
+/* StringTest.java */
+
+package com.anxin_hitsz_01.string.exer1;
+
+import org.junit.Test;
+
+/**
+ * ClassName: StringTest
+ * Package: com.anxin_hitsz_01.string.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 14:54
+ * @Version 1.0
+ */
+public class StringTest {
+
+    /*
+    * 题目 2：
+    * */
+
+    @Test
+    public void test() {
+        String s = "abcdefg";
+        String s1 = reverse(s, 2, 5);
+        String s2 = reverse1(s, 2, 5);
+        System.out.println(s1);
+        System.out.println(s2);
+
+    }
+
+    /*
+    * 方式 1：将 String 转为 char[]，针对 char[] 进行相应位置的反转，反转以后将 char[] 转为 String
+    * */
+    public String reverse(String str, int fromIndex, int toIndex) {
+        //
+        char[] arr = str.toCharArray();
+
+        //
+        for (int i = fromIndex, j = toIndex; i < j; i++, j--) {
+            char temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+
+        //
+        return new String(arr);
+
+    }
+
+    /*
+    * 方式 2：将 str 分为三部分，将第 1 部分、第 2 部分的反转、第 3 部分依次拼接
+    * */
+    public String reverse1(String str, int fromIndex, int toIndex) {
+        // 获取 str 的第 1 部分
+        String finalStr = str.substring(0, fromIndex);  // ab
+
+        // 拼接上第 2 部分
+        for (int i = toIndex; i >= fromIndex; i--) {
+            finalStr += str.charAt(i);
+        }   // abfedc
+
+        // 拼接上第 3 部分
+        finalStr = finalStr + str.substring(toIndex + 1);
+
+        return finalStr;
+
+    }
+
+    /*
+    * 题目 3：
+    * */
+
+    /**
+     * 判断 subStr 在 str 中出现的次数
+     * @param str
+     * @param subStr
+     * @return 返回次数
+     */
+    public int getSubStringCount(String str, String subStr) {
+        int count = 0;  // 记录出现的次数
+
+        if (str.length() >= subStr.length()) {
+            int index = str.indexOf(subStr);
+            while (index >= 0) {
+                count++;
+                index = str.indexOf(subStr, index + subStr.length());
+            }
+        }
+
+        return count;
+    }
+
+    @Test
+    public void test2() {
+        String subStr = "ab";
+        String str = "abkkcadkabkebfkabkskab";
+
+        int count = getSubStringCount(str, subStr);
+        System.out.println(count);
+
+    }
+
+}
 
 ```
 
@@ -959,5 +1063,831 @@ public class StringMethodTest1 {
 
 示例代码：
 ```java
+/* User.java */
+
+package com.anxin_hitsz_01.string.exer2;
+
+/**
+ * ClassName: User
+ * Package: com.anxin_hitsz_01.string.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 15:23
+ * @Version 1.0
+ */
+public class User {
+    private String name;
+    private String password;    // 密码
+
+    public User() {
+    }
+
+    public User(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return name + "-" + password;
+    }
+
+}
+
+
+/* UserTest.java */
+
+package com.anxin_hitsz_01.string.exer2;
+
+import java.util.Scanner;
+
+/**
+ * ClassName: UserTest
+ * Package: com.anxin_hitsz_01.string.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 15:24
+ * @Version 1.0
+ */
+public class UserTest {
+    public static void main(String[] args) {
+
+        // 1. 创建数组，并初始化几个 User 对象
+        User[] arr = new User[3];
+        arr[0] = new User("Tom", "8888");
+        arr[1] = new User("Bob", "123");
+        arr[2] = new User("Jerry", "6666");
+
+        System.out.println("库中的用户有：");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+
+
+        // 2. 实例化 Scanner，获取输入的用户名和密码
+        Scanner scan = new Scanner(System.in);
+        System.out.print("请输入用户名：");
+        String userName = scan.next();
+        System.out.print("请输入密码：");
+        String password = scan.next();
+
+        // 3. 遍历数组元素，匹配用户名和密码
+        boolean isFlag = true;
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].getName().equals(userName)) {    // 存在此用户名
+                isFlag = false;
+                if (arr[i].getPassword().equals(password)) {
+                    System.out.println("登录成功，" + userName);
+                } else {
+                    System.out.println("密码有误");
+                }
+                break;
+            }
+        }
+        if (isFlag) {
+            System.out.println("没有该用户");
+        }
+
+
+        scan.close();
+
+    }
+}
+
+```
+
+## 二、字符串相关类之可变字符序列：`StringBuffer`、`StringBuilder`
+
+因为 `String` 对象是不可变对象，虽然可以共享常量对象，但是对于字符串频繁的修改和拼接操作效率较低，空间消耗也比较高。因此，JDK 又在 java.lang 包提供了可变字符序列 `StringBuffer` 和 `StringBuilder` 类型。
+
+### 2.1 `StringBuffer` 与 `StringBuilder` 的理解
+
+`java.lang.StringBuffer` 代表**可变的字符序列**；JDK 1.0 中声明，可以对字符串内容进行增删，此时不会产生新的对象。
+![StringBuilder](./images/image-20220228153030902.png "StringBuilder")
+
+继承结构：
+![继承结构](./images/image-20220405174233055.png "继承结构")
+
+`AbstractStringBuilder` 声明：
+![AbstractStringBuilder 声明](./images/image-20220405174414780.png "AbstractStringBuilder 声明")
+
+针对于 `StringBuilder` 而言，其内部的属性有：
+* `char[] value`：存储字符序列。
+* `int count`：实际存储的字符的个数。
+
+针对于 `StringBuilder`：
+```java
+StringBuilder sBuffer1 = new StringBuilder();   // char[] value = new char[16];
+StringBuilder sBuffer1 = new StringBuilder("abc");   // char[] value = new char[16 + "abc".length()];
+
+sBuffer1.append("ac");  // value[0] = 'a';  value[1] = 'c';
+sBuffer1.append("b");   // value[2] = 'b';
+
+... // 不断地添加 ……
+
+```
+在添加的过程中，一旦 `count` 要超过 `value.length` 时，就需要扩容；默认扩容为 $原有容量的 2 倍 + 2$，并将原有 `value` 数组中的元素复制到新的数组中。
+
+> 源码启示：
+> * 如果开发中需要频繁地针对于字符串进行增、删、改等操作，建议使用 `StringBuffer` 或 `StringBuilder` 替换 `String`。
+> * 如果开发中，不涉及到线程安全问题，建议使用 `StringBuilder` 替换 `StringBuffer`，因为使用 `StringBuilder` 效率高。
+> * 如果开发中大体确定要操作的字符的个数，建议使用带 `int capacity` 参数的构造器，因为可以避免底层多次扩容操作，性能更高。
+
+`StringBuilder` 和 `StringBuffer` 非常类似，均代表可变的字符序列，而且提供相关功能的方法也一样。
+
+区分 `String`、`StringBuffer`、`StringBuilder`：
+* `String`：不可变的字符序列；JDK 8.0 及之前底层使用 `char[]` 数组存储，JDK 9 及之后底层使用 `byte[]` 数组存储。
+* `StringBuffer`：可变的字符序列；JDK 1.0 声明，线程安全（方法有 `synchronized` 修饰），效率低，JDK 8.0 及之前底层使用 `char[]` 数组存储，JDK 9 及之后底层使用 `byte[]` 数组存储。
+* `StringBuilder`：可变的字符序列；JDK 5.0 声明，线程不安全，效率高，JDK 8.0 及之前底层使用 `char[]` 数组存储，JDK 9 及之后底层使用 `byte[]` 数组存储。
+
+对比三者的执行效率，效率从高到低排列：`StringBuilder` > `StringBuffer` > `String`。
+
+### 2.2 `StringBuilder`、`StringBuffer` 的 API
+
+`StringBuilder`、`StringBuffer` 的 API 是完全一致的，并且很多方法与 `String` 相同。
+
+#### 2.2.1 常用 API
+
+`StringBuffer append(xx)`：提供了很多的 `append()` 方法，用于进行字符串追加的方式拼接。
+
+`StringBuffer delete(int start, int end)`：删除 `[start, end)` 之间字符。
+
+`StringBuffer deleteCharAt(int index)`：删除 `[index]` 位置字符。
+
+`StringBuffer replace(int start, int end, String str)`：替换 `[start, end)` 范围的字符序列为 `str`。
+
+`void setCharAt(int index, char c)`：替换 `[index]` 位置字符。
+
+`char charAt(int index)`：查找指定 `index` 位置上的字符。
+
+`StringBuffer insert(int index, xx)`：在 `[index]` 位置插入 `xx`。
+
+`int length()`：返回存储的字符数据的长度。
+
+`StringBuffer reverse()`：反转。
+
+> 注意：
+> * 当 `append` 和 `insert` 时，如果原来 `value` 数组长度不够，可扩容。
+> * 如上 `StringBuffer append(xx)`、`StringBuffer delete(int start, int end)`、`StringBuffer deleteCharAt(int index)`、`StringBuffer replace(int start, int end, String str)`、`StringBuffer reverse()` 方法支持**方法链操作**；原理：
+>   ![方法链操作原理](./images/image-20220405223542750.png "方法链操作原理")
+
+#### 2.2.2 其它 API
+
+`int indexOf(String str)`：在当前字符序列中查询 `str` 的第一次出现下标。
+
+`int indexOf(String str, int fromIndex)`：在当前字符序列 `[fromIndex, 最后]` 中查询 `str` 的第一次出现下标。
+
+`int lastIndexOf(String str)`：在当前字符序列中查询 `str` 的最后一次出现下标。
+
+`int lastIndexOf(String str, int fromIndex)`：在当前字符序列 `[fromIndex, 最后]` 中查询 `str` 的最后一次出现下标。
+
+`String substring(int start)`：截取当前字符序列 `[start, 最后]`。
+
+`String substring(int start, int end)`：截取当前字符序列 `[start, end)`。
+
+`String toString()`：返回此序列中数据的字符串表示形式。
+
+`void setLength(int newLength)`：设置当前字符序列长度为 `newLength`。
+
+#### 2.2.3 举例
+
+示例代码：
+```java
+/* StringBufferBuilderTest.java */
+
+package com.anxin_hitsz_02.stringmore;
+
+import org.junit.Test;
+
+/**
+ * ClassName: StringBufferBuilderTest
+ * Package: com.anxin_hitsz_02.stringmore
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 17:02
+ * @Version 1.0
+ */
+public class StringBufferBuilderTest {
+
+    /*
+    * 常用 API
+    * */
+
+    @Test
+    public void test1() {
+        StringBuilder sBuilder = new StringBuilder();
+        sBuilder.append("abc").append("123").append("def"); // 方法链的调用
+        System.out.println(sBuilder);
+
+    }
+
+    @Test
+    public void test2() {
+        StringBuilder sBuilder = new StringBuilder("hello");
+        sBuilder.insert(2, 1);
+        sBuilder.insert(2, "abc");
+        System.out.println(sBuilder);
+
+        StringBuilder sBuilder1 = sBuilder.reverse();
+
+        System.out.println(sBuilder);
+        System.out.println(sBuilder1);
+
+        System.out.println(sBuilder == sBuilder1);
+
+        System.out.println(sBuilder.length());  // 实际存储的字符的个数
+
+    }
+
+    /*
+    * 其它 API
+    * */
+
+    @Test
+    public void test3() {
+        StringBuilder sBuilder = new StringBuilder("hello");
+        sBuilder.setLength(2);
+
+        System.out.println(sBuilder);
+
+        sBuilder.append("c");
+        System.out.println(sBuilder);
+
+        sBuilder.setLength(10);
+        System.out.println(sBuilder);
+        System.out.println(sBuilder.charAt(6) == 0);    // true
+
+    }
+
+    /*
+    * 测试 String、StringBuffer、StringBuilder 在操作数据方面的效率
+    * */
+    @Test
+    public void test4() {
+        //初始设置
+        long startTime = 0L;
+        long endTime = 0L;
+
+
+        String text = "";
+        StringBuffer buffer = new StringBuffer("");
+        StringBuilder builder = new StringBuilder("");
+
+        //开始对比
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            buffer.append(String.valueOf(i));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("StringBuffer的执行时间：" + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            builder.append(String.valueOf(i));
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("StringBuilder的执行时间：" + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 20000; i++) {
+            text = text + i;
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("String的执行时间：" + (endTime - startTime));
+    }
+
+}
+
+```
+
+## 三、日期与时间 API
+
+### 3.1 JDK 8 之前
+
+#### 3.1.1 `java.lang.System` 类的方法
+
+`System` 类提供的 `public static long currentTimeMillis()` 用来返回当前时间与 1970 年 1 月 1 日 0 时 0 分 0 秒之间以毫秒为单位的时间差。
+* 获取当前时间对应的毫秒数，`long` 类型，即时间戳。
+* 此方法适于计算时间差。
+
+> 注意：
+>
+> 计算世界时间的主要标准有：
+> * UTC（Coordinated Universal Time）；
+> * GMT（Greenwich Mean Time）；
+> * CST（Central Standard Time）。
+>
+> 在国际无线电通信场合，为了统一起见，使用一个统一的时间，称为通用协调时（UTC，Universal Time Coordinated）。UTC 与格林尼治平均时（GMT，Greenwich Mean Time）一样，都与英国伦敦的本地时相同。这里，UTC 与 GMT 含义完全相同。
+
+#### 3.1.2 `java.util.Date`
+
+表示特定的瞬间，精确到毫秒。
+
+构造器：
+* `Date()`：使用无参构造器创建的对象可以获取本地当前时间。
+* `Date(long 毫秒数)`：把该毫秒值换算成日期时间对象。
+
+常用方法：
+* `getTime()`：返回自 1970 年 1 月 1 日 00:00:00 GMT 以来此 Date 对象表示的毫秒数。
+* `toString()`：把此 `Date` 对象转换为以下形式的 `String`：`dow mon dd hh:mm:ss zzz yyyy`；其中，`dow` 是一周中的某一天（Sun、Mon、Tue、Wed、Thu、Fri、Sat），`zzz` 是时间标准。
+* 其它很多方法都过时了。
+
+#### 3.1.3 `java.text.SimpleDateFormat`
+
+`java.text.SimpleDateFormat` 类是一个不与语言环境有关的方式来格式化和解析日期的具体类。
+
+可以进行格式化：日期 -> 文本。
+
+可以进行解析：文本 -> 日期。
+
+构造器：
+* `SimpleDateFormat()`：默认的模式和语言环境创建对象。
+* `public SimpleDateFormat(String pattern)`：该构造方法可以用参数 `pattern` 指定的格式创建一个对象。
+
+格式化：
+* `public String format(Date date)`：方法格式化时间对象 `date`。
+
+解析：
+* `public Date parse(String source)`：从给定字符串的开始解析文本，以生成一个日期。
+
+格式化常用字段：
+![格式化常用字段](./images/1572599023197.png "格式化常用字段")
+
+#### 3.1.4 `java.util.Calendar`（日历）
+
+`Date` 类的 API 大部分被废弃了，替换为 `Calendar`。
+
+`Calendar` 类是一个抽象类，主要用于完成日期字段之间相互操作的功能。
+
+获取 `Calendar` 实例的方法：
+* 使用 `Calendar.getInstance()` 方法：
+    ![使用 Calendar.getInstance() 方法](./images/image-20220123184906903.png "使用 Calendar.getInstance() 方法")
+* 调用它的子类 `GregorianCalendar`（公历）的构造器：
+    ![调用其子类 GregorianCalendar（公历）的构造器](./images/image-20220405225828816.png "调用其子类 GregorianCalendar（公历）的构造器")
+
+一个 `Calendar` 的实例时系统时间的抽象表示，可以修改或获取 `YEAR`、`MONTH`、`DAY_OF_WEEK`、`HOUR_OF_DAY`、`MINUTE、SECOND` 等**日历字段**对应的时间值。
+* `public int get(int field)`：返回给定日历字段的值。
+* `public void set(int field, int value)`：将给定的日历字段设置为指定的值。
+* `public void add(int field, int amount)`：根据日历的规则，为给定的日历字段添加或者减去指定的时间量。
+* `public final Date getTime()`：将 `Calendar` 转成 `Date` 对象。
+* `public final void setTime(Date date)`：使用指定的 `Date` 对象重置 `Calendar` 的时间。
+
+常用字段：
+![常用字段](./images/1620277709044.png "常用字段")
+
+> 注意：
+> * 获取月份时：一月是 `0`，二月是 `1`，……，以此类推，十二月是 `11`。
+> * 获取星期时，周日是 `1`，周二是 `2`，……，以此类推，周六是 `7`。
+
+#### 3.1.5 举例
+
+示例代码：
+```java
+/* DateTimeTest.java */
+
+package com.anxin_hitsz_03.date.before8;
+
+import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * ClassName: DateTimeTest
+ * Package: com.anxin_hitsz_03.date.before8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 18:13
+ * @Version 1.0
+ */
+public class DateTimeTest {
+
+    /*
+    * Date 类的使用
+    *
+    * |-- java.util.Date
+    *   > 两个构造器的使用
+    *   > 两个方法的使用：1. toString() 2. long getTime()
+    *       |----java.sql.Date：对应着数据库中的 date 类型
+    *
+    * */
+    @Test
+    public void test1() {
+        Date date1 = new Date();    // 创建一个基于当前系统时间的 Date 的实例
+        System.out.println(date1.toString());   // Tue Feb 10 18:22:34 CST 2026
+
+        long milliTimes = date1.getTime();
+        System.out.println("对应的毫秒数为：" + milliTimes);    // 1770718580726
+
+        Date date2 = new Date(1370708580726L);  // 创建一个基于指定时间戳的 Date 的实例
+        System.out.println(date2.toString());
+
+    }
+    @Test
+    public void test2() {
+        java.sql.Date date1 = new java.sql.Date(1370708580726L);
+        System.out.println(date1.toString());   // 2013-06-09
+
+        System.out.println(date1.getTime());    // 1370708580726
+
+    }
+
+    /*
+    * SimpleDateFormat 类：用于日期时间的格式化和解析
+    *
+    * 格式化：日期 -> 字符串
+    * 解析：字符串 -> 日期
+    *
+    * */
+    @Test
+    public void test3() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat();
+        // 格式化：日期 -> 字符串
+        Date date1 = new Date();
+        String strDate = sdf.format(date1);
+        System.out.println(strDate);    // 2026/2/10 18:26
+
+        // 字符串 -> 日期
+        Date date2 = sdf.parse("2026/2/10 15:26");
+        System.out.println(date2);
+
+    }
+    @Test
+    public void test4() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // 格式化：日期 -> 字符串
+        Date date1 = new Date();
+        String strDate = sdf.format(date1);
+        System.out.println(strDate);    // 2026-02-10 18:32:40
+
+        // 解析：字符串 -> 日期
+        Date date2 = sdf.parse("2026-02-10 18:32:40");
+        System.out.println(date2);
+
+        // 解析失败，因为参数的字符串不满足 SimpleDateFormat 可以识别的格式
+//        Date date3 = sdf.parse("2026/2/10 18:26");
+//        System.out.println(date3);
+
+    }
+
+    /*
+    * Calendar：日历类
+    *   1. 实例化：由于 Calendar 是一个抽象类，所以我们需要创建其子类的实例；这里我们通过 Calendar 的静态方法
+    *             getInstance() 即可获取
+    *   2. 常用方法：get(int field) / set(int field, xx) / add(int field, xx) / getTime() / setTime()
+    * */
+    @Test
+    public void test5() {
+        Calendar calendar = Calendar.getInstance();
+
+//        System.out.println(calendar.getClass());
+
+        // 测试方法
+        // get(int field)
+        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+        System.out.println(calendar.get(Calendar.DAY_OF_YEAR));
+
+        // set(int field, xx)
+        calendar.set(Calendar.DAY_OF_MONTH, 23);
+        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+
+        // add(int field, xx)
+        calendar.add(Calendar.DAY_OF_MONTH, 3);
+        calendar.add(Calendar.DAY_OF_MONTH, -5);
+        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+
+        // getTime()：Calendar -> Date
+        Date date = calendar.getTime();
+        System.out.println(date);
+
+        // setTime()：使用指定的 Date 重置 Calendar
+        Date date1 = new Date();
+        calendar.setTime(date1);
+        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+
+    }
+}
+
+```
+
+#### 3.1.6 练习
+
+**练习：**
+> 题目：
+>
+> 如何将一个 `java.util.Date` 的实例转换为 `java.sql.Date` 的实例？
+>
+> 拓展：将控制台获取的年月日（比如：`2026-02-10`）的字符串数据，保存在数据库中。（简化为得到 `java.sql.Date` 的对象，此对象对应的时间为 `2026-02-10`。）
+
+示例代码：
+```java
+/* Exer01.java */
+
+package com.anxin_hitsz_03.date.exer1;
+
+import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * ClassName: Exer01
+ * Package: com.anxin_hitsz_03.date.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 18:50
+ * @Version 1.0
+ */
+public class Exer01 {
+    /*
+    * 练习：
+    * */
+    @Test
+    public void test1() {
+        Date date1 = new Date();
+
+        // 错误的：
+//        java.sql.Date date2 = (java.sql.Date) date1;
+//        System.out.println(date2);  // ClassCastException
+
+        // 正确的：
+        java.sql.Date date2 = new java.sql.Date(date1.getTime());
+        System.out.println(date2);
+
+    }
+
+    /*
+    * 拓展：
+    *   字符串 -> java.util.Date -> java.sql.Date
+    * */
+    @Test
+    public void test2() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String pattern = "2026-02-10";
+
+        // 得到 java.util.Date
+        Date date1 = sdf.parse(pattern);
+        // 转换为 java.sql.Date
+        java.sql.Date date2 = new java.sql.Date(date1.getTime());
+        System.out.println(date2);
+
+    }
+}
+
+```
+
+### 3.2 JDK 8：新的日期时间 API
+
+JDK 1.0 中包含了一个 `java.util.Date` 类，但是它的大多数方法已经在 JDK 1.1 引入 `Calendar` 类之后被弃用了。而 `Calendar` 并不比 `Date` 好多少。它们面临的问题是：
+* 可变性：像日期和时间这样的类应该是不可变的。
+* 偏移性：`Date` 中的年份是从 1900 开始的，而月份都从 0 开始。
+* 格式化：格式化只对 `Date` 有用，`Calendar` 则不行。
+* 此外，它们也不是线程安全的；不能处理闰秒等。
+
+> 闰秒，是指为保持协调世界时接近于世界时时刻，由国际计量局统一规定在年底或年中（也可能在季末）对协调世界时增加或减少 1 秒的调整。由于地球自转的不均匀性和长期变慢性（主要由潮汐摩擦引起的），会使世界时（民用时）和原子时之间相差超过到 ±0.9 秒时，就把协调世界时向前拨 1 秒（负闰秒，最后一分钟为 59 秒）或向后拨 1 秒（正闰秒，最后一分钟为 61 秒）；闰秒一般加在公历年末或公历六月末。
+>
+> 目前，全球已经进行了 27 次闰秒，均为正闰秒。
+
+Java 8 以一个新的开始为 Java 创建优秀的 API，新的日期时间 API 包含：
+* java.time：包含值对象的基础包。
+* java.time.chrono：提供对不同的日历系统的访问。
+* java.time.format：格式化和解析时间和日期。
+* java.time.temporal：包括底层框架和扩展特性。
+* java.time.zone：包含时区支持的类。
+
+> 说明：新的 java.time 中包含了所有关于时钟（`Clock`）、本地日期（`LocalDate`）、本地时间（`LocalTime`）、本地日期时间（`LocalDateTime`）、时区（`ZonedDateTime`）和持续时间（`Duration`）的类。
+
+### 4.1 本地日期时间：`LocalDate`、`LocalTime`、`LocalDateTime`
+
+类似于 `Calendar`。
+
+实例化：`now()` / `of(xxx, xx, xx)`。
+
+方法：`get()` / `withXxx()` / `plusXxx()` / `minusXxx()` ……
+
+### 4.2 瞬时：`Instant`
+
+类似于 `Date`。
+
+实例化：`now()` / `of(xxx, xx, xx)`。
+
+方法：`get()` / `withXxx()` / `plusXxx()` / `minusXxx()` ……
+
+### 4.3 日期时间格式化：`DateTimeFormatter`
+
+类似于 `SimpleDateFormat`。
+
+用于格式化和解析 `LocalDate`、`LocalTime`、`LocalDateTime`。
+
+### 4.4 举例
+
+示例代码：
+```java
+/* DateTimeTest.java */
+
+package com.anxin_hitsz_03.date.jdk8;
+
+import org.junit.Test;
+
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * ClassName: DateTimeTest
+ * Package: com.anxin_hitsz_03.date.jdk8
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 19:54
+ * @Version 1.0
+ */
+public class DateTimeTest {
+    @Test
+    public void test1() {
+        String s1 = "hello";
+        String s2 = s1.replace('l', 'w');   // String 的不可变性
+        System.out.println(s1); // hello
+
+        // 体会 Calendar 的可变性
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 23);
+        System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+
+    }
+
+    @Test
+    public void test2() {
+        // 偏移性：Date 中的年份是从 1900 开始的，而月份都从 0 开始
+        Date date = new Date(2026, 2, 10);
+        System.out.println(date);
+
+    }
+
+    /*
+    * JDK 8 的 API：LocalDate / LocalTime / LocalDateTime
+    * */
+    @Test
+    public void test3() {
+        // now()：获取当前日期和时间对应的实例
+        LocalDate localDate = LocalDate.now();
+        LocalTime localTime = LocalTime.now();
+        LocalDateTime localDateTime = LocalDateTime.now();
+
+        System.out.println(localDate);  // 2026-02-10
+        System.out.println(localTime);  // 20:04:17.835684400
+        System.out.println(localDateTime);  // 2026-02-10T20:04:17.835684400
+
+        // of()：获取指定的日期、时间对应的实例
+        LocalDate localDate1 = LocalDate.of(2021, 5, 23);
+        LocalDateTime localDateTime1 = LocalDateTime.of(2022, 12, 5, 11, 23, 45);
+        System.out.println(localDate1);
+        System.out.println(localDateTime1);
+
+        // getXxx()
+        LocalDateTime localDateTime2 = LocalDateTime.now();
+        System.out.println(localDateTime2.getDayOfMonth());
+        // 体现了不可变性
+        // withXxx()
+        LocalDateTime localDateTime3 = localDateTime2.withDayOfMonth(15);
+        System.out.println(localDateTime2); // 2026-02-10T20:10:40.026545600
+        System.out.println(localDateTime3); // 2026-02-15T20:10:40.026545600
+        // plusXxx()
+        LocalDateTime localDateTime4 = localDateTime2.plusDays(5);
+        System.out.println(localDateTime2); // 2026-02-10T20:12:12.149302300
+        System.out.println(localDateTime4); // 2026-02-15T20:12:12.149302300
+
+    }
+
+    /*
+    * JDK 8 的 API：Instant
+    * */
+    @Test
+    public void test4() {
+        Instant instant = Instant.now();
+        System.out.println(instant);    // 2026-02-10T12:18:22.922455100Z
+        // 了解：
+        OffsetDateTime instant1 = instant.atOffset(ZoneOffset.ofHours(8));
+        System.out.println(instant1);
+
+        Instant instant2 = Instant.ofEpochMilli(24123123312L);
+        System.out.println(instant2);   // 1970-10-07T04:52:03.312Z
+
+        long milliTime = instant.toEpochMilli();
+        System.out.println(milliTime);
+
+        System.out.println(new Date().getTime());
+
+    }
+
+    /*
+    * JDK 8 的 API：DateTimeFormatter
+    * */
+    @Test
+    public void test5() {
+        // 自定义的格式：如 ofPattern("yyyy-MM-dd hh:mm:ss")
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+        //  格式化：日期、时间 -> 字符串
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String strDateTime = dateTimeFormatter.format(localDateTime);
+        System.out.println(strDateTime);    // 2026/02/10 20:27:30
+
+        // 解析：字符串 -> 日期、时间
+        TemporalAccessor temporalAccessor = dateTimeFormatter.parse("2026/02/10 15:27:30");
+        LocalDateTime localDateTime1 = LocalDateTime.from(temporalAccessor);
+        System.out.println(localDateTime1); // 2026-02-10T15:27:30
+
+    }
+}
+
+```
+
+### 4.5 练习
+
+**练习：**
+> 题目 - 百天推算：
+>
+> 使用 `Calendar` 获取当前时间，把这个时间设置为你的生日，再获取你的百天（出生后 100 天）日期。
+>
+> 使用 `LocalDateTime` 获取当前时间，把这个时间设置为你的生日，再获取你的百天（出生后 100 天）日期。
+
+示例代码：
+```java
+/* Exer02.java */
+
+package com.anxin_hitsz_03.date.exer2;
+
+import org.junit.Test;
+
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * ClassName: Exer02
+ * Package: com.anxin_hitsz_03.date.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/10 20:32
+ * @Version 1.0
+ */
+public class Exer02 {
+    /*
+    * 使用 `Calendar` 获取当前时间，把这个时间设置为你的生日，再获取你的百天（出生后 100 天）日期。
+    * */
+    @Test
+    public void test1() {
+        Calendar calendar = Calendar.getInstance();
+        Date date = calendar.getTime();
+        System.out.println("你的生日为：" + date);
+
+        calendar.add(Calendar.DAY_OF_YEAR, 100);
+        Date newDate = calendar.getTime();
+        System.out.println("100 天以后是：" + newDate);
+
+    }
+
+    /*
+    * 使用 `LocalDateTime` 获取当前时间，把这个时间设置为你的生日，再获取你的百天（出生后 100 天）日期。
+    * */
+    @Test
+    public void test2() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        System.out.println("你的生日为：" + localDateTime);
+
+        LocalDateTime localDateTime1 = localDateTime.plusDays(100);
+        System.out.println("100 天以后是：" + localDateTime1);
+
+    }
+}
 
 ```
