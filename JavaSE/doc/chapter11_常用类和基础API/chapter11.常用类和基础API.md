@@ -1891,3 +1891,682 @@ public class Exer02 {
 }
 
 ```
+
+## 五、Java 比较器
+
+我们知道基本数据类型的数据（除 `boolean` 类型外）需要比较大小的话，之间使用比较运算符即可。但是引用数据类型是不能直接使用比较运算符来比较大小的；那么，如何解决这个问题呢？
+
+在 Java 中经常会涉及到对象数组的排序问题，那么就涉及到对象之间的比较问题。
+
+Java 实现对象排序的方式有两种：
+* 自然排序：java.lang.Comparable。
+* 定制排序：java.util.Comparator。
+
+### 5.1 自然排序：java.lang.Comparable
+
+`Comparable` 接口强行对实现它的每个类的对象进行整体排序，这种排序被称为类的自然排序。
+
+实现 `Comparable` 的类必须实现 `compareTo(Object obj)` 方法，两个对象即通过 `compareTo(Object obj)` 方法的返回值来比较大小。如果当前对象 `this` 大于形参对象 `obj`，则返回正整数；如果当前对象 `this` 小于形参对象 `obj`，则返回负整数；如果当前对象 `this` 等于形参对象 `obj`，则返回零。
+
+语法格式：
+```java
+package java.lang;
+
+public interface Comparable {
+    int compareTo(Object obj);
+}
+```
+
+实现步骤：
+1. 具体的类 `A` 实现 `Comparable` 接口。
+2. 重写 `Comparable` 接口中的 `compareTo(Object obj)` 方法，在此方法中指明比较类 `A` 的对象的大小的标准。
+3. 创建类 `A` 的多个实例，进行大小的比较或排序。
+
+实现 `Comparable` 接口的对象列表（和数组）可以通过 `Collections.sort` 或 `Arrays.sort` 进行自动排序。实现此接口的对象可以用作有序映射中的键或有序集合中的元素，无需指定比较器。
+
+对于类 `C` 的每一个 `e1` 和 `e2` 来说，当且仅当 `e1.compareTo(e2) == 0` 与 `e1.equals(e2)` 具有相同的 `boolean` 值时，类 `C` 的自然排序才叫做与 `equals` 一致。建议（虽然不是必需的）**最好使自然排序与 `equals` 一致**。
+
+`Comparable` 的典型实现（**默认都是从小到大排列的**）：
+* `String`：按照字符串中字符的 Unicode 值进行比较。
+* `Character`：按照字符的 Unicode 值来进行比较。
+* 数值类型对应的包装类以及 `BigInteger`、`BigDecimal`：按照它们对应的数值大小进行比较。
+* `Boolean`：`true` 对应的包装类实例大于 `false` 对应的包装类实例。
+* `Date`、`Time` 等：后面的日期时间比前面的日期时间大。
+
+示例代码：
+```java
+/* Product.java */
+
+package com.anxin_hitsz_04.compare;
+
+/**
+ * ClassName: Product
+ * Package: com.anxin_hitsz_04.compare
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 15:31
+ * @Version 1.0
+ */
+public class Product implements Comparable {  // 商品类
+
+    private String name;    // 商品名称
+    private double price;   // 价格
+
+    public Product() {
+    }
+
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
+
+    /*
+    * 当前的类需要实现 Comparable 中的抽象方法：compareTo(Object o)
+    * 在此方法中，指明如何判断当前类的对象的大小；比如：按照价格的高低进行大小的比较（或从低到高排序）
+    *
+    * 如果返回值是正数：当前对象大
+    * 如果返回值是负数：当前对象小
+    * 如果返回值是 0：一样大
+    * */
+//    @Override
+//    public int compareTo(Object o) {
+//        if (o == this) {
+//            return 0;
+//        }
+//
+//        if (o instanceof Product) {
+//            Product p = (Product) o;
+//
+//            return Double.compare(this.price, p.price);
+//        }
+//
+//        // 手动抛出一个异常类的对象
+//        throw new RuntimeException("类型不匹配");
+//
+//    }
+
+    // 比较的标准：先比较价格（从大到小），价格相同，进行名字的比较（从小到大）
+    @Override
+    public int compareTo(Object o) {
+        if (o == this) {
+            return 0;
+        }
+
+        if (o instanceof Product) {
+            Product p = (Product) o;
+
+            int value = Double.compare(this.price, p.price);
+            if (value != 0) {
+                return -value;
+            }
+
+            return this.name.compareTo(p.name);
+        }
+
+        // 手动抛出一个异常类的对象
+        throw new RuntimeException("类型不匹配");
+
+    }
+
+}
+
+
+/* ComparableTest.java */
+
+package com.anxin_hitsz_04.compare.comparable;
+
+import com.anxin_hitsz_04.compare.Product;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+/**
+ * ClassName: ComparableTest
+ * Package: com.anxin_hitsz_04.compare.comparable
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 15:21
+ * @Version 1.0
+ */
+public class ComparableTest {
+    @Test
+    public void test1() {
+        String[] arr = new String[] {"Tom", "Jerry", "Tony", "Rose", "Jack", "Lucy"};
+        Arrays.sort(arr);
+
+        // 排序后，遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        Product[] arr = new Product[5];
+        arr[0] = new Product("HuaweiMate50pro", 6299);
+        arr[1] = new Product("Xiaomi13pro", 4999);
+        arr[2] = new Product("VivoX90pro", 5999);
+        arr[3] = new Product("IPhone14ProMax", 9999);
+        arr[4] = new Product("HonorMagic4", 6299);
+
+        Arrays.sort(arr);
+
+        // 排序后，遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+
+    }
+
+    @Test
+    public void test3() {
+        Product p1 = new Product("HuaweiMate50pro", 6299);
+        Product p2 = new Product("VivoX90pro", 5999);
+        int compare = p1.compareTo(p2);
+        if (compare > 0) {
+            System.out.println("p1 大");
+        } else if (compare < 0) {
+            System.out.println("p2 大");
+        } else {
+            System.out.println("p1 和 p2 一样大");
+        }
+
+    }
+}
+
+```
+
+### 5.2 定制排序：java.util.Comparator
+
+思考：
+* 当元素的类型没有实现 `java.lang.Comparable` 接口而又不方便修改代码（例如：一些第三方的类，我们只有 `.class` 文件，没有源文件）。
+* 如果一个类，实现了 `Comparable` 接口，也指定了两个对象的比较大小的规则，而此时此刻不想按照它预定义的方法比较大小，但是又不能随意修改，因为会影响其他地方的使用，怎么办？
+
+JDK 在设计类库之初，也考虑到这种情况，所以又增加了一个 `java.util.Comparator` 接口，强行对多个对象进行整体排序的比较。
+* 重写 `compare(Object o1, Object o2)` 方法，比较 `o1` 和 `o2` 的大小：如果方法返回正整数，则表示 `o1` 大于 `o2`；如果方法返回 `0`，则表示 `o1` 与 `o2` 相等；如果方法返回负整数，则表示 `o1` 小于 `o2`。
+* 可以将 `Comparator` 传递给 `sort` 方法（如 `Collections.sort` 或 `Arrays.sort`），从而允许在排序顺序上实现精确控制。
+
+语法格式：
+```java
+package java.util;
+
+public interface Comparator {
+    int conpare(Object o1, Object o2);
+}
+```
+
+实现步骤：
+1. 创建一个实现了 `Comparator` 接口的实现类 `A`。
+2. 实现类 `A` 要求重写 `Comparator` 接口中的抽象方法 `compare(Object o1, Object o2)`，在此方法中指明要比较大小的对象的大小关系。（比如，`String` 类、`Product` 类。）
+3. 创建此实现类 `A` 的对象，并将此对象传入到相关方法的参数位置即可。（比如：`Arrays.sort(.., 类 A 的实例)`。）
+
+示例代码：
+```java
+/* Product.java */
+
+package com.anxin_hitsz_04.compare;
+
+/**
+ * ClassName: Product
+ * Package: com.anxin_hitsz_04.compare
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 15:31
+ * @Version 1.0
+ */
+public class Product implements Comparable {  // 商品类
+
+    private String name;    // 商品名称
+    private double price;   // 价格
+
+    public Product() {
+    }
+
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
+
+    /*
+    * 当前的类需要实现 Comparable 中的抽象方法：compareTo(Object o)
+    * 在此方法中，指明如何判断当前类的对象的大小；比如：按照价格的高低进行大小的比较（或从低到高排序）
+    *
+    * 如果返回值是正数：当前对象大
+    * 如果返回值是负数：当前对象小
+    * 如果返回值是 0：一样大
+    * */
+//    @Override
+//    public int compareTo(Object o) {
+//        if (o == this) {
+//            return 0;
+//        }
+//
+//        if (o instanceof Product) {
+//            Product p = (Product) o;
+//
+//            return Double.compare(this.price, p.price);
+//        }
+//
+//        // 手动抛出一个异常类的对象
+//        throw new RuntimeException("类型不匹配");
+//
+//    }
+
+    // 比较的标准：先比较价格（从大到小），价格相同，进行名字的比较（从小到大）
+    @Override
+    public int compareTo(Object o) {
+        if (o == this) {
+            return 0;
+        }
+
+        if (o instanceof Product) {
+            Product p = (Product) o;
+
+            int value = Double.compare(this.price, p.price);
+            if (value != 0) {
+                return -value;
+            }
+
+            return this.name.compareTo(p.name);
+        }
+
+        // 手动抛出一个异常类的对象
+        throw new RuntimeException("类型不匹配");
+
+    }
+
+}
+
+
+/* ComparatorTest.java */
+
+package com.anxin_hitsz_04.compare.comparator;
+
+import com.anxin_hitsz_04.compare.Product;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+/**
+ * ClassName: ComparatorTest
+ * Package: com.anxin_hitsz_04.compare.comparator
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 16:23
+ * @Version 1.0
+ */
+public class ComparatorTest {
+
+    @Test
+    public void test1() {
+        Product[] arr = new Product[5];
+        arr[0] = new Product("HuaweiMate50pro", 6299);
+        arr[1] = new Product("Xiaomi13pro", 4999);
+        arr[2] = new Product("VivoX90pro", 5999);
+        arr[3] = new Product("IPhone14ProMax", 9999);
+        arr[4] = new Product("HonorMagic4", 6299);
+
+        // 创建一个实现了 Comparator 接口的实现类的对象
+        Comparator comparator = new Comparator() {
+
+            // 如何判断两个对象 o1、o2 的大小，其标准就是此方法的方法体要编写的逻辑
+            // 比如：按照价格从高到低排序
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof Product && o2 instanceof Product) {
+                    Product p1 = (Product) o1;
+                    Product p2 = (Product) o2;
+
+                    return -Double.compare(p1.getPrice(), p2.getPrice());
+
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+
+        };
+
+        Comparator comparator1 = new Comparator() {
+
+            // 如何判断两个对象 o1、o2 的大小，其标准就是此方法的方法体要编写的逻辑
+            // 比如：按照 name 从低到高排序
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof Product && o2 instanceof Product) {
+                    Product p1 = (Product) o1;
+                    Product p2 = (Product) o2;
+
+                    return p1.getName().compareTo(p2.getName());
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+
+        };
+
+        Arrays.sort(arr, comparator1);
+
+        // 排序后，遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        String[] arr = new String[] {"Tom", "Jerry", "Tony", "Rose", "Jack", "Lucy"};
+
+        Arrays.sort(arr, new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof String && o2 instanceof String) {
+                    String s1 = (String) o1;
+                    String s2 = (String) o2;
+
+                    return -s1.compareTo(s2);
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+        });
+
+        // 排序后，遍历
+        for (int i = 0; i < arr.length; i++) {
+            System.out.println(arr[i]);
+        }
+    }
+
+}
+
+```
+
+### 5.3 对比两种方式
+
+角度一：
+* 自然排序：单一的、唯一的。
+* 定制排序：灵活的、多样的。
+
+角度二：
+* 自然排序：一劳永逸的。
+* 定制排序：临时的。
+
+角度三（细节）：
+* 自然排序：对应的接口是 `Comparable`，对应的抽象方法 `compareTo(Object obj)`。
+* 定制排序：对应的接口是 `Comparator`，对应的抽象方法 `compare(Object obj1, Object obj2)`。
+
+## 六、系统相关类
+
+### 6.1 `java.lang.System` 类
+
+属性：`out`、`in`、`err`。
+
+方法：`currentTimeMillis()` / `gc()` / `exit(int status)` / `getProperty(String property)`。
+
+### 6.2 `java.lang.Runtime` 类
+
+对应着 Java 进程的内存使用的运行时环境，是单例的。
+
+### 6.3 举例
+
+示例代码：
+```java
+/* OtherAPITest.java */
+
+package com.anxin_hitsz_05.other;
+
+import org.junit.Test;
+
+/**
+ * ClassName: OtherAPITest
+ * Package: com.anxin_hitsz_05.other
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 17:40
+ * @Version 1.0
+ */
+public class OtherAPITest {
+    @Test
+    public void test1() {
+        String javaVersion = System.getProperty("java.version");
+        System.out.println("java的version:" + javaVersion);
+
+        String javaHome = System.getProperty("java.home");
+        System.out.println("java的home:" + javaHome);
+
+        String osName = System.getProperty("os.name");
+        System.out.println("os的name:" + osName);
+
+        String osVersion = System.getProperty("os.version");
+        System.out.println("os的version:" + osVersion);
+
+        String userName = System.getProperty("user.name");
+        System.out.println("user的name:" + userName);
+
+        String userHome = System.getProperty("user.home");
+        System.out.println("user的home:" + userHome);
+
+        String userDir = System.getProperty("user.dir");
+        System.out.println("user的dir:" + userDir);
+
+    }
+
+    @Test
+    public void test2() {
+        Runtime runtime = Runtime.getRuntime();
+        long initialMemory = runtime.totalMemory(); //获取虚拟机初始化时堆内存总量
+        long maxMemory = runtime.maxMemory(); //获取虚拟机最大堆内存总量
+        String str = "";
+        //模拟占用内存
+        for (int i = 0; i < 10000; i++) {
+            str += i;
+        }
+        long freeMemory = runtime.freeMemory(); //获取空闲堆内存总量
+
+        System.out.println("总内存：" + initialMemory / 1024 / 1024 * 64 + "MB");
+        System.out.println("总内存：" + maxMemory / 1024 / 1024 * 4 + "MB");
+        System.out.println("空闲内存：" + freeMemory / 1024 / 1024 + "MB") ;
+        System.out.println("已用内存：" + (initialMemory-freeMemory) / 1024 / 1024 + "MB");
+
+    }
+}
+
+```
+
+## 七、和数学相关的类
+
+### 7.1 `java.lang.Math` 类
+
+凡是与数学运算相关的操作，可以在此类中寻找相关的方法即可。
+
+### 7.2 java.math 包
+
+#### 7.2.1 `BigInteger` 类
+
+`BigInteger` 可以表示任意长度的整数。
+
+#### 7.2.2 `BigDecimal` 类
+
+`BigDecimal` 类可以表示任意精度的浮点数。
+
+### 7.3 `java.util.Random` 类
+
+获取指定范围的随机整数：`nextInt(int bound)`。
+
+### 7.4 举例
+
+示例代码：
+```java
+/* OtherAPITest.java */
+
+package com.anxin_hitsz_05.other;
+
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Random;
+
+/**
+ * ClassName: OtherAPITest
+ * Package: com.anxin_hitsz_05.other
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 17:40
+ * @Version 1.0
+ */
+public class OtherAPITest {
+    @Test
+    public void test1() {
+        String javaVersion = System.getProperty("java.version");
+        System.out.println("java的version:" + javaVersion);
+
+        String javaHome = System.getProperty("java.home");
+        System.out.println("java的home:" + javaHome);
+
+        String osName = System.getProperty("os.name");
+        System.out.println("os的name:" + osName);
+
+        String osVersion = System.getProperty("os.version");
+        System.out.println("os的version:" + osVersion);
+
+        String userName = System.getProperty("user.name");
+        System.out.println("user的name:" + userName);
+
+        String userHome = System.getProperty("user.home");
+        System.out.println("user的home:" + userHome);
+
+        String userDir = System.getProperty("user.dir");
+        System.out.println("user的dir:" + userDir);
+
+    }
+
+    @Test
+    public void test2() {
+        Runtime runtime = Runtime.getRuntime();
+        long initialMemory = runtime.totalMemory(); //获取虚拟机初始化时堆内存总量
+        long maxMemory = runtime.maxMemory(); //获取虚拟机最大堆内存总量
+        String str = "";
+        //模拟占用内存
+        for (int i = 0; i < 10000; i++) {
+            str += i;
+        }
+        long freeMemory = runtime.freeMemory(); //获取空闲堆内存总量
+
+        System.out.println("总内存：" + initialMemory / 1024 / 1024 * 64 + "MB");
+        System.out.println("总内存：" + maxMemory / 1024 / 1024 * 4 + "MB");
+        System.out.println("空闲内存：" + freeMemory / 1024 / 1024 + "MB") ;
+        System.out.println("已用内存：" + (initialMemory-freeMemory) / 1024 / 1024 + "MB");
+
+    }
+
+    @Test
+    public void test3() {
+        // 技巧：floor(x + 0.5)
+        System.out.println(Math.round(12.3));   // 12
+        System.out.println(Math.round(12.5));   // 13
+        System.out.println(Math.round(-12.3));  // -12
+        System.out.println(Math.round(-12.6));  // -13
+        System.out.println(Math.round(-12.5));  // -12
+
+    }
+
+    @Test
+    public void test4() {
+//        long bigNum = 123456789123456789123456789L;
+
+        BigInteger b1 = new BigInteger("12345678912345678912345678");
+        BigInteger b2 = new BigInteger("78923456789123456789123456789");
+
+        //System.out.println("和：" + (b1+b2));//错误的，无法直接使用+进行求和
+
+        System.out.println("和：" + b1.add(b2));
+        System.out.println("减：" + b1.subtract(b2));
+        System.out.println("乘：" + b1.multiply(b2));
+        System.out.println("除：" + b2.divide(b1));
+        System.out.println("余：" + b2.remainder(b1));
+
+    }
+
+    @Test
+    public void test5() {
+        BigInteger bi = new BigInteger("12433241123");
+        BigDecimal bd = new BigDecimal("12435.351");
+        BigDecimal bd2 = new BigDecimal("11");
+        System.out.println(bi);
+        // System.out.println(bd.divide(bd2));
+        System.out.println(bd.divide(bd2, BigDecimal.ROUND_HALF_UP));
+        System.out.println(bd.divide(bd2, 15, BigDecimal.ROUND_HALF_UP));
+
+    }
+
+    @Test
+    public void test6() {
+        Random random = new Random();
+        int i = random.nextInt();
+        System.out.println(i);
+
+        int j = random.nextInt(10); // 随机获取 [0,  10) 范围的整数
+        System.out.println(j);
+
+    }
+
+}
+
+```
