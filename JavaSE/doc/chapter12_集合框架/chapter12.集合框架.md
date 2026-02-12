@@ -348,3 +348,1365 @@ public class CollectionTest {
 }
 
 ```
+
+## 三、`Iterator`（迭代器）接口
+
+### 3.1 `Iterator` 接口
+
+在程序开发中，经常需要遍历集合中的所有元素；针对这种需求，JDK 专门提供了一个接口 `java.util.Iterator`。`Iterator` 接口也是 Java 集合中的一员，但它与 `Collection`、`Map` 接口有所不同。
+* `Collection` 接口与 `Map` 接口主要用于存储元素。
+* `Iterator`，被称为迭代器接口，本身并不提供存储对象的能力，主要用于遍历 `Collection` 中的元素。
+
+`Collection` 接口继承了 `java.lang.Iterable` 接口，该接口有一个 `iterator()` 方法，那么所有实现了 `Collection` 接口的集合类都有一个 `iterator()` 方法，用以返回一个实现了 `Iterator` 接口的对象。
+* `public Iterator iterator()`：获取集合对应的迭代器，用来遍历集合中的元素。
+* 集合对象每次调用 `iterator()` 方法都得到一个全新的迭代器对象，默认游标都在集合的第一个元素之前。
+
+`Iterator` 接口的常用方法如下：
+* `public E next()`：返回迭代的下一个元素。
+* `public boolean hasNext()`：如果仍有元素可以迭代，则返回 `true`。
+
+获取迭代器（`Iterator`）对象：
+```java
+Iterator iterator = coll.iterator();
+```
+
+实现遍历：
+```java
+while (iterator.hasNext()) {
+    System.out.println(iterator.next());    // next()：1. 指针下移；2. 将下移以后集合位置上的元素返回
+}
+```
+
+> 注意：
+>
+> 在调用 `it.next()` 方法之前必须要调用 `it.hasNext()` 进行检测；若不调用，且下一条记录无效，直接调用 `it.next()` 会抛出 `NoSuchElementException` 异常。
+
+示例代码：
+```java
+/* IteratorTest.java */
+
+package com.anxin_hitsz_02.iterator;
+
+import com.anxin_hitsz_01.collection.Person;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
+/**
+ * ClassName: IteratorTest
+ * Package: com.anxin_hitsz_02.iterator
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 13:14
+ * @Version 1.0
+ */
+public class IteratorTest {
+    @Test
+    public void test1() {
+        Collection coll = new ArrayList();
+
+        coll.add("AA");
+        coll.add("AA");
+        Person p1 = new Person("Tom", 12);
+        coll.add(p1);
+        coll.add(128);  // 自动装箱
+        coll.add(new String("尚硅谷"));
+
+        // 获取迭代器对象
+        Iterator iterator = coll.iterator();
+//        System.out.println(iterator.getClass());
+
+        // 方式 1：
+//        System.out.println(iterator.next());
+//        System.out.println(iterator.next());
+//        System.out.println(iterator.next());
+//        System.out.println(iterator.next());
+//        System.out.println(iterator.next());
+
+//        System.out.println(iterator.next());    // 如果超出了集合中元素的个数，会报 NoSuchElementException 异常
+
+        // 方式 2：
+//        for (int i = 0; i < coll.size(); i++) {
+//            System.out.println(iterator.next());
+//        }
+
+        // 方式 3：推荐
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        Collection coll = new ArrayList();
+
+        coll.add("AA");
+        coll.add("BB");
+        Person p1 = new Person("Tom", 12);
+        coll.add(p1);
+        coll.add(128);  // 自动装箱
+        coll.add(new String("尚硅谷"));
+
+        // 方式 1：错误的遍历
+//        Iterator iterator = coll.iterator();
+//
+//        while ((iterator.next()) != null) {
+//            System.out.println(iterator.next());
+//        }
+
+        // 方式 2：错误的遍历
+        // 每次调用 coll.iterator()，都会得到一个新的迭代器对象
+//        while (coll.iterator().hasNext()) {
+//            System.out.println(coll.iterator().next());
+//        }
+
+    }
+
+}
+
+```
+
+### 3.2 迭代器的执行原理
+
+`Iterator` 迭代器对象在遍历集合时，内部采用指针的方式来跟踪集合中的元素，接下来通过一个图例以演示 `Iterator` 对象迭代元素的过程：
+![Iterator 对象迭代元素的过程示意图](./images/image-20220407235130988.png "Iterator 对象迭代元素的过程示意图")
+
+若要使用 `Iterator` 迭代器删除元素，`java.util.Iterator` 迭代器中又一个方法 `void remove()`：
+```java
+Iterator iter = coll.iterator();    // 回到起点
+while (iter.hasNext()) {
+    Object obj = iter.next();
+    if (obj.equals("Tom")) {
+        iter.remove();
+    }
+}
+```
+
+> 注意：
+> * `Iterator` 可以删除集合的元素，但是遍历过程中是通过迭代器对象的 `remove()` 方法删除集合的元素，而不是调用集合对象的 `remove()` 方法。
+> * 如果还未调用 `next()` 或在上一次调用 `next()` 方法之后已经调用了 `remove()` 方法，再调用 `remove()` 方法都会报 `IllegalStateException` 异常。
+
+在 JDK 8.0 时，`Collection` 接口有了 `removeIf` 方法，即可以根据条件删除。
+
+### 3.3 `foreach` 循环
+
+`foreach` 循环（也称增强 `for` 循环）是 JDK 5.0 中定义的一个高级 `for` 循环，专门用来遍历数组和集合的。
+
+foreach 循环的语法格式：
+```java
+for (要遍历的集合或数组元素的数据类型 局部变量 : 要遍历的Collection集合或数组变量) {
+    // 操作局部变量的输出操作
+}
+// 此处的局部变量即为临时变量，可以自定义命名
+```
+
+示例代码：
+```java
+/* ForTest.java */
+
+package com.anxin_hitsz_02.iterator;
+
+import com.anxin_hitsz_01.collection.Person;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+/**
+ * ClassName: ForTest
+ * Package: com.anxin_hitsz_02.iterator
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 13:30
+ * @Version 1.0
+ */
+public class ForTest {
+    @Test
+    public void test() {
+        Collection coll = new ArrayList();
+
+        coll.add("AA");
+        coll.add("BB");
+        Person p1 = new Person("Tom", 12);
+        coll.add(p1);
+        coll.add(128);  // 自动装箱
+        coll.add(new String("尚硅谷"));
+
+        for (Object obj : coll) {
+            System.out.println(obj);
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        int[] arr = new int[] { 1, 2, 3, 4 };
+
+        for (int i : arr) {
+            System.out.println(i);
+        }
+
+    }
+
+    @Test
+    public void test3() {
+        String[] arr = new String[] { "AA", "BB", "CC", "DD" };
+
+        for (String s : arr) {
+            System.out.println(s);
+        }
+
+    }
+
+}
+
+```
+
+对于集合的遍历，增强 `for` 循环的内部原理其实是个 `Iterator` 迭代器。如下图所示：
+![增强 for 循环的内部原理示意图](./images/image-20220128010114124.png "增强 for 循环的内部原理示意图")
+
+它用于遍历 `Collection` 和数组。通常只进行元素的遍历操作，建议不要在遍历的过程中对集合元素进行增删操作。
+
+> 注意：
+>
+> 增强 `for` 循环的执行过程中，是将集合或数组中的元素依次赋值给临时变量；注意，循环体中对临时变量的修改，可能不会导致原有集合或数组中元素的修改。
+
+## 四、`Collection` 子接口 1：`List`
+
+### 4.1 `List` 接口特点
+
+鉴于 Java 中数组用来存储数据的局限性，我们通常使用 `java.util.List` 来替代数组（称为“动态”数组）。
+
+`List` 集合类中**元素有序**、且**可重复**，集合中的每个元素都有其对应的顺序索引。
+
+JDK API 中 `List` 接口的实现类常用的有：`ArrayList`、`LinkedList` 和 `Vector`。
+
+###  4.2 `List` 接口方法
+
+`List` 除了从 `Collection` 集合继承的方法外，`List` 集合里添加了一些**根据索引**来操作集合元素的方法。
+
+插入元素：
+* `void add(int index, Object ele)`：在 `index` 位置插入 `ele` 元素。
+* `boolean addAll(int index, Collection eles)`：从 `index` 位置开始将 `eles` 中的所有元素添加进来。
+
+获取元素：
+* `Object get(int index)`：获取指定 `index` 位置的元素。
+* `List subList(int fromIndex, int toIndex)`：返回从 `fromIndex` 到 `toIndex` 位置的子集合。
+
+获取元素索引：
+* `int indexOf(Object obj)`：返回 `obj` 在集合中首次出现的位置。
+* `int lastIndexOf(Object obj)`：返回 `obj` 在当前集合中末次出现的位置。
+
+删除和替换元素：
+* `Object remove(int index)`：移除指定 `index` 位置的元素，并返回此元素。
+* `Object set(int index, Object ele)`：设置指定 `index` 位置的元素为 `ele`。
+
+遍历：
+* `iterator()`：使用迭代器进行遍历。
+* 增强 `for` 循环。
+* 一般的 `for` 循环。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_03.list;
+
+import java.util.Objects;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_01.collection
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 20:45
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    public Person() {
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        System.out.println("Person equals() ...");
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+
+//    @Override
+//    public int hashCode() {
+//        int result = Objects.hashCode(name);
+//        result = 31 * result + age;
+//        return result;
+//    }
+
+}
+
+
+/* ListTest.java */
+
+package com.anxin_hitsz_03.list;
+
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * ClassName: ListTest
+ * Package: com.anxin_hitsz_03.list
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 14:55
+ * @Version 1.0
+ */
+public class ListTest {
+    @Test
+    public void test1() {
+        List list = new ArrayList();
+
+        // add(Object obj)
+        list.add("AA");
+        list.add("BB");
+        list.add(123);  // 自动装箱
+        list.add(new Person("Tom", 12));
+
+        System.out.println(list.toString());
+
+        // add(int index, Object ele)
+        list.add(2, "CC");
+        System.out.println(list);
+
+        // addAll(int index, Collection eles)
+        List list1 = Arrays.asList(1, 2, 3);
+
+        list.addAll(1, list1);
+
+//        list.add(1, list1); // 将 list1 整体作为一个元素，插入到索引 1 的位置
+        System.out.println(list);
+
+    }
+
+    @Test
+    public void test2() {
+        List list = new ArrayList();
+        // add(Object obj)
+        list.add("AA");
+        list.add("BB");
+        list.add(123);  // 自动装箱
+        list.add(2);    // 自动装箱
+        list.add(new Person("Tom", 12));
+
+        // 删除索引 2 的元素
+//        list.remove(2);
+//        System.out.println(list);
+//        System.out.println(list.get(2));
+
+        // 删除数据 2
+        list.remove(Integer.valueOf(2));
+        System.out.println(list);
+
+    }
+
+    @Test
+    public void test3() {
+        List list = new ArrayList();
+        // add(Object obj)
+        list.add("AA");
+        list.add("BB");
+        list.add(123);  // 自动装箱
+        list.add(2);    // 自动装箱
+        list.add(new Person("Tom", 12));
+
+        // 遍历方式 1：使用迭代器
+//        Iterator iterator = list.iterator();
+//        while (iterator.hasNext()) {
+//            System.out.println(iterator.next());
+//        }
+
+        // 遍历方式 2：增强 for 循环
+//        for (Object obj : list) {
+//            System.out.println(obj);
+//        }
+
+        // 遍历方式 3：一般的 for 循环
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
+        }
+
+    }
+
+}
+
+```
+
+> 注意：
+>
+> 在 JavaSE 中 `List` 名称的类型有两个，一个是 `java.util.List` 集合接口，一个是 `java.awt.List` 图形界面的组件；注意不要导错包。
+
+### 4.3 `List` 接口主要实现类：`ArrayList`
+
+`ArrayList` 是 `List` 接口的**主要实现类**，是线程不安全的，效率高。
+
+本质上，`ArrayList` 是对象引用的一个“变长”数组；底层使用 `Object[]` 数组存储。
+
+`Arrays.asList(...)` 方法返回的 `List` 集合，既不是 `ArrayList` 实例，也不是 `Vector` 实例。`Arrays.asList(...)` 返回值是一个固定长度的 `List` 集合。
+
+在添加数据、查找数据时，效率较高；在插入、删除数据时，效率较低。
+
+### 4.4 `List` 的实现类之二：`LinkedList`
+
+对于对集合中的数据进行频繁的插入或删除元素的操作，建议使用 `LinkedList` 类，效率较高。这是由底层采用链表（双向链表）结构存储数据决定的。
+
+在插入、删除数据时，效率较高；在添加数据、查找数据时，效率较低。
+
+特有方法：
+* `void addFirst(Object obj)`。
+* `void addLast(Object obj)`。
+* `Object getFirst()`。
+* `Object getLast()`。
+* `Object removeFirst()`。
+* `Object removeLast()`。
+
+### 4.5 `List` 的实现类之三：`Vector`
+
+`Vector` 是一个**古老**的集合，JDK 1.0 就有了。大多数操作与 `ArrayList` 相同，区别之处在于 `Vector` 是**线程安全**的，效率低。
+
+底层使用 `Object[]` 数组存储。
+
+在各种 `List` 中，最好把 `ArrayList` 作为默认选择；当插入、删除频繁时，使用 `LinkedList`；`Vector` 总是比 `ArrayList` 慢，所以尽量避免使用。
+
+特有方法：
+* `void addElement(Object obj)`。
+* `void insertElementAt(Object obj, int index)`。
+* `void setElementAt(Object obj, int index)`。
+* `void removeElement(Object obj)`。
+* `void removeAllElements()`。
+
+### 4.6 练习
+
+**练习 1：**
+> 题目：
+>
+> 键盘录入学生信息，保存到集合 `List` 中。
+> 1. 定义学生类，属性为姓名、年龄，提供必要的 `getter`、`setter` 方法、构造器、`toString()` 方法、`euqals()` 方法。
+> 2. 使用 `ArrayList` 集合，保存录入的多个学生对象。
+> 3. 循环录入的方式：`1` 为继续录入，`0` 为结束录入。
+> 4. 录入结束后，用 `foreach` 遍历集合。
+
+示例代码：
+```java
+/* Student.java */
+
+package com.anxin_hitsz_03.list.exer1;
+
+import java.util.Objects;
+
+/**
+ * ClassName: Student
+ * Package: com.anxin_hitsz_03.list.exer1
+ * Description:
+ *      学生类
+ * @Author AnXin
+ * @Create 2026/2/12 15:51
+ * @Version 1.0
+ */
+public class Student {
+    private String name;
+    private int age;
+
+    public Student() {
+    }
+
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Student student = (Student) o;
+        return age == student.age && Objects.equals(name, student.name);
+    }
+
+//    @Override
+//    public int hashCode() {
+//        int result = Objects.hashCode(name);
+//        result = 31 * result + age;
+//        return result;
+//    }
+
+}
+
+
+/* StudentTest.java */
+
+package com.anxin_hitsz_03.list.exer1;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * ClassName: StudentTest
+ * Package: com.anxin_hitsz_03.list.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 15:52
+ * @Version 1.0
+ */
+public class StudentTest {
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+
+        List list = new ArrayList();
+
+        System.out.println("请录入学生信息：");
+
+        // 通过循环的方式，添加多个学生信息
+        while (true) {
+            System.out.println("1：继续录入；0：结束录入");
+            int selection = scan.nextInt();
+
+            if (selection == 0) {
+                break;
+            }
+
+            System.out.print("请输入学生的姓名：");
+            String name = scan.next();
+            System.out.print("请输入学生的年龄：");
+            int age = scan.nextInt();
+
+            Student s = new Student(name, age);
+
+            list.add(s);
+        }
+
+        // 遍历集合中的学生信息
+        System.out.println("遍历学生信息：");
+        for (Object s : list) {
+            Student stu = (Student) s;
+            System.out.println(stu.toString());
+        }
+
+
+        scan.close();
+    }
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 定义方法 `public static int listTest(Collection list, String s)` 统计集合中指定元素出现的次数。
+> 1. 创建集合，集合存放随机生成的 30 个小写字母。
+> 2. 用 `listTest` 统计，`a`、`b`、`c`、`x` 元素的出现次数。
+
+示例代码：
+```java
+/* ListTest.java */
+
+package com.anxin_hitsz_03.list.exer2;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+/**
+ * ClassName: ListTest
+ * Package: com.anxin_hitsz_03.list.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 16:02
+ * @Version 1.0
+ */
+public class ListTest {
+    public static void main(String[] args) {
+
+        // 需求 1：随机生成 30 个字符，存放在 ArrayList 中
+        ArrayList list = new ArrayList();
+
+        for (int i = 0; i < 30; i++) {
+            // 'a' - 'z'：[97, 122]
+            list.add((char)(Math.random() * (122 - 97 + 1) + 97) + "");
+        }
+
+        System.out.println(list);
+
+        int aCount = listTest(list, "a");
+        int bCount = listTest(list, "b");
+        int cCount = listTest(list, "c");
+        int xCount = listTest(list, "x");
+
+        System.out.println("a：" + aCount);
+        System.out.println("b：" + bCount);
+        System.out.println("c：" + cCount);
+        System.out.println("x：" + xCount);
+
+    }
+
+    // 需求 2：遍历 ArrayList，查找指定的元素出现的次数
+    public static int listTest(Collection list, String s) {
+        int count = 0;
+        for (Object obj : list) {
+            if (s.equals(obj)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+}
+
+```
+
+## 五、`Collection` 子接口 2：`Set`
+
+### 5.1 `Set` 接口概述
+
+`Set` 接口是 `Collection` 的子接口，`Set` 接口相较于 `Collection` 接口没有提供额外的方法。
+
+`Set` 存储无序的、不可重复的数据（类似于集合），主要用于过滤重复数据。
+
+`Set` 集合不允许包含相同的元素，如果试着把两个相同的元素加入同一个 `Set` 集合中，则添加操作失败。
+
+`Set` 集合支持的遍历方式和 `Collection` 集合一样：`foreach` 和 `Iterator`。
+
+`Set` 的常用实现类有：`HashSet`、`TreeSet`、`LinkedHashSet`。
+
+### 5.2 `Set` 主要实现类：`HashSet`
+
+#### 5.2.1 `HashSet` 概述
+
+`HashSet` 是 `Set` 接口的主要实现类，大多数时候时候 `Set` 集合时都使用这个实现类。
+
+`HashSet` 底层使用的是 `HashMap`，即使用 `数组 + 单向链表 + 红黑树` 结构进行存储（JDK 8 中）。
+
+`HashSet` 按 `Hash` 算法来存储集合中的元素，因此具有很好的存储、查找、删除性能。
+
+`HashSet` 具有以下**特点**：
+* 不能保证元素的排列顺序。
+* `HashSet` 不是线程安全的。
+* 集合元素可以是 `null`。
+
+`HashSet` 集合**判断两个元素相等的标准**：两个对象通过 `hashCode()` 方法得到的哈希值相等，并且两个对象的 `euqals()` 方法返回值为 `true`。
+
+对于存放在 `Set` 容器中的对象，**对应的类一定要重写 `hashCode()` 和 `equals(Object obj)` 方法**，以实现对象相等规则。即：“相等的对象必须具有相等的散列码”。
+
+`Set` 中无序性、不可重复性的理解，以下以 `HashSet` 及其子类为例进行说明：
+* **无序性**：`HashSet` 集合中元素的无序性，不等同于随机性；添加元素的顺序和遍历元素的顺序不一致，这并不是所谓的“无序性”。这里的无序性与添加的元素的位置有关，不像 `ArrayList` 一样是依次紧密排列的；具体来说，我们在添加每一个元素到数组中时，具体的存储位置是由元素的 `hashCode()` 调用后返回的 `hash` 值决定的，导致在数组中每个元素不是依次紧密存放的（即此位置不是依次排列的），因此表现出一定的无序性。
+* **不可重复性**：添加到 `Set` 中的元素是不能相同的；比较的标准需要判断 `hashCode()` 得到的哈希值以及 `equals()` 得到的 `boolean` 型的结果，哈希值相同且 `equals()` 返回 `true`，则认为元素是相同的。
+
+#### 5.2.2 `HashSet` 中添加元素的过程
+
+`HashSet` 中添加元素的步骤如下：
+1. 当向 `HashSet` 集合中存入一个元素时，`HashSet` 会调用该对象的 `hashCode()` 方法得到该对象的 `hashCode` 值，然后根据 `hashCode` 值，通过某个散列函数决定该对象在 `hashSet` 底层数组中的存储位置。
+2. 如果要在数组中存储的位置上没有元素，则直接添加成功。
+3. 如果要在数组中存储的位置上有元素，则继续比较：
+   * 如果两个元素的 `hashCode` 值不相等，则添加成功。
+   * 如果两个元素的 `hashCode` 值相等，则会继续调用 `equals()` 方法：
+     * 如果 `equals()` 方法结果为 `false`，则添加成功；
+     * 如果 `equals()` 方法结果为 `true`，则添加失败。
+
+> 注意：
+> * 第 2 步添加成功，元素会保存在底层数组中。
+> * 第 3 步两种添加成功的操作，由于该底层数组的位置已经有元素了，则会通过**链表**的方式继续链接、存储。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_04.set;
+
+import java.util.Objects;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_01.collection
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 20:45
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    public Person() {
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        System.out.println("Person equals() ...");
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(name);
+        result = 31 * result + age;
+        return result;
+    }
+
+}
+
+
+/* SetTest.java */
+
+package com.anxin_hitsz_04.set;
+
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+/**
+ * ClassName: SetTest
+ * Package: com.anxin_hitsz_04.set
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 17:03
+ * @Version 1.0
+ */
+public class SetTest {
+    @Test
+    public void test1() {
+        Set set = new HashSet();
+
+        set.add("AA");
+        set.add(123);
+        set.add("BB");
+        set.add(new Person("Tom", 12));
+        set.add(new Person("Tom", 12));
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+//        System.out.println(set.contains(new Person("Tom", 12)));
+
+    }
+
+    @Test
+    public void test2() {
+        Set set = new LinkedHashSet();
+
+        set.add("AA");
+        set.add(123);
+        set.add("BB");
+        set.add(new Person("Tom", 12));
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+}
+
+```
+
+添加到 `HashSet` / `LinkedHashSet` 中元素的要求：
+* 要求元素所在的类要重写两个方法：`equals()` 和 `hashCode()`。
+* 同时，要求 `equals()` 和 `hashCode()` 要保持一致性！我们只需要在 IDEA 中自动生成两个方法的重写即可，即能保证两个方法的一致性。
+
+#### 5.2.3 重写 `hashCode()` 方法的基本原则
+
+在程序运行时，同一个对象多次调用 `hashCode()` 方法应该返回相同的值。
+
+当两个对象的 `equals()` 方法比较返回 `true` 时，这两个对象的 `hashCode()` 方法的返回值也应相等。
+
+对象中用作 `equals()` 方法比较的 `Field`，都应该用来计算 `hashCode` 值。
+
+> 注意：
+>
+> 如果两个元素的 `euqals()` 方法返回 `true`，但它们的 `hashCode()` 返回值不相等，`HashSet` 将会把它们存储在不同的位置，但依然可以添加成功。
+
+#### 5.2.4 重写 `equals()` 方法的基本原则
+
+重写 `equals()` 方法的时候一般都需要同时复写 `hashCode()` 方法。通常参与计算 `hashCode` 的对象的属性也应该参与到 `equals()` 中进行计算。
+
+推荐：开发中直接调用 Eclipse / IDEA 里的快捷键自动重写 `equals()` 方法和 `hashCode()` 方法即可。
+
+### 5.3 `Set` 实现类之二：`LinkedHashSet`
+
+`LinkedHashSet` 是 `HashSet` 的子类，不允许集合元素重复。
+
+`LinkedHashSet` 在现有的 `数组 + 单向链表 + 红黑树` 结构的基础上，又添加了一组双向链表，用于记录添加元素的先后顺序；即：我们可以按照添加元素的顺序实现遍历，便于频繁的查询操作。
+
+`LinkedHashSet` 根据元素的 `hashCode` 值来决定元素的存储位置，但它同时使用**双向链表**维护元素的次序，这使得元素看起来是以**添加顺序**保存的。
+
+`LinkedHashSet` **插入性能略低于** `HashSet`，但在**迭代访问** `Set` 里的全部元素时有很好的性能。
+
+`LinkedHashSet` 底层结构：
+![LinkedHashSet 底层结构示意图](./images/image-20220408235936404.png "LinkedHashSet 底层结构示意图")
+
+### 5.4 `Set` 实现类之三：`TreeSet`
+
+#### 5.4.1 `TreeSet` 概述
+
+`TreeSet` 是 `SortedSet` 接口的实现类，`TreeSet` 可以按照添加的元素的指定的属性的大小顺序进行遍历。
+
+`TreeSet` 底层使用 `红黑树` 结构存储数据，可以按照添加的元素的指定的属性的大小顺序进行遍历。
+
+新增的方法如下：
+* `Comparator comparator()`。
+* `Object first()`。
+* `Object last()`。
+* `Object lower(Object e)`。
+* `Object higher(Object e)`。
+* `SortedSet subSet(fromElement, toElement)`。
+* `SortedSet headSet(toElement)`。
+* `SortedSet tailSet(fromElement)`。
+
+`TreeSet` 特点：不允许重复，实现排序（自然排序或定制排序）。
+
+`TreeSet` 两种排序方法：**自然排序**和**定制排序**。默认情况下，`TreeSet` 采用自然排序。
+* **自然排序**：`TreeSet` 会调用集合元素的 `compareTo(Object obj)` 方法来比较元素之间的大小关系，然后将集合元素按升序（默认情况）排列。
+  * 如果试图把一个对象添加到 `TreeSet` 时，则该对象的类必须实现 `Comparable` 接口。
+  * 实现 `Comparable` 的类必须实现 `compareTo(Object obj)` 方法，两个对象即通过 `compareTo(Object obj)` 方法的返回值来比较大小。
+* **定制排序**：如果元素所属的类没有实现 `Comparable` 接口、或不希望按照升序（默认情况）的方式排列元素、或希望按照其它属性大小进行排序，则考虑使用定制排序。定制排序通过 `Comparator` 接口来实现，需要重写 `compare(T o1, T o2)` 方法。
+  * 利用 `int compare(T o1, T o2)` 方法比较 `o1` 和 `o2` 的大小：如果方法返回正整数，则表示 `o1` 大于 `o2`；如果方法返回 `0`，则表示 `o1` 与 `o2` 相等；如果方法返回负整数，则表示 `o1` 小于 `o2`。
+  * 要实现定制排序，需要将实现 `Comparator` 接口的实例作为形参传递给`TreeSet` 的构造器。
+
+因为只有相同类的两个实例才会比较大小，所以向 `TreeSet` 中添加的应该是**同一个类的对象**。
+
+对于 `TreeSet` 集合而言，它判断两个对象是否相等的唯一标准是两个对象通过 `compareTo(Object obj)` 或 `compare(Object o1, Object o2)` 方法比较返回值，返回值为 `0` 则认为两个对象相等。
+
+向 `TreeSet` 中添加的元素的要求：
+* 要求添加到 `TreeSet` 中的元素必须是同一个类型的对象，否则会报 `ClassCastException` 异常。
+* 添加的元素需要考虑排序：
+  1. 自然排序；
+  2. 定制排序。
+
+判断数据是否相同的标准：
+* 不再是考虑 `hashCode()` 和 `equals()` 方法了，也就意味着添加到 `TreeSet` 中的元素所在的类不需要重写 `hashCode()` 和 `equals()` 方法了。
+* 比较元素大小的或比较元素是否相等的标准就是考虑自然排序或定制排序中，`compareTo()` 或 `compare()` 的返回值。如果 `compareTo()` 或 `compare()` 的返回值为 `0`，则认为两个对象是相等的；由于 `TreeSet` 中不能存放相同的元素，则后一个相等的元素就不能添加到 `TreeSet` 中。
+
+示例代码：
+```java
+/* User.java */
+
+package com.anxin_hitsz_04.set;
+
+/**
+ * ClassName: User
+ * Package: com.anxin_hitsz_04.set
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 18:29
+ * @Version 1.0
+ */
+public class User implements Comparable {
+    private String name;
+    private int age;
+
+    public User() {
+    }
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+//    @Override
+//    public boolean equals(Object o) {
+//        System.out.println("User equals() ...");
+//        if (o == null || getClass() != o.getClass()) return false;
+//
+//        User user = (User) o;
+//        return age == user.age && Objects.equals(name, user.name);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        int result = Objects.hashCode(name);
+//        result = 31 * result + age;
+//        return result;
+//    }
+
+    /*
+    * 比如：按照年龄从小到大排序
+    * */
+//    @Override
+//    public int compareTo(Object o) {
+//        if (this == o) {
+//            return 0;
+//        }
+//
+//        if (o instanceof User) {
+//            User u = (User) o;
+//            return this.age - u.age;
+//        }
+//
+//        throw new RuntimeException("类型不匹配");
+//    }
+
+    /*
+    * 比如：先比较年龄从小到大排列；如果年龄相同，则继续比较姓名，从大到小
+    * */
+    @Override
+    public int compareTo(Object o) {
+        if (this == o) {
+            return 0;
+        }
+
+        if (o instanceof User) {
+            User u = (User) o;
+            int value =  this.age - u.age;
+            if (value != 0) {
+                return value;
+            }
+            return -this.name.compareTo(u.name);
+        }
+
+        throw new RuntimeException("类型不匹配");
+    }
+
+}
+
+
+/* TreeSetTest.java */
+
+package com.anxin_hitsz_04.set;
+
+import org.junit.Test;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.TreeSet;
+
+/**
+ * ClassName: TreeSetTest
+ * Package: com.anxin_hitsz_04.set
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 18:23
+ * @Version 1.0
+ */
+public class TreeSetTest {
+    /*
+    * 自然排序
+    * */
+    @Test
+    public void test1() {
+        TreeSet set = new TreeSet();
+
+        set.add("AA");
+        set.add("BB");
+        set.add("CC");
+        set.add("DD");
+        set.add("EE");
+        set.add("FF");
+
+//        set.add(123); // 会报 ClassCastException 异常
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+    /*
+    * 自然排序
+    * */
+    @Test
+    public void test2() {
+        TreeSet set = new TreeSet();
+
+        User u1 = new User("Tom", 23);
+        User u2 = new User("Jerry", 43);
+        User u3 = new User("Rose", 13);
+        User u4 = new User("Jack", 23);
+        User u5 = new User("Tony", 33);
+
+        set.add(u1);
+        set.add(u2);
+        set.add(u3);
+        set.add(u4);
+        set.add(u5);
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+    /*
+    * 定制排序
+    * */
+    @Test
+    public void test3() {
+        Comparator comparator = new Comparator() {
+            /*
+            * 按照姓名从小到大排列；如果姓名相同，继续比较 age，按照从大到小排列
+            * */
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof User && o2 instanceof User) {
+                    User u1 = (User) o1;
+                    User u2 = (User) o2;
+
+                    int value = u1.getName().compareTo(u2.getName());
+                    if (value != 0) {
+                        return value;
+                    }
+                    return -(u1.getAge() - u2.getAge());
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+        };
+
+        TreeSet set = new TreeSet(comparator);
+
+        User u1 = new User("Tom", 23);
+        User u2 = new User("Jerry", 43);
+        User u3 = new User("Rose", 13);
+        User u4 = new User("Jack", 23);
+        User u5 = new User("Tony", 33);
+
+        set.add(u1);
+        set.add(u2);
+        set.add(u3);
+        set.add(u4);
+        set.add(u5);
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+}
+
+```
+
+### 5.5 练习
+
+**练习 1：**
+> 题目：
+>
+> 定义方法如下：`public static List duplicateList(List list)`。
+>
+> 要求：
+> 1. 参数 `List` 中只存放 `Integer` 的对象。
+> 2. 在 `List` 内去除重复数字值，尽量简单。
+
+示例代码：
+```java
+/* Exer01.java */
+
+package com.anxin_hitsz_04.set.exer1;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+/**
+ * ClassName: Exer01
+ * Package: com.anxin_hitsz_04.set.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 18:51
+ * @Version 1.0
+ */
+public class Exer01 {
+    public static void main(String[] args) {
+        ArrayList list = new ArrayList();
+        list.add(34);
+        list.add(34);
+        list.add(34);
+        list.add(22);
+        list.add(22);
+        list.add(22);
+        list.add(45);
+        list.add(45);
+        list.add(45);
+
+        List newList = duplicateList(list);
+        System.out.println(newList);
+
+    }
+
+    public static List duplicateList(List list) {
+        // 方式 1：
+//        HashSet set = new HashSet();
+//        for (Object obj : list) {
+//            set.add(obj);
+//        }
+//
+//        List list1 = new ArrayList();
+//        for (Object obj : set) {
+//            list1.add(obj);
+//        }
+//
+//        return list1;
+
+        // 方式 2：
+        HashSet set = new HashSet(list);
+        List list1 = new ArrayList(set);
+        return list1;
+
+    }
+
+}
+
+```
+
+**练习 2：**
+> 题目：
+>
+> 编写一个程序，获取 10 个 1 至 20 的随机数，要求随机数不能重复；并把最终的随机数输出到控制台。
+
+示例代码：
+```java
+/* Exer02.java */
+
+package com.anxin_hitsz_04.set.exer2;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+/**
+ * ClassName: Exer02
+ * Package: com.anxin_hitsz_04.set.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 18:58
+ * @Version 1.0
+ */
+public class Exer02 {
+    public static void main(String[] args) {
+
+        Set set = new HashSet();
+
+        while (set.size() < 10) {
+            int random = (int)(Math.random() * (20 - 1 + 1) + 1);
+            set.add(random);
+        }
+
+        Iterator iterator = set.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+    }
+
+}
+
+```
+
+## 六、`Map` 接口
+
+Java 提供了专门的集合框架用来存储映射（即一一对应）关系的对象，即 `java.util.Map` 接口。
+
+`Map` 及其实现类对比：
+* `java.util.Map`：存储一对一对的数据（`key - value` 键值对，类似于函数 $(x_1, y_1), (x_2, y_2) \rightarrow y = f(x)$）。
+  * `HashMap`：主要实现类；线程不安全的，效率高。可以添加 `null` 的 `key` 和 `value` 值。底层使用 `数组 + 单向链表 + 红黑树` 结构存储（JDK 8）。
+    * `LinkedHashMap`：是 `HashMap` 的子类。在 `HashMap` 使用的数据结构的基础上，增加了一对双向链表，用于记录添加的元素的先后顺序，进而我们在遍历元素时，就可以按照添加的顺序显示。开发中，对于频繁的遍历操作，建议使用此类。
+  * `TreeMap`：底层使用 `红黑树` 存储。可以按照添加的 `key - value` 中的 `key` 元素的指定的属性的大小顺序进行遍历。需要考虑使用 1. 自然排序 2. 定制排序。
+  * `Hashtable`：古老实现类；线程安全的，效率低。不可以添加 `null` 的 `key` 或 `value` 值。底层使用 `数组 + 单向链表` 结构存储（JDK 8）。
+    * `Properties`：其 `key` 和 `value` 都是 `String` 类型。常用来处理属性文件。
+
+> 注意：
+>
+> `HashMap` 的底层实现：
+> 1. `new HashMap()`。
+> 2. `put(key, value)`。
+
+示例代码：
+```java
+/* MapTest.java */
+
+package com.anxin_hitsz_05.map;
+
+import org.junit.Test;
+
+import java.util.*;
+
+/**
+ * ClassName: MapTest
+ * Package: com.anxin_hitsz_05.map
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 19:52
+ * @Version 1.0
+ */
+public class MapTest {
+    @Test
+    public void test1() {
+        Map map = new HashMap();
+
+        map.put(null, null);
+        map.put("Tom", 23);
+        map.put("CC", new Date());
+        map.put(34, "AA");
+
+        System.out.println(map);
+
+    }
+
+    @Test
+    public void test2() {
+        Map map = new Hashtable();
+
+//        map.put(null, 123);
+
+        map.put("AA", null);
+
+        System.out.println(map);
+
+    }
+
+    @Test
+    public void test3() {
+        LinkedHashMap map = new LinkedHashMap();
+
+        map.put("Tom", 23);
+        map.put("CC", new Date());
+        map.put(34, "AA");
+
+        System.out.println(map);
+
+    }
+
+}
+
+```
+
+### 6.1 `Map` 接口概述
+
+`Map` 与 `Collection` 并列存在，用于保存具有**映射关系**的数据：`key - value`。
+* `Collection` 集合称为单列集合，元素是孤立存在的。
+* `Map` 集合称为双列集合，元素是成对存在的。
+
+`Map` 中的 `key` 和 `value` 都可以是任何引用类型的数据，但常用 `String` 类作为 `Map` 的“键”。
+
+`Map` 接口的常用实现类：`HashMap`、`LinkedHashMap`、`TreeMap` 和 `Properties`。其中 `HashMap` 是 `Map` 接口使用频率最高的实现类。
+
+![Map 接口及其继承关系](./images/image-20220409001015034.png "Map 接口及其继承关系")
+
+### 6.2 `Map` 中 `key - value` 特点
+
+这里主要以 `HashMap` 为例说明。`HashMap` 中存储的 `key`、`value` 的特点如下：
+* `Map` 中的 **`key` 用 `Set` 来存放**，**不允许重复**；即同一个 `Map` 对象所对应的类，须重写 `hashCode()` 方法和 `equals()` 方法。
+* `key` 和 `value` 之间存在单向一对一关系，即通过指定的 `key` 总能找到唯一的、确定的 `value`，**不同 `key` 对应的 `value` 可以重复**。`value` 所在的类要重写 `equals()` 方法。
+* `key` 和 `value` 构成一个 `entry`，所有的 `entry` 彼此之间是**无序的**、**不可重复的**。
+
+![Map 中 key 和 value 构成一个 entry](./images/image-20220514190412763.png "Map 中 key 和 value 构成一个 entry")
+
+`HashMap` 中元素的特点：
+* `HashMap` 中的所有的 `key` 彼此之间是不可重复的、无序的，所有的 `key` 就构成一个 `Set` 集合。（即：`key` 所在的类要重写 `hashCode()` 方法和 `equals()` 方法。）
+* `HashMap` 中的所有的 `value` 彼此之间是可重复的、无序的，所有的 `value` 就构成一个 `Collection` 集合。（即：`value` 所在的类要重写 `equals()` 方法。）
+* `HashMap` 中的一个 `key - value`，就构成了一个 `entry`。
+* `HashMap` 中的所有的 `entry` 彼此之间是不可重复的、无序的，所有的 `entry` 就构成了一个 `Set` 集合。
