@@ -1710,3 +1710,1100 @@ public class MapTest {
 * `HashMap` 中的所有的 `value` 彼此之间是可重复的、无序的，所有的 `value` 就构成一个 `Collection` 集合。（即：`value` 所在的类要重写 `equals()` 方法。）
 * `HashMap` 中的一个 `key - value`，就构成了一个 `entry`。
 * `HashMap` 中的所有的 `entry` 彼此之间是不可重复的、无序的，所有的 `entry` 就构成了一个 `Set` 集合。
+
+### 6.3  `Map` 接口的常用方法
+
+添加、修改操作：
+* `Object put(Object key, Object value)`：将指定 `key - value` 添加到（或修改）当前 `map` 对象中。
+* `void putAll(Map m)`：将 `m` 中的所有 `key - value` 对存放到当前 `map` 中。
+
+删除操作：
+* `Object remove(Object key)`：移除指定 `key` 的 `key - value` 对，并返回 `value`。
+* `void clear()`：清空当前 `map` 中的所有数据。
+
+元素查询的操作：
+* `Object get(Object key)`：获取指定 `key` 对应的 `value`。
+* `boolean containsKey(Object key)`：是否包含指定的 `key`。
+* `boolean containsValue(Object value)`：是否包含指定的 `value`。
+* `int size()`：返回 `map` 中 `key - value` 对的个数。
+* `boolean isEmpty()`：判断当前 `map` 是否为空。
+* `boolean equals(Object obj)`：判断当前 `map` 和参数对象 `obj` 是否相等。
+
+元视图操作的方法：
+* `Set keySet()`：返回所有 `key` 构成的 `Set` 集合。
+* `Collection values()`：返回所有 `value` 构成的 `Collection` 集合。
+* `Set entrySet()`：返回所有 `key - value` 对构成的 `Set` 集合。
+
+遍历：
+* 遍历 `key` 集：`Set keySet()`：返回所有 `key` 构成的 `Set` 集合。
+* 遍历 `value` 集：`Collection values()`：返回所有 `value` 构成的 `Collection` 集合。
+* 遍历 `entry` 集：`Set entrySet()`：返回所有 `key - value` 对构成的 `Set` 集合。
+
+示例代码：
+```java
+/* Person.java */
+
+package com.anxin_hitsz_05.map;
+
+import java.util.Objects;
+
+/**
+ * ClassName: Person
+ * Package: com.anxin_hitsz_01.collection
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/11 20:45
+ * @Version 1.0
+ */
+public class Person {
+    String name;
+    int age;
+
+    public Person() {
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        System.out.println("Person equals() ...");
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(name);
+        result = 31 * result + age;
+        return result;
+    }
+
+}
+
+
+/* MapTest.java */
+
+package com.anxin_hitsz_05.map;
+
+import org.junit.Test;
+
+import java.util.*;
+
+/**
+ * ClassName: MapTest
+ * Package: com.anxin_hitsz_05.map
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 19:52
+ * @Version 1.0
+ */
+public class MapTest {
+
+    /*
+    * 测试 Map 中的实现类
+    * */
+
+    @Test
+    public void test1() {
+        Map map = new HashMap();
+
+        map.put(null, null);
+        map.put("Tom", 23);
+        map.put("CC", new Date());
+        map.put(34, "AA");
+
+        System.out.println(map);
+
+    }
+
+    @Test
+    public void test2() {
+        Map map = new Hashtable();
+
+//        map.put(null, 123);
+
+        map.put("AA", null);
+
+        System.out.println(map);
+
+    }
+
+    @Test
+    public void test3() {
+        LinkedHashMap map = new LinkedHashMap();
+
+        map.put("Tom", 23);
+        map.put("CC", new Date());
+        map.put(34, "AA");
+
+        System.out.println(map);
+
+    }
+
+    /*
+    * 测试 Map 中的常用方法
+    * */
+
+    @Test
+    public void test4() {
+        HashMap map = new HashMap();
+
+        // 添加：Object put(Object key, Object value)
+        map.put("AA", 56);
+        map.put(67, "Tom");
+        map.put("BB", 78);
+        map.put(new Person("Kerry", 12), 56);
+
+        System.out.println(map);
+        // int size()
+        System.out.println(map.size());
+
+        // Object remove(Object key)
+        Object value = map.remove("AA");
+        System.out.println(value);
+        System.out.println(map);
+
+        // 修改：Object put(Object key, Object value)
+        Object oldValue =  map.put("BB", 99);
+        System.out.println(oldValue);   // 78
+        System.out.println(map);
+
+        // Object get(Object key)
+        Object value1 = map.get(67);
+        System.out.println(value1);
+
+    }
+
+    // Map 的遍历操作
+    @Test
+    public void test5() {
+        HashMap map = new HashMap();
+
+        map.put("AA", 56);
+        map.put(67, "Tom");
+        map.put("BB", 78);
+        map.put(new Person("Kerry", 12), 56);
+
+        // 遍历 key 集：Set keySet()
+        Set keySet = map.keySet();
+        // 使用迭代器
+        Iterator iterator = keySet.iterator();
+        while (iterator.hasNext()) {
+            Object key = iterator.next();
+            System.out.println(key);
+        }
+
+        // 遍历 value 集：Collection values()
+        // 方式 1：推荐
+//        Collection values = map.values();
+//        // 使用增强 for
+//        for (Object obj : values) {
+//            System.out.println(obj);
+//        }
+        // 方式 2：
+//        Set keySet1 = map.keySet();
+//        for (Object key : keySet1) {
+//            Object value = map.get(key);
+//            System.out.println(value);
+//        }
+
+    }
+
+    @Test
+    public void test6() {
+        HashMap map = new HashMap();
+
+        map.put("AA", 56);
+        map.put(67, "Tom");
+        map.put("BB", 78);
+        map.put(new Person("Kerry", 12), 56);
+
+        // 方式 1：遍历 entry 集：Set entrySet()
+        Set entrySet = map.entrySet();
+        Iterator iterator = entrySet.iterator();
+        while (iterator.hasNext()) {
+            // 方法 1：
+//            System.out.println(iterator.next());
+            // 方法 2：
+            Map.Entry entry = (Map.Entry) iterator.next();
+            System.out.println(entry.getKey() + " -> " + entry.getValue());
+        }
+
+        // 方式 2：遍历 entry 集：keySet()、get(key)
+//        Set keySet = map.keySet();
+//        for (Object key : keySet) {
+//            System.out.println(key + " -> " + map.get(key));
+//        }
+
+    }
+
+}
+
+```
+
+### 6.4 `Map` 的主要实现类：`HashMap`
+
+`HashMap` 是 `Map` 接口使用频率最高的实现类。
+
+`HashMap` 是线程不安全的。允许添加 `null` 键和 `null` 值。
+
+存储数据采用的哈希表结构，底层使用 `一维数组 + 单向链表 + 红黑树` 进行 `key - value` 数据的存储。与 `HashSet` 一样，元素的存取顺序不能保证一致。
+
+`HashMap` **判断两个 `key` 相等的标准**是：两个 `key` 的 `hashCode` 值相等，通过 `equals()` 方法返回 `true`。
+
+`HashMap` **判断两个 `value` 相等的标准**是：两个 `value` 通过 `equals()` 方法返回 `true`。
+
+### 6.5 Map 实现类之二：`LinkedHashMap`
+
+`LinkedHashMap` 是 `HashMap` 的子类。
+
+存储数据采用 `哈希表结构 + 链表结构`，在 `HashMap` 存储结构的基础上，使用了一对**双向链表**来**记录添加元素的先后顺序**，可以保证遍历元素时，与添加的顺序一致。
+
+通过哈希表结构可以保证键的唯一、不重复，需要键所在类重写 `hashCode()` 方法、`equals()` 方法。
+
+### 6.5 Map 实现类之三：`TreeMap`
+
+`TreeMap` 存储 `key - value` 对时，需要根据 `key - value` 对进行排序。
+
+`TreeMap` 可以保证所有的 `key - value` 对处于**有序状态**。
+
+`TreeMap` 底层使用 `红黑树` 结构存储数据。
+
+`TreeMap` 可以按照添加的 `key - value` 中的 `key` 元素的指定的属性的大小顺序进行遍历；需要考虑使用 1. 自然排序 2. 定制排序。
+
+> 要求：向 `TreeMap` 中添加的 `key` 必须是同一个类型的对象。
+
+`TreeMap` 的 `key` 的排序：
+* **自然排序**：`TreeMap` 的所有的 `key` 必须实现 `Comparable` 接口，而且所有的 `key` 应该是同一个类的对象，否则将会抛出 `ClassCastException` 异常。
+* **定制排序**：创建 `TreeMap` 时，构造器传入一个 `Comparator` 对象，该对象负责对 `TreeMap` 中的所有 `key` 进行排序；此时不需要 `Map` 的 `key` 实现 `comparable` 接口。
+
+`TreeMap` 判断两个 `key` 相等的标准：两个 `key` 通过 `compareTo()` 方法或者 `compare()` 方法返回 `0`。
+
+示例代码：
+```java
+/* User.java */
+
+package com.anxin_hitsz_05.map;
+
+/**
+ * ClassName: User
+ * Package: com.anxin_hitsz_04.set
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/12 18:29
+ * @Version 1.0
+ */
+public class User implements Comparable {
+    private String name;
+    private int age;
+
+    public User() {
+    }
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+
+//    @Override
+//    public boolean equals(Object o) {
+//        System.out.println("User equals() ...");
+//        if (o == null || getClass() != o.getClass()) return false;
+//
+//        User user = (User) o;
+//        return age == user.age && Objects.equals(name, user.name);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        int result = Objects.hashCode(name);
+//        result = 31 * result + age;
+//        return result;
+//    }
+
+    /*
+    * 比如：按照年龄从小到大排序
+    * */
+    @Override
+    public int compareTo(Object o) {
+        if (this == o) {
+            return 0;
+        }
+
+        if (o instanceof User) {
+            User u = (User) o;
+            return this.age - u.age;
+        }
+
+        throw new RuntimeException("类型不匹配");
+    }
+
+    /*
+    * 比如：先比较年龄从小到大排列；如果年龄相同，则继续比较姓名，从大到小
+    * */
+//    @Override
+//    public int compareTo(Object o) {
+//        if (this == o) {
+//            return 0;
+//        }
+//
+//        if (o instanceof User) {
+//            User u = (User) o;
+//            int value =  this.age - u.age;
+//            if (value != 0) {
+//                return value;
+//            }
+//            return -this.name.compareTo(u.name);
+//        }
+//
+//        throw new RuntimeException("类型不匹配");
+//    }
+
+}
+
+
+/* TreeMapTest.java */
+
+package com.anxin_hitsz_05.map;
+
+import org.junit.Test;
+
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Set;
+import java.util.TreeMap;
+
+/**
+ * ClassName: TreeMapTest
+ * Package: com.anxin_hitsz_05.map
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 16:24
+ * @Version 1.0
+ */
+public class TreeMapTest {
+
+    /*
+    * 自然排序
+    * */
+    @Test
+    public void test1() {
+        TreeMap map = new TreeMap();
+
+        map.put("AA", 89);
+        map.put("BB", 78);
+        map.put("CC", new Date());
+        map.put("DD", 78);
+
+//        map.put(67, 78);  // 报错，因为 key 的类型（Integer）与之前的 key 的类型（String）不一致
+
+        Set entrySet = map.entrySet();
+        for (Object entry : entrySet) {
+            System.out.println(entry);
+        }
+
+    }
+
+    @Test
+    public void test2() {
+        TreeMap map = new TreeMap();
+
+        User u1 = new User("Tom", 23);
+        User u2 = new User("Jerry", 43);
+        User u3 = new User("Rose", 13);
+        User u4 = new User("Jack", 23);
+        User u5 = new User("Tony", 33);
+
+        map.put(u1, 78);
+        map.put(u2, 76);
+        map.put(u3, 88);
+        map.put(u4, 45);
+        map.put(u5, 99);
+
+//        Set entrySet = map.entrySet();
+//        for (Object entry : entrySet) {
+//            System.out.println(entry);
+//        }
+
+//        System.out.println(map.containsKey(new User("Maria", 33)));
+
+    }
+
+    /*
+    * 定制排序
+    * */
+    @Test
+    public void test3() {
+        Comparator comparator = new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof User && o2 instanceof User) {
+                    User u1 = (User) o1;
+                    User u2 = (User) o2;
+
+                    int value = u1.getName().compareTo(u2.getName());
+                    if (value != 0) {
+                        return value;
+                    }
+                    return u1.getAge() - u2.getAge();
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+        };
+
+        TreeMap map = new TreeMap(comparator);
+
+        User u1 = new User("Tom", 23);
+        User u2 = new User("Jerry", 43);
+        User u3 = new User("Rose", 13);
+        User u4 = new User("Jack", 23);
+        User u5 = new User("Tony", 33);
+
+        map.put(u1, 78);
+        map.put(u2, 76);
+        map.put(u3, 88);
+        map.put(u4, 45);
+        map.put(u5, 99);
+
+        Set entrySet = map.entrySet();
+        for (Object entry : entrySet) {
+            System.out.println(entry);
+        }
+
+    }
+
+}
+
+```
+
+### 6.6 `Map` 实现类之四：`Hashtable`
+
+`Hashtable` 是 `Map` 接口的**古老实现类**，JDK 1.0 狐疑提供了。不同于 `HashMap`，`Hashtable` 是线程安全的。
+
+`Hashtable` 实现原理和 `HashMap` 相同，功能相同；底层都使用 `哈希表` 结构（`数组 + 单向链表`），查询速度快。
+
+与 `HashMap` 一样，`Hashtable` 也不能保证其中 `key - value` 对的顺序。
+
+`Hashtable` 判断两个 `key` 相等、两个 `value` 相等的标准，与 `HashMap` 一致。
+
+与 `HashMap` 不同，`Hashtable` 不允许使用 `null` 作为 `key` 或 `value`。
+
+> 面试题：
+>
+> `Hashtable` 和 `HashMap` 的区别：
+>
+> `HashMap`：底层是一个哈希表（JDK 7：`数组 + 链表`；JDK 8：`数组 + 链表 + 红黑树`），是一个线程不安全的集合，执行效率高。
+> `Hashtable`：底层也是一个哈希表（`数组 + 链表`），是一个线程安全的集合，执行效率低。
+>
+> `HashMap` 集合：可以存储 `null` 的键、`null` 的值。
+> `Hashtable` 集合：不能存储 `null` 的键、`null` 的值。
+>
+> `Hashtable` 和 `Vector` 集合一样，在 JDK 1.2 版本之后被更先进的集合（`HashMap`、`ArrayList`）取代了。所以 `HashMap` 是 `Map` 的主要实现类，`Hashtable` 是 `Map` 的古老实现类。
+>
+> `Hashtable` 的子类 `Properties`（配置文件）依然活跃在历史舞台。
+>
+> `Properties` 集合是一个唯一和 IO 流相结合的集合。
+
+### 6.7 Map 实现类之五：`Properties`
+
+`Properties` 类是 `Hashtable` 的子类，该对象用于处理属性文件。
+
+由于属性文件里的 `key`、`value` 都是字符串类型，所以 `Properties` 中要求 `key` 和 `value` 都是字符串类型。
+
+存取数据时，建议使用 `setProperty(String key, String value)` 方法和 `getProperty(String key)` 方法。
+
+示例代码：
+```java
+/* info.properties */
+
+name=汤姆
+password=abc123
+
+
+/* PropertiesTest.java */
+
+package com.anxin_hitsz_05.map;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+/**
+ * ClassName: PropertiesTest
+ * Package: com.anxin_hitsz_05.map
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 16:44
+ * @Version 1.0
+ */
+public class PropertiesTest {
+    @Test
+    public void test() throws IOException { // 注意：因为涉及到流大的操作，为了确保流能关闭，建议使用 try - catch - finally
+        // 方式 1：数据和代码耦合度高；如果修改的话，需要重新编译代码、打包发布，繁琐
+        // 数据
+//        String name = "Tom";
+//        String password = "abc123";
+
+        // 代码：用于操作 name、password 的代码
+        // ...
+
+        // 方式 2：将数据封装到具体的配置文件中，在程序中读取配置文件中的信息；实现了
+        //          数据和代码的解耦：由于我们没有修改代码，就省去了重新编译和打包的过程
+        File file = new File("info.properties");    // 注意：要提前创建好
+//        System.out.println(file.getAbsolutePath());
+        FileInputStream fis = new FileInputStream(file);
+
+        Properties pros = new Properties();
+        pros.load(fis); // 加载流中的文件中的数据
+
+        // 读取数据
+        String name = pros.getProperty("name");
+        String pwd = pros.getProperty("password");
+
+        System.out.println(name + ":" + pwd);
+
+        fis.close();
+
+    }
+
+//    public static void main(String[] args) {
+//        File file = new File("info.properties");
+////        System.out.println(file.getAbsolutePath());
+//    }
+
+}
+
+```
+
+### 6.8 练习
+
+**练习 1：**
+> 题目：
+>
+> 添加你喜欢的歌手以及你喜欢 TA 唱过的歌曲，并遍历。
+
+示例代码：
+```java
+/* SingerTest.java */
+
+package com.anxin_hitsz_05.map.exer1;
+
+import java.util.*;
+
+/**
+ * ClassName: SingerTest
+ * Package: com.anxin_hitsz_05.map.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 16:58
+ * @Version 1.0
+ */
+public class SingerTest {
+    public static void main(String[] args) {
+        HashMap singers = new HashMap();
+        // 添加 1 个歌手和其歌曲
+        String singer1 = "周杰伦";
+
+        ArrayList songs1 = new ArrayList();
+        songs1.add("夜曲");
+        songs1.add("晴天");
+        songs1.add("七里香");
+        songs1.add("发如雪");
+        songs1.add("屋顶");
+        songs1.add("青花瓷");
+
+        singers.put(singer1, songs1);
+
+        // 再添加 1 个歌手和其歌曲
+        String singer2 = "林俊杰";
+        ArrayList songs2 = new ArrayList();
+        songs2.add("江南");
+        songs2.add("曹操");
+        songs2.add("小酒窝");
+        songs2.add("可惜没如果");
+
+        singers.put(singer2, songs2);
+
+        Set entrySet = singers.entrySet();
+        Iterator iterator = entrySet.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            System.out.println("歌手：" + entry.getKey());
+            System.out.println("歌曲有：" + entry.getValue());
+        }
+
+    }
+
+}
+
+```
+
+**练习 2：**
+> 题目 - 二级联动：
+>
+> 将省份和城市的名称保存在集合中；当用户选择省份以后，二级联动，显示对应省份的地级市供用户选择。
+>
+> 提示：如果输入的省份不正确，需要重新输入；如果输入的城市不正确，需要重新输入。
+
+示例代码：
+```java
+/* CityMapTest.java */
+
+package com.anxin_hitsz_05.map.exer2;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+
+/**
+ * ClassName: CityMapTest
+ * Package: com.anxin_hitsz_05.map.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 17:07
+ * @Version 1.0
+ */
+public class CityMapTest {
+    public static void main(String[] args) {
+        // 1. 获取 Map，并遍历 Map 中的所有 key
+        Map map = CityMap.model;
+
+        Set provinces = map.keySet();
+        for (Object province : provinces) {
+            System.out.print(province + "\t\t");
+        }
+
+        // 2. 根据提示，从键盘获取省份值，判断此省份是否存在：
+        //      如果存在，遍历其 value 中的各个城市
+        //      如果不存在，提示用户重新输入
+        Scanner scan = new Scanner(System.in);
+        String[] cities;
+        while (true) {
+            System.out.println("\n请选择你所在的省份：");
+            String province = scan.next();
+            // 获取省份对应的各个城市构成的 String[]
+            cities = (String[]) map.get(province);
+
+            if (cities == null || cities.length == 0) {
+                System.out.println("你输入的省份有误，请重新输入");
+            } else {
+                break;  // 意味着用户输入的省份是存在的，则跳出当前循环
+            }
+        }
+        for (int i = 0; i < cities.length; i++) {
+            System.out.print(cities[i] + "\t\t");
+        }
+        System.out.println();
+
+        // 3. 根据提示，从键盘获取城市，遍历各个城市构成的 String[]，判断输入的城市是否存在于此数组中：
+        //      如果存在，信息等级完毕
+        //      如果不存在，提示用户重新输入
+        l:while (true) {
+            System.out.println("请选择你所在的城市：");
+            String city = scan.next();
+            // 方式 1：
+//            for (int i = 0; i < cities.length; i++) {
+//                if (city.equals(cities[i])) {
+//                    System.out.println("信息登记完毕");
+//                    break l;
+//                }
+//            }
+//
+//            System.out.println("输入的城市有误，请重新输入");
+
+            // 方式 2:
+            if (containsCity(cities, city)) {
+                System.out.println("信息登记完毕");
+                break;
+            }
+
+            System.out.println("输入的城市有误，请重新输入");
+        }
+
+
+        scan.close();
+
+    }
+
+    // 第 2 种方式处理城市是否存在
+    public static boolean containsCity(String[] cities, String city) {
+        for (int i = 0; i < cities.length; i++) {
+            if (city.equals(cities[i])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+class CityMap {
+
+    public static Map model = new HashMap();
+
+    static {
+        model.put("北京", new String[] {"北京"});
+        model.put("辽宁", new String[] {"沈阳","盘锦","铁岭","丹东","大连","锦州","营口"});
+        model.put("吉林", new String[] {"长春","延边","吉林","白山","白城","四平","松原"});
+        model.put("河北", new String[] {"承德","沧州","邯郸","邢台","唐山","保定","石家庄"});
+        model.put("河南", new String[] {"郑州","许昌","开封","洛阳","商丘","南阳","新乡"});
+        model.put("山东", new String[] {"济南","青岛","日照","临沂","泰安","聊城","德州"});
+    }
+
+}
+
+```
+
+## 七、`Collections` 工具类
+
+参考操作数组的工具类 `Arrays`，`Collections` 是一个操作 `Set`、`List` 和 `Map` 等集合的工具类。
+
+### 7.1 常用方法
+
+`Collections` 中提供了一系列静态的方法对集合元素进行排序、查询和修改等操作，还提供了对集合对象设置不可变、对集合对象实现同步控制等方法（均为 `static` 方法）。
+
+排序操作：
+* `reverse(List)`：反转 `List` 中元素的顺序。
+* `shuffle(List)`：对 `List` 集合元素进行随机排序。
+* `sort(List)`：根据元素的自然顺序对指定 `List` 集合元素按升序排序。
+* `sort(List, Comparator)`：根据指定的 `Comparator` 产生的顺序对 `List` 集合元素进行排序。
+* `swap(List, int, int)`：将指定 `list` 集合中的 `i` 处元素和 `j` 处元素进行交换。
+
+查找：
+* `Object max(Collection)`：根据元素的自然顺序，返回给定集合中的最大元素。
+* `Object max(Collection, Comparator)`：根据 `Comparator` 指定的顺序，返回给定集合中的最大元素。
+
+> 注意：
+>
+> 默认以集合排序后序列最右侧元素为该集合中的最大元素。
+
+* `Object min(Collection)`：根据元素的自然顺序，返回给定集合中的最小元素。
+* `Object min(Collection, Comparator)`：根据 `Comparator` 指定的顺序，返回给定集合中的最小元素。
+
+> 注意：
+>
+> 默认以集合排序后序列最左侧元素为该集合中的最小元素。
+
+* `int binarySearch(List list, T key)`：在 `List` 集合中查找某个元素的下标，但是 `List` 的元素必须是 `T` 或 `T` 的子类对象，而且必须是可比较大小的，即支持自然排序的；而且集合也事先必须是有序的，否则结果不确定。
+* `int binarySearch(List list, T key, Comparator c)`：在 `List` 集合中查找某个元素的下标，但是 `List` 的元素必须是 `T` 或 `T` 的子类对象，而且集合也事先必须是按照 `c` 比较器规则进行排序过的，否则结果不确定。
+* `int frequency(Collection c, Object o)`：返回指定集合中指定元素的出现次数。
+
+复制、替换：
+* `void copy(List dest, List src)`：将 `src` 中的内容复制到 `dest` 中。
+
+> 注意：
+>
+> 在 `void copy(List dest, List src)` 方法中，需要确保 `dest.size() >= src.size()`。
+
+* `boolean replaceAll(List list, Object oldVal, Object newVal)`：使用新值替换 `List` 对象的所有旧值。
+* 提供了多个 `unmodifiableXxx()` 方法，该方法返回指定 `Xxx` 的不可修改的视图。
+
+添加：
+* `boolean addAll(Collection c, T ... elements)`：将所有指定元素添加到指定 `Collection` 中。
+
+同步：
+* `Collections` 类中提供了多个 `synchronizedXxx()` 方法，该方法可使将指定集合包装成线程同步的集合，从而可以解决多线程并发访问集合时的线程安全问题：
+![Collections 类中提供的多个 synchronizedXxx() 方法](./images/image-20220409003002526.png "Collections 类中提供的多个 synchronizedXxx() 方法")
+
+> 面试题：
+>
+> 区分 `Collection` 和 `Collections`：
+> * `Collection`：集合框架中的用于存储一个一个元素的接口，又分为 `List` 和 `Set` 等子接口。
+> * `Collections`：用于操作集合框架的一个工具类，此时的集合框架包括 `Set`、`List`、`Map`。
+
+### 7.2 举例
+
+示例代码：
+```java
+/* CollectionsTest.java */
+
+package com.anxin_hitsz_06.collections;
+
+import org.junit.Test;
+
+import java.util.*;
+
+/**
+ * ClassName: CollectionsTest
+ * Package: com.anxin_hitsz_06.collections
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 18:13
+ * @Version 1.0
+ */
+public class CollectionsTest {
+
+    /*
+    * 排序操作
+    * */
+
+    @Test
+    public void test1() {
+        List list = Arrays.asList(45, 43, 65, 6, 43, 2, 32, 45, 56, 34, 23);
+        System.out.println(list);
+        // reverse(List)：反转 List 中元素的顺序
+//        Collections.reverse(list);
+
+        // shuffle(List)：对 List 集合元素进行随机排序
+//        Collections.shuffle(list);
+
+        // sort(List)：根据元素的自然顺序对指定 List 集合元素按升序排序
+//        Collections.sort(list);
+
+        // sort(List, Comparator)：根据指定的 Comparator 产生的顺序对 List 集合元素进行排序
+        Collections.sort(list,  new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof Integer && o2 instanceof Integer) {
+                    Integer i1 = (Integer) o1;
+                    Integer i2 = (Integer) o2;
+
+//                    return i1 - i2;
+                    return -(i1.intValue() - i2.intValue());
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+        });
+
+
+        System.out.println(list);
+
+    }
+
+    /*
+    * 查找
+    * */
+
+    @Test
+    public void test2() {
+        List list = Arrays.asList(45, 43, 65, 6, 43, 2, 32, 45, 56, 34, 23);
+        System.out.println(list);
+
+        Object max =  Collections.max(list);
+
+        Object max1 = Collections.max(list, new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof Integer && o2 instanceof Integer) {
+                    Integer i1 = (Integer) o1;
+                    Integer i2 = (Integer) o2;
+
+//                    return i1 - i2;
+                    return -(i1.intValue() - i2.intValue());
+                }
+
+                throw new RuntimeException("类型不匹配");
+            }
+        });
+
+        System.out.println(max);
+        System.out.println(max1);
+
+        int count = Collections.frequency(list, 45);
+        System.out.println("45 出现了 " + count + " 次");
+
+    }
+
+    /*
+    * 复制、替换
+    * */
+
+    @Test
+    public void test3() {
+        List src = Arrays.asList(45, 43, 65, 6, 43, 2, 32, 45, 56, 34, 23);
+
+        // void copy(List dest, List src)：将 src 中的内容复制到 dest 中
+        // 错误的写法：
+//        List dest = new ArrayList();
+        // 正确的写法：
+        List dest = Arrays.asList(new Object[src.size()]);
+
+        Collections.copy(dest, src);
+
+        System.out.println(dest);
+
+    }
+
+    @Test
+    public void test4() {
+        // 提供了多个 unmodifiableXxx() 方法，该方法返回指定 Xxx 的不可修改的视图
+
+        List list1 = new ArrayList();
+        // list1 可以写入数据
+        list1.add(34);
+        list1.add(12);
+        list1.add(45);
+
+        List list2 = Collections.unmodifiableList(list1);
+        // 此时的 list2 只能读，不能写
+        list2.add("AA");    // 不能写
+        System.out.println(list2.get(0));   // 34
+
+    }
+
+    /*
+    * 同步
+    * */
+
+    @Test
+    public void test5() {
+        // Collections 类中提供了多个 synchronizedXxx() 方法
+        List list1 = new ArrayList();
+        // 返回的 list2 就是线程安全的
+        List list2 = Collections.synchronizedList(list1);
+        list2.add(123);
+
+        HashMap map1 = new HashMap();
+        // 返回的 map2 就是线程安全的
+        Map map2 = Collections.synchronizedMap(map1);
+
+    }
+
+}
+
+```
+
+### 7.3 练习
+
+**练习：**
+> 题目：
+>
+> 模拟斗地主洗牌和发牌，牌没有排序。
+>
+> 提示：不要忘记大王、小王。
+> 
+> 初始化数据结构，声明如下：
+> ```java
+> String[] num = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" };
+> String[] color = { "方片♦", "梅花♣", "红桃♥", "黑桃♠" };
+> ArrayList poker = new ArrayList();
+> ```
+>
+> 以上为题目描述。
+
+示例代码：
+```java
+/* PokerTest.java */
+
+package com.anxin_hitsz_06.collections.exer;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
+/**
+ * ClassName: PokerTest
+ * Package: com.anxin_hitsz_06.collections.exer
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/13 18:42
+ * @Version 1.0
+ */
+public class PokerTest {
+    public static void main(String[] args) {
+
+        // 1. 组成一副扑克牌
+        String[] num = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" };
+        String[] color = { "方片♦", "梅花♣", "红桃♥", "黑桃♠" };
+        ArrayList poker = new ArrayList();
+
+        for (int i = 0; i < color.length; i++) {
+            for (int j = 0; j < num.length; j++) {
+                poker.add(color[i] + " " + num[j]);
+            }
+        }
+
+        // 添加大小王
+        poker.add("小王");
+        poker.add("大王");
+
+        // 2. 洗牌
+        Collections.shuffle(poker);
+
+        // 3. 发牌
+        // 3.1 创建 3 个角色和 1 个底牌对应的 4 个 ArrayList
+        ArrayList tom = new ArrayList();
+        ArrayList jerry = new ArrayList();
+        ArrayList me = new ArrayList();
+        ArrayList lastCards = new ArrayList();
+
+        for (int i = 0; i < poker.size(); i++) {
+            if (i >= poker.size() - 3) {
+                lastCards.add(poker.get(i));
+            } else if (i % 3 == 0) {
+                tom.add(poker.get(i));
+            } else if (i % 3 == 1) {
+                jerry.add(poker.get(i));
+            } else if (i % 3 == 2) {
+                me.add(poker.get(i));
+            }
+        }
+
+        // 3.2 遍历显示 4 个 ArrayList
+        System.out.println("Tom：");
+        System.out.println(tom);
+
+        System.out.println("Jerry：");
+        System.out.println(jerry);
+
+        System.out.println("Me：");
+        System.out.println(me);
+
+        System.out.println("底牌：");
+        System.out.println(lastCards);
+
+    }
+}
+
+```
