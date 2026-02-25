@@ -555,3 +555,198 @@ public class TreeMap<K, V> {
     }
 }
 ```
+
+## 七、List 接口分析
+
+启示与开发建议：
+1. `Vector` 基本不使用了。
+2. `ArrayList` 底层使用数组结构，查找和添加（尾部添加）操作效率高，时间复杂度为 $O(1)$；删除和插入操作效率低，时间复杂度为 $O(n)$。`LinkedList` 底层使用双向链表结构，删除和插入操作效率高，时间复杂度为 $O(1)$；查找和添加（尾部添加）操作效率低，时间复杂度为 $O(n)$（注意：有可能添加操作是 $O(1)$！）。
+3. 在选择了 `ArrayList` 的前提下：`new ArrayList()` 底层创建长度为 10 的数组；`new ArrayList(int capacity)` 底层创建指定 `capacity` 长度的数组。开发中，如果可以大体确认数组的长度，则推荐使用 `new ArrayList(int capacity)` 这个构造器，避免了底层的扩容、复制数组的操作。
+
+### 7.1 List 接口特点
+
+List 集合所有的元素是以一种**线性方式**存储的。例如，存元素的顺序是 `11`、`22`、`33`，那么集合中元素的存储就是按照 `11`、`22`、`33` 的顺序完成的。
+
+List 是一个元素**存取有序**的集合，即元素的存入顺序和取出顺序有保证。
+
+List 是一个**带有索引**的集合，通过索引就可以精确地操作集合中的元素（与数组的索引是一个道理）。
+
+集合中可以有**重复**的元素，通过元素的 `equals` 方法，来比较是否为重复的元素。
+
+> 注意：
+>
+> List 集合关心元素是否有序，而不关心是否重复。
+
+List 接口的主要实现类：
+* `ArrayList`：动态数组。
+* `Vector`：动态数组。
+* `LinkedList`：双向链表。
+* `Stack`：栈。
+
+### 7.2 动态数组 `ArrayList` 与 `Vector`
+
+Java 的 List 接口的实现类中有两个动态数组的实现：`ArrayList` 和 `Vector`。
+
+#### 7.2.1 `ArrayList` 与 `Vector` 的区别
+
+`ArrayList` 的特点：
+* 实现了 List 接口，存储有序的、可以重复的数据。
+* 底层使用 `Object[]` 数组存储。
+* 线程不安全的。
+
+`Vector` 的特点：
+* 实现了 List 接口，存储有序的、可以重复的数据。
+* 底层使用 `Object[]` 数组存储。
+* 线程安全的。
+
+`ArrayList` 和 `Vector` 的底层物理结构都是数组，我们称为动态数组。
+
+`ArrayList` 是新版的动态数组，线程不安全，效率高；`Vector` 是旧版的动态数组，线程安全，效率低。
+
+动态数组的扩容机制不同：`ArrayList` 默认扩容为原来的 1.5 倍，`Vector` 默认扩容增加为原来的 2 倍。
+
+数组的初始化容量不同：如果在构建 `ArrayList` 与 `Vector` 的集合对象时没有显式指定初始化容量，那么 `Vector` 的内部数组的初始容量默认为 10；而 `ArrayList` 在 JDK 6.0 及之前的版本也是 10，JDK 8.0 之后的版本 `ArrayList` 初始化长度为 0 的空数组，之后在添加第一个元素时，再创建长度为 10 的数组。原因：
+* 使用的时候再创建数组，避免浪费。因为很多方法的返回值是 `ArrayList` 类型，需要返回一个 `ArrayList` 的对象。例如，后期从数据库查询对象的方法，返回值很多就是 `ArrayList`；有可能要查询的数据不存在，要么返回 `null`，要么返回一个没有元素的 `ArrayList` 对象。
+
+#### 7.2.2 `ArrayList` 部分源码分析
+
+**`ArrayList` 之 JDK 7 源码剖析：**
+
+![ArrayList 之 JDK 7 源码剖析](./images/01-ArrayList之JDK7源码剖析.jpg "ArrayList 之 JDK 7 源码剖析")
+
+示例代码（以 jdk1.7.0_07 为例）：
+```java
+// 如下代码的执行，底层会初始化数组，数组的长度为 10：Object[] elementData = new Object[10];
+ArrayList<String> list = new ArrayList<>();
+
+list.add("AA"); // elementData[0] = "AA";
+list.add("BB"); // elementData[1] = "BB";
+...
+// 当要添加第 11 个元素的时候，底层的 elementData 数组已满，则需要扩容；默认扩容为原来长度的 1.5 倍，并将原有数组中的元素复制到新的数组中。
+```
+
+**`ArrayList` 之 JDK 8 源码剖析：**
+
+![ArrayList 之 JDK 8 源码剖析](./images/02-ArrayList之JDK8源码剖析.jpg "ArrayList 之 JDK 8 源码剖析")
+
+示例代码（以 jdk1.8.0_271 为例）：
+```java
+// 如下代码的执行，底层会初始化数组，即：Object[] elementData = new Object[] {};
+ArrayList<String> list = new ArrayList<>();
+
+list.add("AA"); // 首次添加元素时，会初始化数组 elementData = new Object[10]; elementData[0] = "AA";
+list.add("BB"); // elementData[1] = "BB";
+...
+// 当要添加第 11 个元素的时候，底层的 elementData 数组已满，则需要扩容；默认扩容为原来长度的 1.5 倍，并将原有数组中的元素复制到新的数组中。
+```
+
+> 小结：
+>
+> jdk1.7.0_07 版本中，`ArrayList` 类似于饿汉式；jdk1.8.0_271 版本中，`ArrayList` 类似于懒汉式。
+
+#### 7.2.3 `ArrayList` 相关方法图示
+
+`ArrayList` 采用数组作为底层实现：
+![ArrayList 采用数组作为底层实现](./images/image-20221029112037297.png "ArrayList 采用数组作为底层实现")
+
+`ArrayList` 自动扩容过程：
+![ArrayList 自动扩容过程](./images/image-20221029112107691.png "ArrayList 自动扩容过程")
+
+`ArrayList` 的 `add(E e)` 方法：
+![ArrayList 的 add(E e) 方法](./images/image-20221029112129161.png "ArrayList 的 add(E e) 方法")
+
+`ArrayList` 的 `add(int index, E e)` 方法：
+![ArrayList 的 add(int index, E e) 方法](./images/image-20221029112157007.png "ArrayList 的 add(int index, E e) 方法")
+
+#### 7.2.4 `Vector` 部分源码分析
+
+`Vector` 之 JDK 8 源码剖析：
+
+![Vector 之 JDK 8 源码剖析](./images/03-Vector之JDK8源码剖析.jpg "Vector 之 JDK 8 源码剖析")
+
+示例代码：
+```java
+Vector v = new Vector();    // 底层初始化数组，长度为 10：Object elementData = new Object[10];
+v.add("AA");    // elementData[0] = "AA";
+v.add("BB");    // elementData[1] = "BB";
+...
+// 当添加第 11 个元素时，需要扩容；默认扩容为原来的 2 倍。
+```
+
+### 7.3 链表 `LinkedList`
+
+Java 中有双链表的实现 —— `LinkedList`，它是 List 接口的实现类。
+
+`LinkedList` 是一个**双向链表**，如图所示：
+![LinkedList 的底层实现 - 双向链表](./images/image-20220514165707977-1661448081075.png "LinkedList 的底层实现 - 双向链表")
+
+`LinkedList` 的特点：
+* 实现了 List 接口，存储有序的、可以重复的数据。
+* 底层使用双向链表存储。
+* 线程不安全的。
+
+#### 7.3.1 链表与动态数组的区别
+
+动态数组底层的物理结构是数组，因此根据索引访问的效率非常高。但是非末尾位置的插入和删除效率不高，因为涉及到移动元素；另外添加操作时涉及到扩容问题，就会增加时空消耗。
+
+链表底层的物理结构是链表，因此根据索引访问的效率不高，即查找元素慢。但是插入和删除不需要移动元素，只需要修改前后元素的指向关系即可，所以插入、删除元素快；而且链表的添加不会涉及到扩容问题。
+
+#### 7.3.2 `LinkedList` 源码分析
+
+`LinkedList` 之 JDK 8 源码剖析：
+
+![LinkedList 之 JDK 8 源码剖析](./images/04-LinkedList之JDK8源码剖析.jpg "LinkedList 之 JDK 8 源码剖析")
+
+示例代码：
+```java
+LinkedList<String> list = new LinkedList<>();
+list.add("AA"); // 将 "AA" 封装到一个 Node 对象 1 中，list 对象的属性 first、last 都指向此 Node 对象
+list.add("BB"); // 将 "BB" 封装到一个 Node 对象 2 中，对象 1 和对象 2 构成一个双向链表，同时 last 指向 Node 对象 2
+...
+// 因为 LinkedList 使用的是双向链表，不需要考虑扩容问题。
+```
+
+`LinkedList` 内部声明：
+```java
+private static class Node<E> {
+    E item;
+    Node<E> next;
+    Node<E> prev;
+}
+```
+
+> 注意：
+>
+> LinkedList 是否存在扩容问题？不存在！
+
+#### 7.3.3 `LinkedList` 相关方法图示
+
+只有 1 个元素的 `LinkedList`：
+![只有 1 个元素的 LinkedList](./images/image-20221029134437888.png "只有 1 个元素的 LinkedList")
+
+包含 4 个元素的 `LinkedList`：
+![包含 4 个元素的 LinkedList](./images/image-20221029134534198.png "包含 4 个元素的 LinkedList")
+
+`add(E e)` 方法：
+![add(E e) 方法](./images/image-20221029135013377.png "add(E e) 方法")
+
+`add(int index, E e)` 方法：
+![add(int index, E e) 方法](./images/image-20221029135045120.png "add(int index, E e) 方法")
+
+`remove(Object obj)` 方法：
+![remove(Object obj) 方法](./images/image-20221029134721089.png "remove(Object obj) 方法")
+
+`remove(int index)` 方法：
+![remove(int index) 方法](./images/image-20221029134807613.png "remove(int index) 方法")
+
+## 八、Map 接口分析
+
+### 8.1 哈希表的物理结构
+
+`HashMap` 和 `Hashtable` 底层都是哈希表（也称散列表），其中维护了一个长度为 **2 的幂次方** 的 `Entry` 类型的数组 `table`，数组的每一个索引位置被称为一个桶（bucket），向其中添加的映射关系 `(key, value)` 最终都被封装为一个 `Map.Entry` 类型的对象，放到某个 `table[index]` 桶中。
+
+使用数组的目的是查询和添加的效率高，可以根据索引直接定位到某个 `table[index]`。
+
+![Java 8 HashMap 结构示意图](./images/image-20221029144811305.png "Java 8 HashMap 结构示意图")
+
+### 8.2 `HashMap` 源码剖析
