@@ -741,6 +741,14 @@ private static class Node<E> {
 
 ## 八、Map 接口分析
 
+> 说明：
+>
+> `key - value` 存储到 `HashMap` 中会存储 `key` 的 `hash` 值，这样就不用在每次查找时重新计算每一个 `Entry` 或 `Node`（`TreeNode`）的 `hash` 值了；因此如果已经 `put` 到 Map 中的 `key - value`，再修改 `key` 的属性，而这个属性又参与 `hashCode` 值的计算，那么会导致匹配不上。
+>
+> 这个规则也同样适用于 `LinkedHashMap`、`HashSet`、`LinkedHashSet`、`Hashtable` 等所有散列存储结构的集合。
+>
+> 所以实际开发中，经常选用 `String`、`Integer` 等作为 `key`，因为它们都是不可变对象。
+
 ### 8.1 哈希表的物理结构
 
 `HashMap` 和 `Hashtable` 底层都是哈希表（也称散列表），其中维护了一个长度为 **2 的幂次方** 的 `Entry` 类型的数组 `table`，数组的每一个索引位置被称为一个桶（bucket），向其中添加的映射关系 `(key, value)` 最终都被封装为一个 `Map.Entry` 类型的对象，放到某个 `table[index]` 桶中。
@@ -749,4 +757,120 @@ private static class Node<E> {
 
 ![Java 8 HashMap 结构示意图](./images/image-20221029144811305.png "Java 8 HashMap 结构示意图")
 
-### 8.2 `HashMap` 源码剖析
+### 8.2 `HashMap` 剖析
+
+#### 8.2.1 `HashMap` 中元素的特点
+
+`HashMap` 中的所有的 `key` 彼此之间是不可重复的、无序的，所有的 `key` 就构成一个 `Set` 集合；即 `key` 所在的类要重写 `hashCode()` 和 `equals()`。
+
+`HashMap` 中的所有的 `value` 彼此之间是可重复的、无序的，所有的 `value` 就构成一个 `Collection` 集合；即 `value` 所在的类要重写 `equals()`。
+
+`HashMap` 中的一个 `key - value` 就构成了一个 `entry`。
+
+`HashMap` 中的所有的 `entry` 彼此之间是不可重复的、无序的，所有的 `entry` 就构成了一个 `Set` 集合。
+
+#### 8.2.2 `HashMap` 源码解析
+
+##### 8.2.2.1 JDK 7 中创建对象和添加数据过程
+
+`HashMap` 之 JDK 7 源码剖析：
+
+![HashMap 之 JDK 7 源码剖析](./images/05-HashMap之JDK7源码剖析.jpg "HashMap 之 JDK 7 源码剖析")
+
+示例代码（以 jdk1.7.0_07 为例）：
+```java
+// 创建对象的过程中，底层会初始化数组 Entry[] table = new Entry[16];
+HashMap<String, Integer> map = new HashMap<>();
+...
+map.put("AA", 78);  // "AA" 和 78 封装到一个 Entry 对象中，考虑将此对象添加到 table 数组中
+...
+```
+
+![HashMap 之 jdk1.7.0_07](./images/image-20220514190849626-1661448231966.png "HashMap 之 jdk1.7.0_07")
+
+添加 / 修改的过程：
+1. 将 `(key1, value1)` 添加到当前的 `map` 中：
+   1. 首先，需要调用 `key1` 所在类的 `hashCode()` 方法，计算 `key1` 对应的哈希值 1，此哈希值 1 经过某种算法（`hash()`）之后，得到哈希值 2。
+   2. 哈希值 2 再经过某种算法（`indexFor()`）之后，就确定了 `(key1, value1)` 在数组 `table` 中的索引位置 `i`。
+      1. （情况 1）如果此索引位置 `i` 的数组上没有元素，则 `(key1, value1)` 添加成功。
+      2. （哈希冲突）如果此索引位置 `i` 的数组上有元素 `(key2, value2)`，则需要继续比较 `key1` 和 `key2` 的哈希值 2。
+         1. （情况 2）如果 `key1` 的哈希值 2 与 `key2` 的哈希值 2 不相同，则 `(key1, value1)` 添加成功。
+         2. 如果 `key1` 的哈希值 2 与 `key2` 的哈希值 2 相同，则需要继续比较 `key1` 和 `key2` 的 `equals()`；要调用 `key1` 所在类的 `equals()` 方法，将 `key2` 作为参数传递进去。
+            1. （情况 3）调用 `equals()` 方法，返回 `false`：则 `(key1, value1)` 添加成功。
+            2. 调用 `equals()` 方法，返回 `true`：则认为 `key1` 和 `key2` 是相同的；默认情况下，`value1` 替换原有的 `value2`。
+
+> 说明：
+>
+> 情况 1：将 `(key1, value1)` 存放到数组的索引 `i` 的位置。
+> 情况 2、情况 3：`(key1, value1)` 元素与现有的 `(key2, value2)` 构成单向链表结构，`(key1, value1)` 指向 `(key2, value2)`。
+
+2. 随着不断地添加元素，在满足如下的条件的情况下，会考虑扩容：
+   * `(size >= threshold) && (null != table[i])`：当元素的个数达到临界值（-> $数组的长度 \times 加载因子$）时，就考虑扩容。默认的临界值为 16 * 0.75，即为 12；默认扩容为原来的 2 倍。
+
+##### 8.2.2.2 JDK 8 与 JDK 7 的不同之处
+
+`HashMap` 之 JDK 8 源码剖析：
+![HashMap 之 JDK 8 源码剖析](./images/06-HashMap之JDK8源码剖析.jpg "HashMap 之 JDK 8 源码剖析")
+
+JDK 8 与 JDK 7 的不同之处（以 jdk1.8.0_271 为例）：
+1. 在 JDK 8 中，当我们创建了 `HashMap` 实例以后，底层并没有初始化 `table` 数组；当首次添加 `(key, value)` 时，进行判断，如果发现 `table` 尚未初始化，则对数组进行初始化。
+2. 在 JDK 8 中，`HashMap` 底层定义了 `Node` 内部类，替换 JDK 7 中的 `Entry` 内部类；意味着，我们创建的数组是 `Node[]`。
+3. 在 JDK 8 中，如果当前的 `(key, value)` 经过一系列判断之后，可以添加到当前的数组角标 `i` 中；如果此时角标 `i` 位置上有元素，在 JDK 7 中是将新的 `(key, value)` 指向已有的旧的元素（头插法），而在 JDK 8 中是旧的元素指向新的 `(key, value)` 元素（尾插法）。（口诀：“七上八下”。）
+4. JDK 7 中，结构为 `数组 + 单向链表`；JDK 8 中，结构为 `数组 + 单向链表 + 红黑树`。
+   * 什么时候会使用单向链表变为红黑树：如果数组索引 `i` 位置上的元素的个数达到 8，并且数组的长度达到 64 时，我们就将此索引 `i` 位置上的多个元素改为使用红黑树的结构进行存储。（为什么修改呢？红黑树进行 `put()` / `get()` / `remove`() 操作的时间复杂度为 $O(\log n)$，比单向链表的时间复杂度 $O(n)$ 的好，性能更高。）
+   * 什么时候会使用红黑树变为单向链表：当使用红黑树的索引 `i` 位置上的元素的个数低于 6 的时候，就会将红黑树结构退化为单向链表。
+
+##### 8.2.2.3 属性 / 字段
+
+源码剖析：
+```java
+static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // 默认的初始容量 16
+static final int MAXIMUM_CAPACITY = 1 << 30;    // 最大容量 1 << 30
+static final float DEFAULT_LOAD_FACTOR = 0.75f; // 默认加载因子
+static final int TREEIFY_THRESHOLD = 8; // 默认树化阈值 8，当链表的长度达到这个值后，要考虑树化
+static final int UNTREEIFY_THRESHOLD = 6;   // 默认反树化阈值 6，当树中结点的个数达到此阈值后，要考虑变为链表
+
+// 当单个的链表的结点个数达到 8，并且 table 的长度达到 64，才会树化
+// 当单个的链表的结点个数达到 8，但是 table 的长度未达到 64，会先扩容
+static final int MIN_TREEIFY_CAPACITY = 64; // 最小树化容量 64
+
+transient Node<K, V>[] table;   // 数组
+transient int size; // 记录有效映射关系的对数，也是 Entry 对象的个数
+int threshold;  // 阈值，当 size 达到阈值时，考虑扩容
+final float loadFactor; // 加载因子，影响扩容的频率
+```
+
+### 8.3 `LinkedHashMap` 剖析
+
+#### 8.3.1 `LinkedHashMap` 与 `HashMap` 的关系
+
+`LinkedHashMap` 是 `HashMap` 的子类。
+
+`LinkedHashMap` 在 `HashMap` 使用的 `数组 + 单向链表 + 红黑树` 的基础上，又增加了一对双向链表，记录添加的 `(key, value)` 的先后顺序，便于我们遍历所有的 `key - value`。
+
+`LinkedHashMap` 重写了 `HashMap` 的如下方法：
+```java
+Node<K, V> newNode(int hash, K key, V value, Node<K, V> e) {
+    LinkedHashMap.Entry<K, V> p = new LinkedHashMap.Entry<K, V>(hash, key, value, e);
+    linkNodeLast(p);
+    return p;
+}
+```
+
+#### 8.3.2 `LinkedHashMap` 底层结构
+
+`LinkedHashMap` 内部定义了一个 `Entry`：
+```java
+static class Entry<K, V> extends HashMap.Node<K, V> {
+    Entry<K, V> before, after;  // 增加的一对双向链表
+    Entry(int hash, K key, V value, Node<K, V> next) {
+        super(hash, key, value, next);
+    }
+}
+```
+
+### 8.4 `HashSet` 和 `LinkedHashSet` 的源码分析
+
+`HashSet` 底层使用的是 `HashMap`。
+
+`LinkedHashSet` 底层使用的是 `LinkedHashMap`。
