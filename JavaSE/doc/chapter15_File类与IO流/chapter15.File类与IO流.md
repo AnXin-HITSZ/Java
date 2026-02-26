@@ -17,10 +17,12 @@
 
 一个 `File` 对象代表硬盘或网络中可能存在的一个文件或者文件目录（俗称文件夹），与平台无关。
 
-`File` 能新建、删除、重命名文件和目录，但 `File` 不能访问文件内容本身；如果需要访问文件内容本身，则需要使用输入 / 输出流。
+`File` 能新建、删除、重命名文件和目录，但 `File` 不能访问文件内容本身；如果需要访问文件内容本身，则需要使用 输入/输出 流（I/O 流）。
 * `File` 对象可以作为参数传递给流的构造器。
 
 想要在 Java 程序中表示一个真实存在的文件或目录，那么必须有一个 `File` 对象；但是 Java 程序中的一个 `File` 对象，可能没有一个真实存在的文件或目录。
+
+File 类的对象，通常是作为 I/O 流操作的文件的端点出现的；代码层面，将 File 类的对象作为参数传递到 I/O 流相关类的构造器中。
 
 ### 1.2 构造器
 
@@ -38,6 +40,66 @@
 
 示例代码：
 ```java
+/* FileTest.java */
+
+package com.anxin_hitsz_01.file;
+
+import org.junit.Test;
+
+import java.io.File;
+
+/**
+ * ClassName: FileTest
+ * Package: com.anxin_hitsz_01.file
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/26 20:32
+ * @Version 1.0
+ */
+public class FileTest {
+
+    /*
+    * 构造器
+    *
+    * 文件的路径表示方式：
+    * * 方式 1 - 绝对路径：以 Windows 操作系统为例，包括盘符在内的文件或文件目录的完整路径。
+    * * 方式 2 - 相对路径：相对于某一个文件目录来讲的相对的位置。
+    *               在 IDEA 中，如果使用单元测试方法：相对于当前的 module 来讲
+    *                          如果使用 main() 方法，相对于当前的 project 来讲
+    * */
+
+    @Test
+    public void test1() {
+        // public File(String pathname)
+        File file1 = new File("d:/io\\hello.txt");
+
+        File file2 = new File("ab");
+        System.out.println(file2.getAbsolutePath());
+
+    }
+
+//    public static void main(String[] args) {
+//        File file2 = new File("abc");
+//        System.out.println(file2.getAbsolutePath());
+//    }
+
+    @Test
+    public void test2() {
+        // public File(String parent, String child)
+        // 参数 1 - parent：一定是一个文件目录
+        // 参数 2 - child：可以是一个文件，也可以是一个文件目录
+        File file1 = new File("d:\\io", "abc.txt");
+        File file2 = new File("abc", "a12");
+
+        // public File(File parent, String child)
+        // 参数 1 - parent：一定是一个文件目录
+        // 参数 2 - child：可以是一个文件，也可以是一个文件目录
+        File file3 = new File(file2, "ab.txt");
+
+    }
+
+}
 
 ```
 
@@ -53,6 +115,180 @@
 > 当构造路径是绝对路径时，那么 `getPath` 和 `getAbsolutePath` 结果一样；当构造路径是相对路径时，那么 `getAbsolutePath 的路径 = user.dir 的路径 + 构造路径`。
 
 ### 1.3 常用方法
+
+示例代码：
+```java
+/* FileTest1.java */
+
+package com.anxin_hitsz_01.file;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * ClassName: FileTest1
+ * Package: com.anxin_hitsz_01.file
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/26 20:56
+ * @Version 1.0
+ */
+public class FileTest1 {
+
+    /*
+    * 获取文件和目录基本信息
+    * */
+
+    @Test
+    public void test1() {
+        File file1  = new File("hello.txt");
+        System.out.println(file1.getName());
+        System.out.println(file1.getPath());
+        System.out.println(file1.getAbsolutePath());
+        System.out.println(file1.getAbsoluteFile());
+        System.out.println(file1.getParent());
+        System.out.println(file1.getAbsoluteFile().getParent());
+        System.out.println(file1.length());
+        System.out.println(file1.lastModified());
+
+    }
+
+    @Test
+    public void test2() {
+        File file1  = new File("D:\\io\\io1");
+        System.out.println(file1.getName());
+        System.out.println(file1.getPath());
+        System.out.println(file1.getAbsolutePath());
+        System.out.println(file1.getAbsoluteFile());
+        System.out.println(file1.getParent());
+        System.out.println(file1.getAbsoluteFile().getParent());
+        System.out.println(file1.length());
+        System.out.println(file1.lastModified());
+
+    }
+
+    /*
+    * 列出目录的下一级
+    * */
+
+    @Test
+    public void test3() {
+        File file1 = new File("D:\\Learn\\Java\\JavaSE\\doc\\chapter15_File类与IO流");
+        String[] fileArr = file1.list();
+        for (String s : fileArr) {
+            System.out.println(s);
+        }
+
+        System.out.println();
+
+        File[] files = file1.listFiles();
+        for (File f : files) {
+            System.out.println(f.getName());
+        }
+
+    }
+
+    /*
+    * File 类的重命名功能
+    * */
+
+    @Test
+    public void test4() {
+        File file1 = new File("hello.txt");
+
+        File file2 = new File("d:\\io\\abc.txt");
+
+        boolean renameSuccess = file1.renameTo(file2);
+        System.out.println(renameSuccess ? "重命名成功" : "重命名失败");
+
+    }
+
+    /*
+    * 判断功能的方法
+    * */
+
+    @Test
+    public void test5() {
+        File file1 = new File("d:\\io\\abc.txt");
+        System.out.println(file1.exists());
+        System.out.println(file1.isDirectory());
+        System.out.println(file1.isFile());
+        System.out.println(file1.canRead());
+        System.out.println(file1.canWrite());
+        System.out.println(file1.isHidden());
+
+        System.out.println();
+
+        File file2 = new File("d:\\ioo");
+        System.out.println(file2.exists());
+        System.out.println(file2.isDirectory());
+        System.out.println(file2.isFile());
+        System.out.println(file2.canRead());
+        System.out.println(file2.canWrite());
+        System.out.println(file2.isHidden());
+
+    }
+
+    /*
+    * 创建、删除功能
+    * */
+
+    @Test
+    public void test6() throws IOException {
+        File file1 = new File("d:\\io\\hello.txt");
+        // 测试文件的创建、删除
+        if (!file1.exists()) {
+            boolean isSuccessed = file1.createNewFile();
+            if (isSuccessed) {
+                System.out.println("创建成功");
+            }
+        } else {
+            System.out.println("此文件已存在");
+
+            System.out.println(file1.delete() ? "文件删除成功" : "文件删除失败");
+        }
+
+    }
+
+    @Test
+    public void test7() {
+        // 前提：d:\\io 文件目录存在，io2 或 io3 目录是不存在的
+        File file1 = new File("d:\\io\\io2");
+
+        System.out.println(file1.mkdir());  // true
+
+        File file2 = new File("d:\\io\\io3");
+
+        System.out.println(file2.mkdirs()); // true
+
+    }
+
+    @Test
+    public void test8() {
+        // 前提：d:\\io 文件目录存在，io2 或 io3 目录是不存在的
+        File file1 = new File("d:\\io\\io2\\io4");
+
+        System.out.println(file1.mkdir());  // false
+
+        File file2 = new File("d:\\io\\io3\\io5");
+
+        System.out.println(file2.mkdirs()); // true
+
+    }
+
+    @Test
+    public void test9() {
+        File file1 = new File("d:\\io\\io3");
+
+        System.out.println(file1.delete());
+    }
+
+}
+
+```
 
 #### 1.3.1 获取文件和目录基本信息
 
@@ -74,25 +310,19 @@
 >
 > 如果 `File` 对象代表的文件或目录存在，则 `File` 对象实例初始化时，就会用硬盘中对应文件或目录的属性信息（例如：时间、类型等）为 `File` 对象得到的属性赋值；否则除了路径和名称，`File` 对象的其他属性将会保留默认值。
 
-示例代码：
-```java
-
-```
-
 #### 1.3.2 列出目录的下一级
 
 `public String[] list()`：返回一个 `String` 数组，表示该 `File` 目录中的所有子文件或目录。
 
 `public File[] listFiles()`：返回一个 `File` 数组，表示该 `File` 目录中的所有的子文件或目录。
 
-示例代码：
-```java
-
-```
-
 #### 1.3.3 `File` 类的重命名功能
 
 `public boolean renameTo(File dest)`：把文件重命名为指定的文件路径。
+
+> 注意：
+>
+> `file1.renameTo(file2)` 要想此方法执行完返回 `true`，要求：`file1` 必须存在，且 `file2` 必须不存在，且 `file2` 所在的文件目录需要存在。
 
 #### 1.3.4 判断功能的方法
 
@@ -108,14 +338,9 @@
 
 `public boolean isHidden()`：判断是否隐藏。
 
-示例代码：
-```java
-
-```
-
 > 注意：
 >
-> 如果文件或目录不存在，那么 `exists()`、`isFile()` 和 `isDirectory()` 都是返回 `true`。
+> 如果文件或目录不存在，那么 `exists()`、`isFile()` 和 `isDirectory()` 都是返回 `false`。
 
 #### 1.3.5 创建、删除功能
 
@@ -130,16 +355,187 @@
 1. Java 中的删除不走回收站。
 2. 要删除一个文件目录，应注意该文件目录内不能包含文件或者文件目录。
 
-示例代码：
-```java
-
-```
-
 > 注意：
 >
 > 对于 `delete()` 方法，如果此 `File` 表示目录，则目录必须为空才能删除。
 
 ### 1.4 练习
+
+**练习 1：**
+
+题目：创建一个与 hello.txt 文件在相同文件目录下的另一个名为 abc.txt 文件。
+
+示例代码：
+```java
+/* Exer01.java */
+
+package com.anxin_hitsz_01.file.exer1;
+
+import java.io.File;
+
+/**
+ * ClassName: Exer01
+ * Package: com.anxin_hitsz_01.file.exer1
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/26 21:33
+ * @Version 1.0
+ */
+public class Exer01 {
+    public static void main(String[] args) {
+        // 创建一个与 hello.txt 文件在相同文件目录下的另一个名为 abc.txt 文件
+        File file1 = new File("hello.txt");
+
+        System.out.println(file1.getAbsolutePath());
+
+        // 获取 file1 的绝对路径，获取此路径的上层文件目录
+//        System.out.println(file1.getAbsoluteFile().getParent());
+
+        File file2 = new File(file1.getAbsoluteFile().getParent(), "abc.txt");
+
+        System.out.println(file2.getAbsolutePath());
+
+    }
+}
+
+```
+
+**练习 2：**
+
+题目：判断指定目录下是否有后缀名为 .jpg 的文件；如果有，就输出该文件名称。
+
+提示：
+> `File` 类提供了文件过滤器方法：
+> ```java
+> public String[] list(FilenameFilter filter);
+> ```
+> 该方法可实现对文件的过滤。
+
+示例代码：
+```java
+/* Exer02.java */
+
+package com.anxin_hitsz_01.file.exer2;
+
+import org.junit.Test;
+
+import java.io.File;
+import java.io.FilenameFilter;
+
+/**
+ * ClassName: Exer02
+ * Package: com.anxin_hitsz_01.file.exer2
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/26 21:36
+ * @Version 1.0
+ */
+public class Exer02 {
+    /*
+    * 判断指定目录下是否有后缀名为 .jpg 的文件；如果有，就输出该文件名称
+    * */
+    @Test
+    public void test1() {
+        File dir =  new File("D:\\Learn\\Java\\JavaSE\\doc\\chapter15_File类与IO流\\images");
+
+        // 方式 1：
+//        String[] listFiles = dir.list();
+//        for (String s : listFiles) {
+//            if (s.endsWith(".jpg")) {
+//                System.out.println(s);
+//            }
+//        }
+
+        // 方式 2：
+        // public String[] list(FilenameFilter filter)
+        String[] listFiles = dir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {  // name：即为子文件或子文件目录的名称
+//                if (name.endsWith(".jpg")) {
+//                    return true;
+//                } else {
+//                    return false;
+//                }
+
+                return name.endsWith(".jpg");
+            }
+        });
+
+        for (String s : listFiles) {
+            System.out.println(s);
+        }
+
+    }
+}
+
+```
+
+**练习 3：**
+
+题目：
+1. 遍历指定文件目录下的所有文件的名称，包括子文件目录中的文件。
+    ```java
+    public void printFileName(File file); // file 可能是文件，也可能是文件目录
+    ```
+2. 删除指定文件目录及其下的所有文件。
+```java
+public void deleteDirectory(File file); // file 可能是文件，也可能是文件目录
+```
+3. 计算指定文件目录占用空间的大小。
+```java
+public long getDirectorySize(File file);  // file 可能是文件，也可能是文件目录
+```
+
+示例代码：
+```java
+/* Exer03.java */
+
+package com.anxin_hitsz_01.file.exer3;
+
+import org.junit.Test;
+
+import java.io.File;
+
+/**
+ * ClassName: Exer03
+ * Package: com.anxin_hitsz_01.file.exer3
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/26 21:43
+ * @Version 1.0
+ */
+public class Exer03 {
+
+    /*
+    * 遍历指定文件目录下的所有文件的名称，包括子文件目录中的文件
+    * */
+
+    // public void printFileName(File file); // file 可能是文件，也可能是文件目录
+    @Test
+    public void test1() {
+        File file = new File("D:\\Learn\\Java\\JavaSE\\doc\\chapter15_File类与IO流");
+        printFileName(file);
+
+    }
+
+    public void printFileName(File file) {
+        if (file.isFile()) {
+            System.out.println(file.getName());
+        } else if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (File f : files) {
+                printFileName(f);
+            }
+        }
+
+    }
+
+}
+
+```
 
 ## 二、IO 流原理及流的分类
 

@@ -14,6 +14,7 @@
       <module fileurl="file://$PROJECT_DIR$/chapter12_collection_map/chapter12_collection_map.iml" filepath="$PROJECT_DIR$/chapter12_collection_map/chapter12_collection_map.iml" />
       <module fileurl="file://$PROJECT_DIR$/chapter13_generic/chapter13_generic.iml" filepath="$PROJECT_DIR$/chapter13_generic/chapter13_generic.iml" />
       <module fileurl="file://$PROJECT_DIR$/chapter14_datastructure/chapter14_datastructure.iml" filepath="$PROJECT_DIR$/chapter14_datastructure/chapter14_datastructure.iml" />
+      <module fileurl="file://$PROJECT_DIR$/chapter15_io/chapter15_io.iml" filepath="$PROJECT_DIR$/chapter15_io/chapter15_io.iml" />
     </modules>
   </component>
 </project>
