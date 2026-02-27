@@ -1866,11 +1866,245 @@ public class BufferedReaderWriterTest {
 
 ```
 
-### 5.5 练习
+## 六、处理流之二：转换流
 
-**练习：**
+### 6.1 问题引入
 
-题目：分别使用文件流（`FileInputStream`、`FileOutputStream`）和缓冲流（`BufferedInputStream`、`BufferedOutputStream`）实现文本文件 / 图片 / 视频文件的复制，并比较二者在数据复制方面的效率。
+**引入情况 1：**
+
+使用 `FileReader` 读取项目中的文本文件。由于 IDEA 设置中针对项目设置了 UTF-8 编码，当读取 Windows 系统中创建地文本文件时，如果 Windows 系统默认的是 GBK 编码，则读入内存中会出现乱码。
+
+那么如何读取 GBK 编码的文件呢？
+
+**引入情况 2：**
+
+针对文本文件，现在使用一个字节流进行数据的读入，希望将数据显示在控制台上，此时针对包含中文的文本数据，可能会出现乱码。
+
+### 6.2 转换流的理解
+
+作用：转换流是字节与字符间的桥梁。
+
+![转换流作为字节与字符间的桥梁示意图](./images/2_zhuanhuan.jpg "转换流作为字节与字符间的桥梁示意图")
+
+具体来说：
+![转换流的转换原理示意图](./images/image-20220412231533768.png "转换流的转换原理示意图")
+
+### 6.3 `InputStreamReader` 与 `OutputStreamWriter`
+
+#### 6.3.1 `InputStreamReader`
+
+转换流 `java.io.InputStreamReader`，是 `Reader` 的子类，是从字节流到字符流的桥梁；它读取字节，并使用指定的字符集将其解码为字符。它的字符集可以由名称指定，也可以接受平台的默认字符集。
+
+即：将一个输入型的字节流转换为输入型的字符流。
+
+构造器：
+* `InputStreamReader(InputStream in)`：创建一个使用默认字符集的字符流。
+* `InputStreamReader(InputStream in, String charsetName)`：创建一个指定字符集的字符流。
+
+语法格式：
+```java
+// 使用默认字符集
+InputStreamReader isr1 = new InputStreamReader(new FileInputStream("in.txt"));
+// 使用指定字符集
+InputStreamReader isr2 = new InputStreamReader(new FileInputStream("in.txt"), "GBK");
+```
+
+#### 6.3.2 `OutputStreamWriter`
+
+转换流 `java.io.OutputStreamWriter`，是 `Writer` 的子类，是从字符流到字节流的桥梁；可以使用指定的字符集将字符编码为字节。它的字符集可以由名称指定，也可以接受平台的默认字符集。
+
+即：将一个输出型的字符流转换为输出型的字节流。
+
+构造器：
+* `OutputStreamWriter(OutputStream in)`：创建一个使用默认字符集的字符流。
+* `OutputStreamWriter(OutputStream in, String charsetName)`：创建一个指定字符集的字符流。
+
+语法格式：
+```java
+// 使用默认字符集
+OutputStreamWriter osw1 = new OutputStreamWriter(new FileOutputStream("out.txt"));
+// 使用指定的字符集
+OutputStreamWriter osw2 = new OutputStreamWriter(new FileOutputStream("out.txt"), "GBK");
+```
+
+#### 6.3.3 举例
+
+示例代码：
+```java
+/* InputStreamReaderTest.java */
+
+package com.anxin_hitsz_04.inputstreamreader;
+
+import org.junit.Test;
+
+import java.io.*;
+
+/**
+ * ClassName: InputStreamReaderTest
+ * Package: com.anxin_hitsz_04.inputstreamreader
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/2/27 20:50
+ * @Version 1.0
+ */
+public class InputStreamReaderTest {
+    @Test
+    public void test1() throws IOException {
+        // 创建 File 对象
+        File file1 = new File("dbcp_utf-8.txt");
+
+        // 创建流对象
+        FileInputStream fis = new FileInputStream(file1);
+//        InputStreamReader isr = new InputStreamReader(fis); // 此时使用的是 IDEA 默认的 UTF-8 的字符集
+        InputStreamReader isr1 = new InputStreamReader(fis, "utf-8"); // 显式地使用 UTF-8 的字符集
+
+        // 读入操作
+        char[] cBuffer = new char[1024];
+        int len;
+        while ((len = isr1.read(cBuffer)) != -1) {
+            String str = new String(cBuffer, 0, len);
+            System.out.print(str);
+        }
+
+        // 关闭资源
+        isr1.close();
+    }
+
+    /*
+    * 读取到的数据出现了乱码。
+    * 因为 dbcp_utf-8.txt 文件使用的是 utf-8 的字符集进行的编码，所以在读取此文件时使用的解码集必须也是 utf-8，
+    * 否则会出现乱码！
+    * */
+    @Test
+    public void test2() throws IOException {
+        // 创建 File 对象
+        File file1 = new File("dbcp_utf-8.txt");
+
+        // 创建流对象
+        FileInputStream fis = new FileInputStream(file1);
+        InputStreamReader isr1 = new InputStreamReader(fis, "gbk"); // 显式地使用 gbk 的字符集
+
+        // 读入操作
+        char[] cBuffer = new char[1024];
+        int len;
+        while ((len = isr1.read(cBuffer)) != -1) {
+            String str = new String(cBuffer, 0, len);
+            System.out.print(str);
+        }
+
+        // 关闭资源
+        isr1.close();
+    }
+
+    @Test
+    public void test3() throws IOException {
+        // 创建 File 对象
+        File file1 = new File("dbcp_gbk.txt");
+
+        // 创建流对象
+        FileInputStream fis = new FileInputStream(file1);
+        InputStreamReader isr1 = new InputStreamReader(fis, "gbk"); // 显式地使用 gbk 的字符集
+
+        // 读入操作
+        char[] cBuffer = new char[1024];
+        int len;
+        while ((len = isr1.read(cBuffer)) != -1) {
+            String str = new String(cBuffer, 0, len);
+            System.out.print(str);
+        }
+
+        // 关闭资源
+        isr1.close();
+    }
+
+    /*
+    * 需求：将 gbk 格式的文件转换为 utf-8 格式的文件存储
+    * */
+    @Test
+    public void test4() throws IOException {
+        // 1. 造文件
+        File file1 = new File("dbcp_gbk.txt");
+        File file2 = new File("dbcp_gbk_to_utf8.txt");
+
+        // 2. 造流
+        FileInputStream fis = new FileInputStream(file1);
+        // 参数 2 对应的是解码集，必须与 dbcp_gbk.txt 的解码集一致
+        InputStreamReader isr = new InputStreamReader(fis, "GBK");
+
+        FileOutputStream fos = new FileOutputStream(file2);
+        // 参数 2 指明内存中的字符存储到文件中的字节过程中使用的编码集
+        OutputStreamWriter osw = new OutputStreamWriter(fos, "utf8");
+
+        // 3. 读写过程
+        char[] cBuffer = new char[1024];
+        int len;
+        while ((len = isr.read(cBuffer)) != -1) {
+            osw.write(cBuffer, 0, len);
+        }
+
+        System.out.println("操作完成");
+
+        // 4. 关闭资源
+        osw.close();
+        isr.close();
+
+    }
+
+}
+
+```
+
+### 6.4 字符编码和字符集
+
+#### 6.4.1 编码与解码
+
+字符编码：字符、字符串、字符数组 -> 字节、字节数组，即从我们能看懂的编码为我们看不懂的。
+
+字符解码：字节、字节数组 -> 字符、字符串、字符数组，即从我们看不懂的编码为我们能看懂的。
+
+如果希望程序在读取文本文件时，不出现乱码，需要注意什么？
+* 解码时使用的字符集必须与当初编码时使用的字符集相同或兼容。
+* 拓展：解码集必须要与编码集兼容。例如：文件编码使用的是 GBK，解码时使用的是 UTF-8，如果文件中只有 a、b、c 等英文字符，此情况下也不会出现乱码；因为 GBK 和 UTF-8 都向下兼容了 ASCII（或：ascii）。
+
+#### 6.4.2 字符集
+
+> 注意：
+>
+> 在中文操作系统上，ANSI（American National Standards Institute，美国国家标准学会）编码即为 GBK；在英文操作系统上，ANSI 编码即为 ISO-8859-1。
+
+##### 6.4.2.1 在存储的文件中的字符
+
+**ascii**：主要用来存储 a、b、c 等英文字符和 1、2、3 等阿拉伯数字以及常用的标点符号。每个字符占用 1 个字节。
+
+**iso-8859-1**：拉丁码表，别名 Latin-1，用于显示欧洲使用的语言，包括荷兰语、德语、意大利语、葡萄牙语等。每个字符占用 1 个字节，向下兼容 ascii。
+
+**gbk**：用来存储中文（简体与繁体）、英文字符、阿拉伯数字以及常用的标点符号等字符。中文字符使用 2 个字节存储；向下兼容 ascii，意味着英文字符、阿拉伯数字、标点符号（英文半角）仍使用 1 个字节。
+
+**utf-8**：可以用来存储世界范围内主要的语言的所有的字符。使用 1 - 4 个不等的字节表示一个字符。中文字符使用 3 个字节存储；向下兼容 ascii，意味着英文字符、阿拉伯数字、标点符号（英文半角）仍使用 1 个字节。
+
+##### 6.4.2.2 在内存中的字符
+
+在内存中，一个字符（`char`）占用 2 个字节。
+
+在内存中使用的字符集称为 Unicode 字符集。
+
+> Unicode 字符集：
+>
+> Unicode 编码为表达**任意语言的任意字符**而设计，也称为统一码、标准万国码。Unicode 将世界上所有的文字用 **2 个字节** 统一进行编码，为每个字符设定唯一的二进制编码，以满足跨语言、跨平台进行文本处理的要求。
+>
+> 对于 Unicode 的缺点，这里有三个问题：
+> 1. 第一，英文字母只用一个字节表示就够了，如果用更多的字节存储是**极大的浪费**。
+> 2. 第二，如何才能**区别 Unicode 和 ASCII**？计算机怎么知道两个字节表示一个符号，而不是分别表示两个符号呢？
+> 3. 第三，如果和 GBK 等双字节编码方式一样，用最高位是 1 或 0 表示两个字节和一个字节，就少了很多值无法用于表示字符，**不够表示所有字符**。
+>
+> Unicode 在很长一段时间内无法推广，直到互联网的出现。为解决 Unicode 如何在网络上传输的问题，于是面向传输的众多 UTF（UCS Transfer Format）标准出现。具体来说，有三种编码方案，分别为 UTF-8、UTF-16 和 UTF-32。
+
+### 6.5 练习
+
+练习：
+
+题目：把当前 module 下的 hello.txt 字符编码为 GBK，复制到电脑桌面目录下的 hello_desktop.txt，字符编码为 UTF-8。
 
 示例代码：
 ```java
