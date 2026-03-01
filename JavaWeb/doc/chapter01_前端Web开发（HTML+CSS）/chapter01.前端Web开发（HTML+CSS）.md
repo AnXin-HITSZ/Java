@@ -603,7 +603,7 @@ Visual Studio Code（简称 VS Code）是 Microsoft 于 2015 年 4 月发布的�
 
 在上述的正文排版中，用到了如下标签：
 | 标签 | 作用 | 属性 / 说明 |
-| :--: | :--: | :-- |
+| :--: | :--: | -- |
 | `<video>` | 视频标签 | 1. `src`：指定视频的 url（绝对路径 / 相对路径）<br>2. `controls`：是否显示播放控件<br>3. `width`：宽度（像素 / 相对于父元素百分比）；备注：一般 `width` 和 `height` 我们只会指定一个，另外一个会自动地等比例缩放<br>4. `height`：高度（像素 / 相对于父元素百分比）；备注：一般 `width` 和 `height` 我们只会指定一个，另外一个会自动地等比例缩放 |
 | `<img>` | 图片标签 | 1. `src`<br>2. `width`<br>3. `height` |
 | `<p>` | 段落标签 | - |
@@ -1216,6 +1216,1124 @@ CSS 盒子模型，其实和日常生活中的包装盒是非常类似的。盒�
         </p>
     </div>
     
+</body>
+</html>
+```
+
+### 4.4 案例
+
+#### 4.4.1 需求
+
+通过一个央视新闻页面的制作，我们已经熟悉了 HTML 中的常见标签及 CSS 中基础样式的写法及作用。接下来，我们将会通过一个案例，加深对于这些标签和样式的掌握和使用。
+
+**需求：参照 Tlias 智能学习辅助系统，完成员工管理页面的制作。**
+
+产品经理制作的页面原型如下：
+![Tlias 智能学习辅助系统 - 员工管理页面原型](./images/01_Tlias智能学习辅助系统-员工管理页面原型.png "Tlias 智能学习辅助系统 - 员工管理页面原型")
+
+> 页面原型：指在应用程序开发初期，由产品经理制作的一个早期项目模型，它用于展示页面的基本布局、功能和交互设计。通常用来帮助设计师、开发者等更好地理解和讨论最终产品的外观和行为。
+
+#### 4.4.2 代码实现
+
+##### 4.4.2.1 顶部导航栏
+
+###### 4.4.2.1.1 基本实现
+
+原型效果：
+![Tlias 智能学习辅助系统 - 顶部导航栏原型效果](./images/01_Tlias智能学习辅助系统-顶部导航栏原型效果.png "Tlias 智能学习辅助系统 - 顶部导航栏原型效果")
+
+页面代码如下：
+```html
+<!-- 10.Tlias案例-顶部导航栏.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <h1>Tlias智能学习辅助系统</h1>
+        <a href="#">退出登录</a>
+    </div>
+</body>
+</html>
+```
+
+###### 4.4.2.1.2 flex 布局
+
+在上述的案例代码中，其实我们用到了一种布局模式，称为 **flex 布局**。
+
+flex 是 flexible Box 的缩写，意为“弹性布局”。采用 flex 布局的元素，称为 Flex 容器（container），它的所有子元素自动称为容器成员，称为 Flex 项目（item）。
+
+通过给父容器添加 flex 属性，来控制子元素的位置和排列方式。
+
+![flex 布局](./images/01_flex布局.png "flex 布局")
+
+测试代码如下：
+```html
+<!-- 11.flex布局.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>flex弹性布局</title>
+  <style>
+    /* body {
+      margin: 0;
+    } */
+    #container {
+      background-color: #f1eeee;
+      width: 500px;
+      height: 300px;
+
+      display: flex; /* flex弹性布局 */
+      flex-direction: row; /* 默认为row水平布局, 设置主轴 */
+      /* flex-start: 从头开始排列 */
+      /* flex-end: 从尾部开始排列 */
+      /* center: 在主轴上居中对齐 */
+      /* space-around: 平分剩余空间 */
+      /* space-between: 先两边贴边, 再平分剩余空间 */
+      justify-content: space-between; 
+    }
+    .item {
+      background-color: rgb(184, 246, 184);
+      border: 1px solid rgb(141, 138, 138);
+      width: 100px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div class="item">1</div>
+    <div class="item">2</div>
+    <div class="item">3</div>
+  </div>
+</body>
+</html>
+```
+
+flex 布局相关的 CSS 样式：
+| 属性 | 说明 | 取值 |
+| :--: | :--: | -- |
+| `display` | 模式 | `flex`：使用 flex 布局 |
+| `flex-direction` | 设置主轴 | 1. `row`：主轴方向为 x 轴，水平向右（默认）<br>2. `column`：主轴方向为 y 轴，垂直向下 |
+| `justify-content` | 子元素在主轴上的对齐方式 | 1. `flex-start`：从头开始排列<br>2. `flex-end`：从尾部开始排列<br>3. `center`：在主轴居中对齐<br>4. `space-around`：平分剩余空间<br>5. `space-between`：先两边贴边，再平分剩余空间 |
+
+如果主轴设置为 `row`，其实就是横向布局；主轴设置为 `column`，其实就是纵向布局。如下所示：
+![横向布局与纵向布局示意图](./images/01_横向布局与纵向布局示意图.png "横向布局与纵向布局示意图")
+
+##### 4.4.2.2 搜索表单
+
+接下来，我们要完成的是第二个部分，也就是搜索栏的制作。页面原型展示如下：
+![Tlias 智能学习辅助系统 - 搜索栏页面原型](./images/01_Tlias智能学习辅助系统-搜索栏页面原型.png "Tlias 智能学习辅助系统 - 搜索栏页面原型")
+
+因此，这里需要用到 HTML 中的表单。那么接下来，我们先来介绍一下表单标签，然后再来实现搜索表单栏的制作。
+
+###### 4.4.2.2.1 表单标签
+
+在我们访问网站时出现的登录页面、注册页面、个人信息提交页面，其实都是一个一个的表单。当我们在这些表单中录入数据之后，一点击“提交”，就会将表单中我们填写的数据采集并提交；而填写的数据一般会提交到服务端，最终保存在数据库中。
+
+整个表单窗口是一个表单；而表单是一项一项的，我们称为表单项或表单元素。
+* 表单场景：表单就是在网页中负责数据采集功能的；如：注册、登录的表单。
+* 表单标签：`<form>`。
+* 表单属性：
+  * `action`：规定表单提交时，向何处发送表单数据，即表单提交的 URL。
+  * `method`：规定用于发送表单数据的方式，常见为 `GET`、`POST`。
+    * `GET`：表单数据是拼接在 url 后面的，如 `xxxxxxxxxxx?username=Tom&age=12`；url 中能携带的表单数据大小是有限制的。
+    * `POST`：表单数据是在请求体（消息体）中携带的，大小没有限制。
+* 表单项标签：不同类型的 `input` 元素、下拉列表、文本域等。
+  * `input`：定义表单项，通过 `type` 属性控制输入形式。
+  * `select`：定义下拉列表。
+  * `textarea`：定义文本域。
+
+示例代码：
+```html
+<!-- 12.表单标签.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表单标签</title>
+</head>
+<body>
+    <!-- form 表单：
+        action：表单数据提交的 url 地址
+        method：提交方式
+            get：默认，表单数据会出现在 utl 后面，形式：/save?name=Tom&age=18
+                特点：
+                    1. 如果表单中包含了隐私数据，get 方式并不安全，不推荐使用该方式
+                    2. 在浏览器中 get 请求的大小是有限制的，不适合提交大数据量的表单
+            post：表单数据会在消息体 / 请求体中提交到服务器
+                特点：
+                    1. 安全
+                    2. 请求大小没有限制
+        注意：表单项要想能够采集数据，必须得设置 name 属性，表示当前表单项的名字
+    -->
+    <form action="/save" method="post">
+        姓名：<input type="text" name="name">
+        年龄：<input type="text" name="age">
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>
+```
+
+> 注意：
+>
+> 表单中的所有表单项，要想能够正常地采集数据并在提交的时候能提交到服务端，表单项必须指定 `name` 属性：
+> ```html
+> 用户名: <input type="text" name="username">
+> ```
+>
+> 否则，无法提交该表单项。
+
+###### 4.4.2.2.2 表单项标签
+
+在一个表单中，可以存在很多的表单项。虽然表单项的形式各种各样，但是表单项的标签其实只有三个，分别是 `<input>`、`<select>`、`<textarea>`。
+
+`<input>`：表单项，通过 `type` 属性控制输入形式。
+
+| `type` 取值 | 描述 |
+| :--: | :--: |
+| `text` | 默认值，定义单行的输入字段 |
+| `password` | 定义密码字段 |
+| `radio` | 定义单选按钮 |
+| `checkbox` | 定义复选框 |
+| `file` | 定义文件上传按钮 |
+| `date` / `time` / `datetime-local` | 定义日期 / 时间 / 日期时间 |
+| `number` | 定义数字输入框 |
+| `email` | 定义邮件输入框 |
+| `hidden` | 定义隐藏域 |
+| `submit` / `reset` / `button` | 定义提交按钮 / 重置按钮 / 可点击按钮 |
+
+`<select>`：定义下拉列表，`<option>` 定义列表项。
+
+`<textarea>`：文本域。
+
+示例代码：
+```html
+<!-- 13.表单项标签.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML-表单项标签</title>
+</head>
+<body>
+
+<!-- value: 表单项提交的值 -->
+<form action="/save" method="post">
+     姓名: <input type="text" name="name"> <br><br>
+
+     密码: <input type="password" name="password"> <br><br> 
+
+     性别: <input type="radio" name="gender" value="1"> 男
+          <label><input type="radio" name="gender" value="2"> 女 </label> <br><br>
+     
+     爱好: <label><input type="checkbox" name="hobby" value="java"> java </label>
+          <label><input type="checkbox" name="hobby" value="game"> game </label>
+          <label><input type="checkbox" name="hobby" value="sing"> sing </label> <br><br>
+     
+     图像: <input type="file" name="image">  <br><br>
+
+     生日: <input type="date" name="birthday"> <br><br>
+
+     时间: <input type="time" name="time"> <br><br>
+
+     日期时间: <input type="datetime-local" name="datetime"> <br><br>
+
+     学历: <select name="degree">
+               <option value="">----------- 请选择 -----------</option>
+               <option value="1">大专</option>
+               <option value="2">本科</option>
+               <option value="3">硕士</option>
+               <option value="4">博士</option>
+          </select>  <br><br>
+
+     描述: <textarea name="description" cols="30" rows="10"></textarea>  <br><br>
+     
+     <input type="hidden" name="id" value="1">
+
+     <!-- 表单常见按钮 -->
+     <input type="button" value="按钮">
+     <input type="reset" value="重置"> 
+     <input type="submit" value="提交">   
+     <br>
+</form>
+
+</body>
+</html>
+```
+
+对于 `<input type="hidden">`，是一个隐藏域，在表单中并不会显示出来；但是在提交表单的时候，是会提交到服务端的。
+
+###### 4.4.2.2.3 搜索表单实现
+
+在基本的表单标签和表单项标签讲解完毕后，接下来我们就来完成搜索表单的实现。
+
+代码实现如下：
+```html
+<!-- 14.Tlias案例-搜索表单区域.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 300px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <h1>Tlias智能学习辅助系统</h1>
+        <a href="#">退出登录</a>
+    </div>
+
+    <!-- 搜索表单区域 -->
+    <!-- form表单标签: 
+            action: 表单提交的地址 - url
+            method: 表单提交的方式 - get(默认) / post
+                get: 提交时, 表单数据会在url后提交到服务端; 比如: /search?name=Tom&gender=2&position=3 ; 
+                     get方式提交数据长度有限制, 不能提交大量数据; get方式不安全;
+                post: 提交时, 表单数据会在请求体(消息体)中提交到服务端; 比如: /search -- name=Cat&gender=1&position=2
+                     post方式提交数据长度无限制; post方式安全;
+    -->
+    <form class="search-form" action="/search" method="post">
+        <label for="name">姓名：</label>
+        <input type="text" id="name" name="name" placeholder="请输入姓名">
+
+        <label for="gender">性别：</label>
+        <select id="gender" name="gender">
+            <option value=""></option>
+            <option value="1">男</option>
+            <option value="2">女</option>
+        </select>
+
+        <label for="position">职位：</label>
+        <select id="position" name="position">
+            <option value=""></option>
+            <option value="1">班主任</option>
+            <option value="2">讲师</option>
+            <option value="3">学工主管</option>
+            <option value="4">教研主管</option>
+            <option value="5">咨询师</option>
+        </select>
+
+        <button type="submit">查询</button>
+        <button type="reset">清空</button>
+    </form>
+</body>
+</html>
+```
+
+##### 4.4.2.3 表格数据展示
+
+###### 4.4.2.3.1 基本实现
+
+页面效果如下：
+![Tlias 智能学习辅助系统 - 表格数据展示页面效果](./images/01_Tlias智能学习辅助系统-表格数据展示页面效果.png "Tlias 智能学习辅助系统 - 表格数据展示页面效果")
+
+代码实现如下：
+```html
+<!-- 15.Tlias案例-表格数据展示区域.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 300px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; /* 边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: center; /* 居中对齐 */
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .avatar {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <h1>Tlias智能学习辅助系统</h1>
+        <a href="#">退出登录</a>
+    </div>
+
+    <!-- 搜索表单区域 -->
+    <form class="search-form" action="/search" method="post">
+        <label for="name">姓名：</label>
+        <input type="text" id="name" name="name" placeholder="请输入姓名">
+
+        <label for="gender">性别：</label>
+        <select id="gender" name="gender">
+            <option value=""></option>
+            <option value="1">男</option>
+            <option value="2">女</option>
+        </select>
+
+        <label for="position">职位：</label>
+        <select id="position" name="position">
+            <option value=""></option>
+            <option value="1">班主任</option>
+            <option value="2">讲师</option>
+            <option value="3">学工主管</option>
+            <option value="4">教研主管</option>
+            <option value="5">咨询师</option>
+        </select>
+
+        <button type="submit">查询</button>
+        <button type="reset">清空</button>
+    </form>
+
+    <!-- 表格展示区 -->
+    <table>
+        <!-- 表头 -->
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>头像</th>
+                <th>职位</th>
+                <th>入职日期</th>
+                <th>最后操作时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+
+        <!-- 表格主体内容 -->
+        <tbody>
+            <tr>
+                <td>令狐冲</td>
+                <td>男</td>
+                <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="令狐冲"></td>
+                <td>讲师</td>
+                <td>2021-06-15</td>
+                <td>2024-09-16 15:30</td>
+                <td class="action-buttons">
+                    <button type="button">编辑</button>
+                    <button type="button">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>任盈盈</td>
+                <td>女</td>
+                <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任盈盈"></td>
+                <td>咨询师</td>
+                <td>2021-07-20</td>
+                <td>2024-09-17 09:00</td>
+                <td class="action-buttons">
+                    <button type="button">编辑</button>
+                    <button type="button">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>向问天</td>
+                <td>男</td>
+                <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                <td>教研主管</td>
+                <td>2021-05-01</td>
+                <td>2024-09-15 17:45</td>
+                <td class="action-buttons">
+                    <button type="button">编辑</button>
+                    <button type="button">删除</button>
+                </td>
+            </tr>
+            <tr>
+                <td>任我行</td>
+                <td>男</td>
+                <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任我行"></td>
+                <td>教研主管</td>
+                <td>2021-05-01</td>
+                <td>2024-09-15 17:45</td>
+                <td class="action-buttons">
+                    <button type="button">编辑</button>
+                    <button type="button">删除</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
+```
+
+###### 4.4.2.3.2 表格标签
+
+| 标签 | 描述 |
+| :--: | :--: |
+| `<table>` | 定义表格整体 |
+| `<thead>` | 用于定义表格头部（可选） |
+| `<tbody>` | 定义表格中的主体部分（可选） |
+| `<tr>` | 表格的行，可以包裹多个 `<td>` |
+| `<td>` | 表格单元格（普通），可以包裹内容；如果是表头单元格，可以替换为 `<th>` |
+
+##### 4.4.2.4 底部版权区域
+
+页面原型展示如下：
+![Tlias 智能学习辅助系统 - 底部版权区域页面原型](./images/01_Tlias智能学习辅助系统-底部版权区域页面原型.png "Tlias 智能学习辅助系统 - 底部版权区域页面原型")
+
+页面代码如下：
+```html
+<!-- 16.Tlias案例-底部版权区域.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 260px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; /* 边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: center; /* 左对齐 */
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: #b5b3b3; /* 灰色背景 */
+            color: white; /* 白色文字 */
+            text-align: center; /* 居中文本 */
+            padding: 10px 0; /* 上下内边距 */
+            margin-top: 30px;
+        }
+
+        #container {
+            width: 80%; /* 宽度为80% */
+            margin: 0 auto; /* 水平居中 */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <h1>Tlias智能学习辅助系统</h1>
+            <a href="#">退出登录</a>
+        </div>
+
+        <!-- 搜索表单区域 -->
+        <form class="search-form" action="/search" method="post">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" placeholder="请输入姓名">
+
+            <label for="gender">性别：</label>
+            <select id="gender" name="gender">
+                <option value=""></option>
+                <option value="1">男</option>
+                <option value="2">女</option>
+            </select>
+
+            <label for="position">职位：</label>
+            <select id="position" name="position">
+                <option value=""></option>
+                <option value="1">班主任</option>
+                <option value="2">讲师</option>
+                <option value="3">学工主管</option>
+                <option value="4">教研主管</option>
+                <option value="5">咨询师</option>
+            </select>
+
+            <button type="submit">查询</button>
+            <button type="reset">清空</button>
+        </form>
+
+        <!-- 表格展示区 -->
+        <table>
+            <!-- 表头 -->
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>头像</th>
+                    <th>职位</th>
+                    <th>入职日期</th>
+                    <th>最后操作时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+
+            <!-- 表格主体内容 -->
+            <tbody>
+                <tr>
+                    <td>令狐冲</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="令狐冲"></td>
+                    <td>讲师</td>
+                    <td>2021-06-15</td>
+                    <td>2024-09-16 15:30</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>任盈盈</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任盈盈"></td>
+                    <td>咨询师</td>
+                    <td>2021-07-20</td>
+                    <td>2024-09-17 09:00</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>向问天</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>任我行</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任我行"></td>
+                    <td>教研主管</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>田伯光</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="田伯光"></td>
+                    <td>班主任</td>
+                    <td>2021-06-15</td>
+                    <td>2024-09-16 15:30</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>不戒</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="不戒"></td>
+                    <td>班主任</td>
+                    <td>2021-07-20</td>
+                    <td>2024-09-17 09:00</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>左冷禅</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="左冷禅"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>定逸</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="定逸"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>东方兄弟</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="东方兄弟"></td>
+                    <td>讲师</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>金庸</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="金庸"></td>
+                    <td>咨询师</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 页脚版权区域 -->
+        <footer class="footer">
+            <p>江苏传智播客教育科技股份有限公司</p>
+            <p>版权所有 Copyright 2006-2024 All Rights Reserved</p>
+        </footer>
+    </div>
+</body>
+</html>
+```
+
+##### 4.4.2.5 版心居中
+
+Tlias 智能学习辅助系统案例类似于央视新闻页面，页面中的内容都需要居中显示，所以在这里我们就可以使用盒子模型来进行布局。
+
+具体代码如下：
+```html
+<!-- 16.Tlias案例-底部版权区域.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 260px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; /* 边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: center; /* 左对齐 */
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: #b5b3b3; /* 灰色背景 */
+            color: white; /* 白色文字 */
+            text-align: center; /* 居中文本 */
+            padding: 10px 0; /* 上下内边距 */
+            margin-top: 30px;
+        }
+
+        #container {
+            width: 80%; /* 宽度为80% */
+            margin: 0 auto; /* 水平居中 */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <h1>Tlias智能学习辅助系统</h1>
+            <a href="#">退出登录</a>
+        </div>
+
+        <!-- 搜索表单区域 -->
+        <form class="search-form" action="/search" method="post">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" placeholder="请输入姓名">
+
+            <label for="gender">性别：</label>
+            <select id="gender" name="gender">
+                <option value=""></option>
+                <option value="1">男</option>
+                <option value="2">女</option>
+            </select>
+
+            <label for="position">职位：</label>
+            <select id="position" name="position">
+                <option value=""></option>
+                <option value="1">班主任</option>
+                <option value="2">讲师</option>
+                <option value="3">学工主管</option>
+                <option value="4">教研主管</option>
+                <option value="5">咨询师</option>
+            </select>
+
+            <button type="submit">查询</button>
+            <button type="reset">清空</button>
+        </form>
+
+        <!-- 表格展示区 -->
+        <table>
+            <!-- 表头 -->
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>头像</th>
+                    <th>职位</th>
+                    <th>入职日期</th>
+                    <th>最后操作时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+
+            <!-- 表格主体内容 -->
+            <tbody>
+                <tr>
+                    <td>令狐冲</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="令狐冲"></td>
+                    <td>讲师</td>
+                    <td>2021-06-15</td>
+                    <td>2024-09-16 15:30</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>任盈盈</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任盈盈"></td>
+                    <td>咨询师</td>
+                    <td>2021-07-20</td>
+                    <td>2024-09-17 09:00</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>向问天</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>任我行</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任我行"></td>
+                    <td>教研主管</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>田伯光</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="田伯光"></td>
+                    <td>班主任</td>
+                    <td>2021-06-15</td>
+                    <td>2024-09-16 15:30</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>不戒</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="不戒"></td>
+                    <td>班主任</td>
+                    <td>2021-07-20</td>
+                    <td>2024-09-17 09:00</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>左冷禅</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="左冷禅"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>定逸</td>
+                    <td>女</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="定逸"></td>
+                    <td>班主任</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>东方兄弟</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="东方兄弟"></td>
+                    <td>讲师</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>金庸</td>
+                    <td>男</td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="金庸"></td>
+                    <td>咨询师</td>
+                    <td>2021-05-01</td>
+                    <td>2024-09-15 17:45</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 页脚版权区域 -->
+        <footer class="footer">
+            <p>江苏传智播客教育科技股份有限公司</p>
+            <p>版权所有 Copyright 2006-2024 All Rights Reserved</p>
+        </footer>
+    </div>
 </body>
 </html>
 ```
