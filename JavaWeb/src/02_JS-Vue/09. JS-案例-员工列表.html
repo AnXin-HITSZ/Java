@@ -166,7 +166,7 @@
                 <tr>
                     <td>任我行</td>
                     <td>男</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任我行"></td>
                     <td>教研主管</td>
                     <td>2021-05-01</td>
                     <td>2024-09-15 17:45</td>
@@ -178,7 +178,7 @@
                 <tr>
                     <td>田伯光</td>
                     <td>男</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="令狐冲"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="田伯光"></td>
                     <td>班主任</td>
                     <td>2021-06-15</td>
                     <td>2024-09-16 15:30</td>
@@ -190,7 +190,7 @@
                 <tr>
                     <td>不戒</td>
                     <td>女</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="任盈盈"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="不戒"></td>
                     <td>班主任</td>
                     <td>2021-07-20</td>
                     <td>2024-09-17 09:00</td>
@@ -202,7 +202,7 @@
                 <tr>
                     <td>左冷禅</td>
                     <td>男</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="左冷禅"></td>
                     <td>班主任</td>
                     <td>2021-05-01</td>
                     <td>2024-09-15 17:45</td>
@@ -214,7 +214,7 @@
                 <tr>
                     <td>定逸</td>
                     <td>女</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="定逸"></td>
                     <td>班主任</td>
                     <td>2021-05-01</td>
                     <td>2024-09-15 17:45</td>
@@ -226,7 +226,7 @@
                 <tr>
                     <td>东方兄弟</td>
                     <td>男</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="东方兄弟"></td>
                     <td>讲师</td>
                     <td>2021-05-01</td>
                     <td>2024-09-15 17:45</td>
@@ -238,7 +238,7 @@
                 <tr>
                     <td>金庸</td>
                     <td>男</td>
-                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="向问天"></td>
+                    <td><img class="avatar" src="https://web-framework.oss-cn-hangzhou.aliyuncs.com/2023/1.jpg" alt="金庸"></td>
                     <td>咨询师</td>
                     <td>2021-05-01</td>
                     <td>2024-09-15 17:45</td>
@@ -258,8 +258,23 @@
     </div>
 
     <script>
-        //通过JS为上述的表格中数据行添加事件监听, 实现鼠标进入后, 背景色#f2e2e2; 鼠标离开后, 背景色需要设置为#fff; (JS新版本的语法)
-        
+        // 需求：通过 JS 为上述的表格中数据行添加事件监听
+        // 实现：鼠标进入后，背景色需要设置为 #f2e2e2；鼠标离开后，背景色需要设置为 #fff
+        // （注意：需要使用 JS 新版本的语法）
+
+        // 1. 获取所有的 tr 标签
+        let trs = document.querySelectorAll('tr');
+
+        // 2. 为每一个 tr 标签添加事件监听
+        for (let i = 0; i < trs.length; i++) {
+            trs[i].addEventListener('mouseenter', function() {  // mouseenter：鼠标进入
+                this/* 或：trs[i] */.style.backgroundColor = '#f2e2e2';
+            });
+
+            trs[i].addEventListener('mouseleave', function() {  // mouseleave：鼠标离开
+                this/* 或：trs[i] */.style.backgroundColor = '#fff';
+            });
+        }
     </script>
 </body>
 </html>

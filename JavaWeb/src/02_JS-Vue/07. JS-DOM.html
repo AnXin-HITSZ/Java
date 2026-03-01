@@ -12,7 +12,16 @@
   <h1>33333</h1>
 
   <script>
-    
+    // 1. 修改第一个 h1 标签中的文本内容
+    // 1.1 获取 DOM 对象
+    // let h1 = document.querySelector('#title1');
+    // let h1 = document.querySelector('h1');  // 获取第一个 h1 标签
+
+    let hs = document.querySelectorAll('h1');
+
+    // 1.2 调用 DOM 对象中的属性或方法
+    // h1.innerHTML = '修改后的文本内容';
+    hs[0].innerHTML = '修改后的文本内容';
   </script>
 </body>
 </html>
