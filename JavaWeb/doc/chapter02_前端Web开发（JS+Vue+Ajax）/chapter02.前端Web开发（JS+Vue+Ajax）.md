@@ -1264,3 +1264,148 @@ JavaScript 对于事件的绑定还提供了另外 2 种方式（早期版本）
 
 </html>
 ```
+
+### 2.5 优化 - JS 模块化
+
+在 《2.4 常见事件》的示例代码 10.JS-常见事件.html 中，存在**复用**与**维护**较差的问题：
+![优化前代码存在问题的区域](./images/02_优化前代码存在问题的区域.png "优化前代码存在问题的区域")
+
+因此，通过 JS 模块化（`export` 与 `import`）对上述程序进行优化：
+
+```javascript
+/* ./js/utils.js */
+
+export function printLog(msg){
+  console.log(msg);
+}
+```
+
+```javascript
+/* ./js/eventDemo.js */
+
+import { printLog } from "./utils.js";
+
+//click: 鼠标点击事件
+document.querySelector('#b2').addEventListener('click', () => {
+    printLog("我被点击了...");
+})
+
+//mouseenter: 鼠标移入
+document.querySelector('#last').addEventListener('mouseenter', () => {
+    printLog("鼠标移入了...");
+})
+
+//mouseleave: 鼠标移出
+document.querySelector('#last').addEventListener('mouseleave', () => {
+    printLog("鼠标移出了...");
+})
+
+//keydown: 某个键盘的键被按下
+document.querySelector('#username').addEventListener('keydown', () => {
+    printLog("键盘被按下了...");
+})
+
+//keyup: 某个键盘的键被抬起
+document.querySelector('#username').addEventListener('keyup', () => {
+    printLog("键盘被抬起了...");
+})
+
+//blur: 失去焦点事件
+document.querySelector('#age').addEventListener('blur', () => {
+    printLog("失去焦点...");
+})
+
+//focus: 元素获得焦点
+document.querySelector('#age').addEventListener('focus', () => {
+    printLog("获得焦点...");
+})
+
+//input: 用户输入时触发
+document.querySelector('#age').addEventListener('input', () => {
+  printLog("用户输入时触发...");
+})
+
+//submit: 提交表单事件
+document.querySelector('form').addEventListener('submit', () => {
+    alert("表单被提交了...");
+})
+```
+
+```html
+<!-- ./11.JS-常见事件（优化） -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS-事件-常见事件</title>
+</head>
+
+<body>
+    <form action="" style="text-align: center;">
+        <input type="text" name="username" id="username">
+        <input type="text" name="age" id="age">
+        <input id="b1" type="submit" value="提交">
+        <input id="b2" type="button" value="单击事件">
+    </form>
+
+    <br><br><br>
+
+    <table width="800px" border="1" cellspacing="0" align="center">
+        <tr>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>分数</th>
+            <th>评语</th>
+        </tr>
+        <tr align="center">
+            <td>001</td>
+            <td>张三</td>
+            <td>90</td>
+            <td>很优秀</td>
+        </tr>
+        <tr align="center" id="last">
+            <td>002</td>
+            <td>李四</td>
+            <td>92</td>
+            <td>优秀</td>
+        </tr>
+    </table>
+    <!-- type="module"：模块化 JS -->
+    <script src="./js/eventDemo.js" type="module"></script>
+</body>
+
+</html>
+```
+
+## 三、Vue 介绍
+
+### 3.1 概述
+
+Vue（读音 /vjuː /，类似于 view），是一款用于**构建用户界面**的**渐进式**的 JavaScript **框架**。
+
+Vue 官方网站：[Vue 官方网站](https://cn.vuejs.org "Vue 官方网站")。
+
+关键词：**构建用户界面**、**渐进式**、**框架**。
+
+#### 3.1.1 关键词 1：构建用户界面
+
+构建用户界面是指，在 Vue 中，可以基于数据渲染出用户看到的界面。那这句话是什么意思呢？我们来举一个例子，比如将来服务器端返回给前端的原始数据如下所示：
+```JSON
+userList: [
+  {"id": 1, "name": "谢逊", "image": "1.jpg", "gender": 1, "job": "班主任"},
+  {"id": 2, "name": "韦一笑", "image": "2.jpg", "gender": 1, "job": "班主任"}
+]
+```
+
+上面的这些原始数据，用户是看不懂的；而我们开发人员可以使用 Vue 中提供的操作，将原始数据遍历、解析出来，从而渲染呈现出用户所能看懂的界面。如下所示：
+![原始数据经遍历、解析后渲染呈现出用户所能看懂的界面](./images/02_原始数据经遍历、解析后渲染呈现出用户所能看懂的界面.png "原始数据经遍历、解析后渲染呈现出用户所能看懂的界面")
+
+那么这个过程就是基于数据渲染出用户看到的界面，也就是所谓的“**构建用户界面**”。
+
+#### 3.1.2 关键词 2：渐进式
+
+渐进式中的“渐进”，字面意思就是“循序渐进”。Vue 生态中的语法是非常多的，比如声明式渲染、组件系统、客户端路由（Vue）
