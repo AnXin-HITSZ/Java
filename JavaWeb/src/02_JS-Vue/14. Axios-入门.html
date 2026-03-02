@@ -13,15 +13,32 @@
 
     <script src="js/axios.js"></script>
     <script>
-        //发送GET请求
+        // 发送 GET 请求
         document.querySelector('#btnGet').addEventListener('click', () => {
-           
-        })
+            // Axios 发起异步请求
+            axios({
+                url: 'https://mock.apifox.cn/m1/3083103-0-default/emps/list',
+                method: 'GET'
+            }).then((result) => {   // 成功回调函数
+                console.log(result.data);
+            }).catch((err) => {
+                console.log(err);   // 失败回调函数
+            })
+        });
         
-        //发送POST请求
+        // 发送 POST 请求
         document.querySelector('#btnPost').addEventListener('click', () => {
-            
-        })
+            // Axios 发起异步请求
+            axios({
+                url: 'https://mock.apifox.cn/m1/3083103-0-default/emps/update',
+                method: 'POST',
+                data: 'id=1'    // POST 请求方式，请求体
+            }).then((result) => {   // 成功回调函数
+                console.log(result.data);
+            }).catch((err) => {
+                console.log(err);   // 失败回调函数
+            })
+        });
     </script>
 </body>
 </html>
