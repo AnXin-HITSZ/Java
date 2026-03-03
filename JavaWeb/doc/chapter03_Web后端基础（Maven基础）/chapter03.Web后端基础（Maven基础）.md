@@ -218,7 +218,7 @@ Maven 安装配置步骤：
     </mirror>
     ```
 
-注意配置的位置，在 `<mirrors> ... </mirrors>` 中间添加配置。如下图所示：
+注意配置的位置，在 `<mirrors>...</mirrors>` 中间添加配置。如下图所示：
 ![Maven - 添加配置](./images/03_Maven-添加配置.png "Maven - 添加配置")
 
 4). 配置环境变量
@@ -239,7 +239,7 @@ Maven 安装配置步骤：
 
 5). 配置关联的 JDK 版本（可选）
 
-进入到 conf 目录下修改 settings.xml 配置文件，在 `<profiles> ... </profiles>` 中增加如下配置：
+进入到 conf 目录下修改 settings.xml 配置文件，在 `<profiles>...</profiles>` 中增加如下配置：
 ```xml
 <profile>
         <id>jdk-17</id>
@@ -406,4 +406,600 @@ Maven 坐标主要组成：
 
 依赖：指当前项目中运行所需要的 jar 包；一个项目中可以引入多个依赖。
 
-例如：在当前
+例如：在当前工程中，我们需要用到 logback 来记录日志，此时就可以在 Maven 工程的 pom.xml 文件中，引入 logback 的依赖。具体步骤如下：
+1. 在 pom.xml 中编写 `<dependencies>` 标签。
+2. 在 `<dependencies>` 标签中使用 `<dependency>` 引入坐标。
+3. 定义坐标的 `groupId`、`artifactId`、`version`：
+    ```xml
+    <dependencies>
+        <!-- 依赖 : spring-context -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>6.1.4</version>
+        </dependency>
+    </dependencies>
+    ```
+4. 点击刷新按钮，引入最新加入的坐标。
+    * 刷新依赖：保证每一次引入新的依赖，或者修改现有的依赖配置，都可以加入最新的坐标。
+    ![刷新依赖](./images/03_刷新依赖.png "刷新依赖")
+
+> 注意：
+> 1. 如果引入的依赖在本地仓库中不存在，将会连接远程仓库 / 中央仓库，然后下载依赖（这个过程会比较耗时，耐心等待）。
+> 2. 如果不知道依赖的坐标信息，可以到 mvn 的中央仓库（[mvn 中央仓库](https://mvnrepository.com/ "mvn 中央仓库")）中搜索。
+
+#### 4.1.2 查找依赖
+
+1). 利用中央仓库搜索的依赖坐标
+
+以常见的 logback-classic 为例：
+![查找依赖 - 利用中央仓库搜索的依赖坐标](./images/03_查找依赖-利用中央仓库搜索的依赖坐标.gif "查找依赖 - 利用中央仓库搜索的依赖坐标")
+
+2). 利用 IDEA 工具搜索依赖
+
+以常见的 logback-classic 为例：
+![查找依赖 - 利用 IDEA 工具搜索依赖](./images/03_查找依赖-利用IDEA工具搜索依赖.gif "查找依赖 - 利用 IDEA 工具搜索依赖")
+
+3). 熟练上手 Maven 后，快速导入依赖
+
+以常见的 logback-classic 为例：
+![查找依赖 - 快速导入依赖](./images/03_查找依赖-快速导入依赖.gif "查找依赖 - 快速导入依赖")
+
+#### 4.1.3 依赖传递
+
+我们上面在 pom.xml 中配置了一项依赖，就是 spring-context，但是我们通过右侧的 Maven 面板可以看到，其实引入进来的依赖并不是这一项，有非常多的依赖都被引入进来了。我们可以看到如下图所示：
+![依赖传递](./images/03_依赖传递.png "依赖传递")
+
+为什么会出现这样的现象呢？这里涉及到 Maven 中非常重要的一个特性，那就是 Maven 中的**依赖传递**。
+
+所谓 Maven 的依赖传递，指的就是如果在 Maven 项目中，A 依赖了 B，B 依赖了 C，C 依赖了 D，那么在项目 A 中，也会有 C、D 依赖，因为依赖会传递。
+
+那如果，传递下来的依赖，在项目开发中我们确实不需要，此时我们可以通过 Maven 中的排除依赖功能，来将这个依赖排除掉。
+
+#### 4.1.4 排除依赖
+
+![排除依赖](./images/03_排除依赖.png "排除依赖")
+
+排除依赖：指主动断开依赖的资源，被排除的资源无需指定版本。
+
+配置形式如下：
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>6.1.4</version>
+
+    <!--排除依赖, 主动断开依赖的资源-->
+    <exclusions>
+        <exclusion>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-observation</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+依赖排除示例：
+1. 默认通过 Maven 的依赖传递，传递下来了 micrometer-observation 的依赖：
+![排除依赖示例 - 1](./images/03_排除依赖示例-1.png "排除依赖示例 - 1")
+2. 加入排除依赖的配置之后，该依赖就被排除掉了：
+![排除依赖示例 - 2](./images/03_排除依赖示例-2.png "排除依赖示例 - 2")
+
+### 4.2 生命周期
+
+#### 4.2.1 介绍
+
+Maven 的生命周期就是为了对所有的构建过程进行抽象和统一。
+
+Maven 总结了一套项目构建生命周期，这个生命周期包含了项目的清理、初始化、编译、测试、打包、集成测试、验证、部署和站点生成等几乎所有构建步骤。
+
+Maven 对项目构建的生命周期划分为 3 套（相互独立）：
+![Maven 对项目构建的生命周期划分](./images/03_Maven对项目构建的生命周期划分.png "Maven 对项目构建的生命周期划分")
+* clear：清理工作。
+* default：核心工作；如：编译、测试、打包、安装、部署等。
+* site：生成报告、发布站点等。
+
+三套生命周期包含的具体的阶段如下图所示：
+![Maven 的三套生命周期包含的具体的阶段](./images/03_Maven的三套生命周期包含的具体的阶段.png "Maven 的三套生命周期包含的具体的阶段")
+
+每套生命周期包含一些阶段（phase），阶段是有顺序的，后面的阶段依赖于前面的阶段。
+
+我们主要关注以下几个阶段：
+* clean：移除上一次构建生成的文件。
+* compile：编译项目源代码。
+* test：使用合适的单元测试框架运行测试（junit）。
+* package：将编译后的文件打包；如：jar、war 等。
+* install：安装项目到本地仓库。
+
+Maven 的生命周期是抽象的，这意味着生命周期本身不做任何实际工作。**在 Maven 的设计中，实际任务（如源代码编译）都交由插件来完成。**
+
+![实际任务都交由插件来完成](./images/03_实际任务都交由插件来完成.png "实际任务都交由插件来完成")
+
+IDEA 工具为了方便程序员使用 Maven 生命周期，在右侧的 Maven 工具栏中，已给出快速访问通道：
+![IDEA 中对 Maven 生命周期的快速访问通道](./images/03_IDEA中对Maven生命周期的快速访问通道.png "IDEA 中对 Maven 生命周期的快速访问通道")
+
+生命周期的顺序是：clean -> validate -> compile -> test -> package -> verify -> install -> site -> deploy。
+
+我们需要关注的就是：clean -> compile -> test -> package -> install。
+
+> 说明：
+>
+> 在**同一套**生命周期中，我们在执行后面的生命周期时，前面的生命周期都会执行。
+
+> 思考：当运行 package 生命周期时，clean、compile 生命周期会不会运行？
+>
+> 答：clean 不会运行，compile 会运行。因为 compile 与 package 属于同一套生命周期，而 clean 与 package 不属于同一套生命周期。
+
+#### 4.2.2 执行
+
+在日常开发中，当我们要执行指定的生命周期时，有两种执行方式：
+1. 在 IDEA 工具右侧的 Maven 工具栏中，选择对应的生命周期，双击执行。
+2. 在 DOS 命令行中，通过 Maven 命令执行；例如：`mvn clean`、`mvn compile`、`mvn test`、`mvn package`、`mvn install`。
+
+## 五、单元测试
+
+### 5.1 介绍
+
+**测试：** 是一种用来促进鉴定软件的正确性、完整性、安全性和质量的过程。
+
+**阶段划分：** 单元测试、集合测试、系统测试、验收测试。
+![测试 - 阶段划分](./images/03_测试-阶段划分.png "测试 - 阶段划分")
+
+**测试方法：** 白盒测试、黑盒测试及灰盒测试。
+![测试 - 测试方法](./images/03_测试-测试方法.png "测试 - 测试方法")
+
+![测试 - 测试阶段及其对应的测试方法](./images/03_测试-测试阶段及其对应的测试方法.png "测试 - 测试阶段及其对应的测试方法")
+
+### 5.2 Junit 入门
+
+#### 5.2.1 单元测试
+
+单元测试：针对最小的功能单元（方法），编写测试代码对其正确性进行测试。
+
+JUnit：最流行的 Java 测试框架之一，提供了一些功能，方便程序进行单元测试（第三方公司提供）。
+
+#### 5.2.2 入门程序
+
+需求：使用 JUnit，对 UserService 中的业务方法进行单元测试，测试其正确性。
+
+1). 在 pom.xml 中，引入 JUnit 的依赖
+
+```xml
+<!-- JUnit 单元测试依赖 -->
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <version>5.9.1</version>
+    <!-- <scope>test</scope> -->
+</dependency>
+```
+
+2). 在 test/java 目录下，创建测试类，并编写对应的测试方法，并在方法上声明 `@Test` 注解。
+
+```java
+@Test
+public void testGetAge(){
+    Integer age = new UserService().getAge("110002200505091218");
+    System.out.println(age);
+}
+```
+
+3). 运行单元测试（测试通过：绿色；测试失败：红色）
+
+> 注意：
+> * 测试类的命名规范为：`XxxxTest`。
+> * 测试方法的命名规范为：`public void xxx() { ... }`。
+>
+> 即：JUnit 单元测试类名命名规范为：`XxxxxTest`【规范】；JUnit 单元测试的方法，必须声明为 `public void`【规定】。
+
+示例代码：
+```java
+/* UserServiceTest.java */
+
+package com.anxin_hitsz;
+
+/**
+ * ClassName: UserServiceTest
+ * Package: com.anxin_hitsz
+ * Description:
+ *      测试类
+ * @Author AnXin
+ * @Create 2026/3/3 21:17
+ * @Version 1.0
+ */
+
+import org.junit.jupiter.api.Test;
+
+/**
+ * 测试类
+ */
+public class UserServiceTest {
+
+    @Test
+    public void testGetAge() {
+        UserService userService = new UserService();
+        Integer age = userService.getAge("100000200010011011");
+        System.out.println(age);
+    }
+
+}
+
+```
+
+### 5.3 断言
+
+JUnit 提供了一些辅助方法，用来帮我们确定被测试的方法是否按照预期的效果正常工作，这种方式称为**断言**。
+
+| 断言方法 | 描述 |
+| :--: | :--: |
+| `Assertions.assertEquals(Object exp, Object act, String msg)` | 检查两个值是否相等，不相等就报错 |
+| `Assertions.assertNotEquals(Object unexp, Object act, String msg)` | 检查两个值是否不相等，相等就报错 |
+| `Assertions.assertNull(Object act, String msg)` | 检查对象是否为 `null`，不为 `null` 就报错  |
+| `Assertions.assertNotNull(Object act, String msg)` | 检查对象是否不为 `null`，为 `null` 就报错 |
+| `Assertions.assertTrue(boolean condition, String msg)` | 检查条件是否为 `true`，不为 `true` 就报错 |
+| `Assertions.assertFalse(boolean condition, String msg)` | 检查条件是否为 `false`，不为 `false` 就报错 |
+| `Assertions.assertSame(Object exp, Object act, String msg)` | 检查两个对象引用是否相等，不相等就报错 |
+| `Assertions.assertThrows(Class expType, Executable exec, String msg)` | 检查程序运行抛出的异常，是否符合预期 |
+
+> 注意：
+>
+> 上述方法形参中的最后一个参数 `msg`，表示错误提示信息，可以不指定（有对应的重载方法）。
+
+示例代码：
+```java
+/* UserServiceTest.java */
+
+package com.anxin_hitsz;
+
+/**
+ * ClassName: UserServiceTest
+ * Package: com.anxin_hitsz
+ * Description:
+ *      测试类
+ * @Author AnXin
+ * @Create 2026/3/3 21:17
+ * @Version 1.0
+ */
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+/**
+ * 测试类
+ */
+public class UserServiceTest {
+
+    @Test
+    public void testGetAge() {
+        UserService userService = new UserService();
+        Integer age = userService.getAge("100000200010011011");
+        System.out.println(age);
+    }
+
+    @Test
+    public void testGetGender() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        System.out.println(gender);
+    }
+
+    /**
+     * 断言
+     */
+    @Test
+    public void testGetGenderWithAssert() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        // 断言
+//        Assertions.assertEquals("男", gender);
+        Assertions.assertEquals("男", gender, "性别获取错误，有问题");
+    }
+
+    /**
+     * 断言
+     */
+    @Test
+    public void testGetGenderWithAssert2() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        // 断言
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender(null);
+        });
+    }
+
+}
+
+```
+
+### 5.4  常见注解
+
+在 JUnit 中还提供了一些注解，以增强其功能。常见的注解见下表：
+| 注解 | 说明 | 备注 |
+| :--: | :--: | :--: |
+| `@Test` | 测试类中的方法用它修饰才能成为测试方法，才能启动执行 | 单元测试 |
+| `@BeforeEach` | 用来修饰一个实例方法，该方法会在**每一个**测试方法执行之前执行一次 | 初始化资源（准备工作） |
+| `@AfterEach` | 用来修饰一个实例方法，该方法会在**每一个**测试方法执行之后执行一次 | 释放资源（清理工作） |
+| `@BeforeAll` | 用来修饰一个静态方法，该方法会在所有测试方法之前**只执行一次** | 初始化资源（准备工作） |
+| `@AfterAll` | 用来修饰一个静态方法，该方法会在所有测试方法之后**只执行一次** | 释放资源（清理工作） |
+| `@ParameterizedTest` | 参数化测试的注解（可以让单个测试运行多次，每次运行时仅参数不同） | 用了该注解，就不需要 `@Test` 注解了 |
+| `@ValueSource` | 参数化测试的参数来源，赋予测试方法参数 | 与参数化测试注解配合使用 |
+| `@DisplayName` | 指定测试类、测试方法显示的名称（默认为类名、方法名） | - |
+
+示例代码：
+```java
+/* UserServiceTest.java */
+
+package com.anxin_hitsz;
+
+/**
+ * ClassName: UserServiceTest
+ * Package: com.anxin_hitsz
+ * Description:
+ *      测试类
+ * @Author AnXin
+ * @Create 2026/3/3 21:17
+ * @Version 1.0
+ */
+
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+/**
+ * 测试类
+ */
+@DisplayName("用户信息测试类")
+public class UserServiceTest {
+
+//    @BeforeAll  // 在所有的单元测试方法运行之前，运行一次
+//    public static void beforeAll() {
+//        System.out.println("before All");
+//    }
+//    @AfterAll   // 在所有的单元测试方法运行之后，运行一次
+//    public static void afterAll() {
+//        System.out.println("after All");
+//    }
+//    @BeforeEach // 在每一个单元测试方法运行之前，都会运行一次
+//    public void beforeEach() {
+//        System.out.println("before Each");
+//    }
+//    @AfterEach  // 在每一个单元测试方法运行之后，都会运行一次
+//    public void afterEach() {
+//        System.out.println("after Each");
+//    }
+
+    @Test
+    public void testGetAge() {
+        UserService userService = new UserService();
+        Integer age = userService.getAge("100000200010011011");
+        System.out.println(age);
+    }
+
+    @Test
+    public void testGetGender() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        System.out.println(gender);
+    }
+
+    /**
+     * 断言
+     */
+    @Test
+    public void testGetGenderWithAssert() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        // 断言
+//        Assertions.assertEquals("男", gender);
+        Assertions.assertEquals("男", gender, "性别获取错误，有问题");
+    }
+
+    /**
+     * 断言
+     */
+    @Test
+    public void testGetGenderWithAssert2() {
+        UserService userService = new UserService();
+        String gender = userService.getGender("100000200010011011");
+        // 断言
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender(null);
+        });
+    }
+
+    /**
+     * 参数化测试
+     */
+    @DisplayName("测试用户性别")
+    @ParameterizedTest
+    @ValueSource(strings = { "100000200010011011", "100000200010011031", "100000200010011051" })
+    public void testGetGender2(String idCard) {
+        UserService userService = new UserService();
+        String gender = userService.getGender(idCard);
+        // 断言
+        Assertions.assertEquals("男", gender);
+    }
+
+}
+
+```
+
+> 思考：在 Maven 项目中，test 目录存放单元测试的代码；是否可以在 main 目录中编写单元测试呢？
+>
+> 答：可以，但是**不规范**。
+
+### 5.5 企业开发规范
+
+原则：编写测试方法时，要尽可能地覆盖业务方法中所有可能的情况（尤其是边界值）。
+
+示例代码：
+```java
+/* UserService2Test.java */
+
+package com.anxin_hitsz;
+
+import org.junit.jupiter.api.*;
+
+/**
+ * ClassName: UserService2Test
+ * Package: com.anxin_hitsz
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/3 22:29
+ * @Version 1.0
+ */
+
+/**
+ * 测试类
+ */
+@DisplayName("用户信息测试类")
+public class UserService2Test {
+
+    private UserService userService;
+    @BeforeEach
+    public void setUp() {
+        userService = new UserService();
+    }
+
+    /**
+     * 测试获取性别 - null
+     */
+    @Test
+    @DisplayName("获取性别 - null 值")
+    public void testGetGender1() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender(null);
+        });
+    }
+
+    /**
+     * 测试获取性别 - ""
+     */
+    @Test
+    @DisplayName("获取性别 - 空串")
+    public void testGetGender2() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender("");
+        });
+    }
+
+    /**
+     * 测试获取性别 - 长度不足
+     */
+    @Test
+    @DisplayName("获取性别 - 长度不足")
+    public void testGetGender3() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender("110");
+        });
+    }
+
+    /**
+     * 测试获取性别 - 长度超出
+     */
+    @Test
+    @DisplayName("获取性别 - 长度超出")
+    public void testGetGender4() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getGender("1000002000100110111100000");
+        });
+    }
+
+    /**
+     * 测试获取性别 - 正常：男
+     */
+    @Test
+    @DisplayName("获取性别 - 正常男性身份证")
+    public void testGetGender5() {
+        String gender = userService.getGender("100000200010011011");
+        Assertions.assertEquals("男", gender);
+    }
+
+    /**
+     * 测试获取性别 - 正常：女
+     */
+    @Test
+    @DisplayName("获取性别 - 正常女性身份证")
+    public void testGetGender6() {
+        String gender = userService.getGender("100000200010011021");
+        Assertions.assertEquals("女", gender);
+    }
+
+    // ----------------------- 测试获取年龄 -----------------------
+    /**
+     * 测试获取年龄 - 正常
+     */
+    @Test
+    @DisplayName("获取年龄 - 正常身份证")
+    public void testGetAge1() {
+        Integer age = userService.getAge("100000200010011011");
+        Assertions.assertEquals(25, age);
+    }
+
+    /**
+     * 测试获取年龄 - null 值
+     */
+    @Test
+    @DisplayName("获取年龄 - null 值")
+    public void testGetAge2() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getAge(null);
+        });
+    }
+
+    /**
+     * 测试获取年龄 - 超长
+     */
+    @Test
+    @DisplayName("获取年龄 - 长度超长")
+    public void testGetAge3() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getAge("10000020001001101111");
+        });
+    }
+
+    /**
+     * 测试获取年龄 - 长度不足
+     */
+    @Test
+    @DisplayName("获取年龄 - 长度不足")
+    public void testGetAge4() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            userService.getAge("100000200010011");
+        });
+    }
+
+}
+
+```
+
+我们也可以利用 IDEA 中的 AI 插件，基于 AI 帮助我们快速生成测试代码。
+
+### 5.6 依赖范围
+
+依赖的 jar 包，默认情况下，可以在任何地方使用：在 main 目录下，可以使用，在 test 目录下，也可以使用。
+
+在 Maven 中，如何希望限制依赖的使用范围，可以通过 `<scope>...</scope>` 设置其作用范围。
+
+作用范围：
+* 主程序范围有效（main 文件夹范围内）。
+* 测试程序范围有效（test 文件夹范围内）。
+* 是否参与打包运行（package 指令范围内）。
+
+可以在 pom.xml 中配置 `<scope></scope>`  属性来控制依赖范围：
+![在 pom.xml 中进行配置以控制依赖范围](./images/03_在pom.xml中进行配置以控制依赖范围.png "在 pom.xml 中进行配置以控制依赖范围")
+
+如果对 JUnit 单元测试的依赖设置 `scope` 为 `test`，就代表该依赖只是在测试程序中可以使用，在主程序中是无法使用的。所以我们会看到如下现象：
+![对 JUnit 单元测试的依赖设置 scope 为 test](./images/03_对JUnit单元测试的依赖设置scope为test.png "对 JUnit 单元测试的依赖设置 scope 为 test")
+
+如上图所示，给 JUnit 依赖通过 `scope` 标签 指定依赖的作用范围，那么这个依赖 就只能作用在测试环境，其他环境下不能使用。
+
+`scope` 的常见取值如下表所示：
+| scope 值 | 主程序 | 测试程序 | 打包（运行） | 范例 |
+| :--: | :--: | :--: | :--: | :--: |
+| `compile`（默认） | Y | Y | Y | log4j |
+| `test` | - | Y | - | junit |
+| `provided` | Y | Y | - | servlet-api |
+| `runtime` | - | Y | Y | jdbc 驱动 |
