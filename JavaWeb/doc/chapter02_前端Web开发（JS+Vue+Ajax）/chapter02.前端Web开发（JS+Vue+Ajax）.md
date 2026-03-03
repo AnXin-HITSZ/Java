@@ -2572,19 +2572,238 @@ axios.post('https://mock.apifox.cn/m1/3083103-0-default/emps/update', 'id=1').th
 
 具体代码实现如下：
 ```html
+<!-- 16.Vue-案例-员工列表（异步交互）.html -->
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 260px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; /* 边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: center; /* 左对齐 */
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: #b5b3b3; /* 灰色背景 */
+            color: white; /* 白色文字 */
+            text-align: center; /* 居中文本 */
+            padding: 10px 0; /* 上下内边距 */
+            margin-top: 30px;
+        }
+
+        #container {
+            width: 80%; /* 宽度为80% */
+            margin: 0 auto; /* 水平居中 */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <h1>Tlias智能学习辅助系统</h1>
+            <a href="#">退出登录</a>
+        </div>
+
+        <!-- 搜索表单区域 -->
+        <form class="search-form" action="/search" method="post">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" v-model="searchForm.name" placeholder="请输入姓名">
+
+            <label for="gender">性别：</label>
+            <select id="gender" name="gender" v-model="searchForm.gender">
+                <option value=""></option>
+                <option value="1">男</option>
+                <option value="2">女</option>
+            </select>
+
+            <label for="position">职位：</label>
+            <select id="position" name="position" v-model="searchForm.job">
+                <option value=""></option>
+                <option value="1">班主任</option>
+                <option value="2">讲师</option>
+                <option value="3">学工主管</option>
+                <option value="4">教研主管</option>
+                <option value="5">咨询师</option>
+            </select>
+
+            <button type="button" v-on:click="search">查询</button>
+            <button type="button" @click="clear">清空</button>
+        </form>
+
+        <!-- 表格展示区 -->
+        <table>
+            <!-- 表头 -->
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>头像</th>
+                    <th>职位</th>
+                    <th>入职日期</th>
+                    <th>最后操作时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+
+            <!-- 表格主体内容 -->
+            <tbody>
+                <tr v-for="(e, index) in empList" :key="e.id">
+                    <td>{{index + 1}}</td>
+                    <td>{{e.name}}</td>
+                    <td>{{e.gender == 1 ? '男' : '女'}}</td>
+                    <!-- 插值表达式是不能出现在标签内部的 -->
+                    <td><img class="avatar" v-bind:src="e.image" :alt="e.name"></td>
+                    
+                    <!-- v-if: 控制元素的显示与隐藏 -->
+                    <td>
+                        <span v-if="e.job == 1">班主任</span>
+                        <span v-else-if="e.job == 2">讲师</span>
+                        <span v-else-if="e.job == 3">学工主管</span>
+                        <span v-else-if="e.job == 4">教研主管</span>
+                        <span v-else-if="e.job == 5">咨询师</span>
+                        <span v-else>其他</span>
+                    </td>
+
+                    <!-- v-show: 控制元素的显示与隐藏 -->
+                    <!-- <td>
+                        <span v-show="e.job == 1">班主任</span>
+                        <span v-show="e.job == 2">讲师</span>
+                        <span v-show="e.job == 3">学工主管</span>
+                        <span v-show="e.job == 4">教研主管</span>
+                        <span v-show="e.job == 5">咨询师</span>
+                    </td> -->
+                    <td>{{e.entrydate}}</td>
+                    <td>{{e.updatetime}}</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 页脚版权区域 -->
+        <footer class="footer">
+            <p>江苏传智播客教育科技股份有限公司</p>
+            <p>版权所有 Copyright 2006-2024 All Rights Reserved</p>
+        </footer>
+    </div>
+    
+    <script src="js/axios.js"></script>
+    <script type="module">
+      import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+      createApp({
+        data() {
+          return {
+            searchForm: {   // 封装用户输入的查询条件
+                name: '',
+                gender: '',
+                job: ''
+            },
+            empList: []
+          }
+        },
+        // 方法
+        methods: {
+            async search() {
+                // 发送 Ajax 请求，获取数据
+                // axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`).then((result) => {
+                //     this.empList = result.data.data;
+                // });
+                // console.log('=================================');
+
+                let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`);
+                this.empList = result.data.data;
+            },
+            clear() {
+                // 清空表单项数据
+                this.searchForm = {name:'', gender:'', job:''};
+                this.search();
+            }
+        }
+      }).mount('#container');
+    </script>
+
+</body>
+</html>
 ```
+
+> 注意：
+>
+> 上述实现代码存在问题：当页面首次加载出来时，表格中的数据并不会随之一起加载出来；而是需要手动点击“查询”按钮之后，表格中的数据才会被加载出来。该问题将于《六、Vue 生命周期》中予以解决。
 
 如果使用 Axios 中提供的 `.then(function() {...}).catch(function() {...})` 这种回调函数的写法，会使得代码的可读性和维护性变差。而为了解决这个问题，我们可以使用两个关键字，分别是：`async`、`await`。
 
 可以通过 `async`、`await` 可以让异步变为同步操作。`async` 用来声明一个异步方法，`await` 用来等待异步任务执行。
 
+> 注意：
+>
+> `await` 关键字只在 `async` 函数内有效，`await` 关键字取代 `then` 函数，等待获取到请求成功的结果值。
+
 代码修改前：
 ```javascript
 search() {
-  // 基于 Axios 发起异步请求，请求 https://web-server.itheima.net/emps/list，根据条件查询员工列表
+  // 基于 Axios 发送异步请求，请求 https://web-server.itheima.net/emps/list，根据条件查询员工列表
   axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`).then(res => {
-    this.empList = res.data.data
+    this.empList = res.data.data;
   })
 },
 ```
@@ -2592,9 +2811,266 @@ search() {
 代码修改后：
 ```javascript
 async search() {
-  // 基于 Axios 发起异步请求，请求 https://web-server.itheima.net/emps/list，根据条件查询员工列表
-  constaxios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`).then(res => {
-    this.empList = res.data.data
-  })
+  // 基于 Axios 发送异步请求，请求 https://web-server.itheima.net/emps/list，根据条件查询员工列表
+  const result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`);
+  this.empList = result.data.data;
 },
 ```
+
+修改后，代码就变成同步操作了，一行一行地从前往后执行。在前端项目开发中，经常使用这两个关键字配合，使得代码地可读性和可维护性变高。
+
+## 六、Vue 生命周期
+
+### 6.1 介绍
+
+Vue 的生命周期：指的是 Vue 对象从创建到销毁的过程。
+
+Vue 的生命周期包含 8 个阶段，每触发一个生命周期事件，会自动执行一个生命周期方法，这些生命周期方法也被称为钩子方法。其完整的生命周期如下表所示：
+| 状态 | 阶段周期 |
+| :--: | :--: |
+| beforeCreate | 创建前 |
+| created | 创建后 |
+| beforeMount | 挂载前 |
+| mounted | 挂载完成 |
+| beforeUpdate | 更新前 |
+| update | 更新后 |
+| beforeDestroy | 销毁前 |
+| destroyed | 销毁后 |
+
+下图是 Vue 官网提供的从创建 Vue 到销毁 Vue 对象的整个过程及各个阶段对应的钩子函数：
+![从创建 Vue 到销毁 Vue 对象的整个过程及各个阶段对应的钩子函数](./images/02_从创建Vue到销毁Vue对象的整个过程及各个阶段对应的钩子函数.png "从创建 Vue 到销毁 Vue 对象的整个过程及各个阶段对应的钩子函数")
+
+其中我们需要重点关注的是 mounted，其他的我们了解即可。
+
+mounted：挂载完成，Vue 初始化成功，HTML 页面渲染成功。**以后我们一般用于页面初始化自动地 Ajax 请求后台数据。**
+
+### 6.2 案例完善
+
+要想在页面加载完毕就查询出员工列表，可以在 `mounted` 钩子函数中发送异步请求查询员工数据。
+
+具体代码如下：
+```html
+<!-- 16.Vue-案例-员工列表（异步交互）.html -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Tlias智能学习辅助系统</title>
+    <style>
+        /* 导航栏样式 */
+        .navbar {
+            background-color: #b5b3b3; /* 灰色背景 */
+            
+            display: flex; /* flex弹性布局 */
+            justify-content: space-between; /* 左右对齐 */
+
+            padding: 10px; /* 内边距 */
+            align-items: center; /* 垂直居中 */
+        }
+        .navbar h1 {
+            margin: 0; /* 移除默认的上下外边距 */
+            font-weight: bold; /* 加粗 */
+            color: white;
+            /* 设置字体为楷体 */
+            font-family: "楷体";
+        }
+        .navbar a {
+            color: white; /* 链接颜色为白色 */
+            text-decoration: none; /* 移除下划线 */
+        }
+
+        /* 搜索表单样式 */
+        .search-form {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 10px; /* 控件之间的间距 */
+            margin: 20px 0;
+        }
+        .search-form input[type="text"], .search-form select {
+            padding: 5px; /* 输入框内边距 */
+            width: 260px; /* 宽度 */
+        }
+        .search-form button {
+            padding: 5px 15px; /* 按钮内边距 */
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; /* 边框 */
+            padding: 8px; /* 单元格内边距 */
+            text-align: center; /* 左对齐 */
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            background-color: #b5b3b3; /* 灰色背景 */
+            color: white; /* 白色文字 */
+            text-align: center; /* 居中文本 */
+            padding: 10px 0; /* 上下内边距 */
+            margin-top: 30px;
+        }
+
+        #container {
+            width: 80%; /* 宽度为80% */
+            margin: 0 auto; /* 水平居中 */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- 顶部导航栏 -->
+        <div class="navbar">
+            <h1>Tlias智能学习辅助系统</h1>
+            <a href="#">退出登录</a>
+        </div>
+
+        <!-- 搜索表单区域 -->
+        <form class="search-form" action="/search" method="post">
+            <label for="name">姓名：</label>
+            <input type="text" id="name" name="name" v-model="searchForm.name" placeholder="请输入姓名">
+
+            <label for="gender">性别：</label>
+            <select id="gender" name="gender" v-model="searchForm.gender">
+                <option value=""></option>
+                <option value="1">男</option>
+                <option value="2">女</option>
+            </select>
+
+            <label for="position">职位：</label>
+            <select id="position" name="position" v-model="searchForm.job">
+                <option value=""></option>
+                <option value="1">班主任</option>
+                <option value="2">讲师</option>
+                <option value="3">学工主管</option>
+                <option value="4">教研主管</option>
+                <option value="5">咨询师</option>
+            </select>
+
+            <button type="button" v-on:click="search">查询</button>
+            <button type="button" @click="clear">清空</button>
+        </form>
+
+        <!-- 表格展示区 -->
+        <table>
+            <!-- 表头 -->
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>头像</th>
+                    <th>职位</th>
+                    <th>入职日期</th>
+                    <th>最后操作时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+
+            <!-- 表格主体内容 -->
+            <tbody>
+                <tr v-for="(e, index) in empList" :key="e.id">
+                    <td>{{index + 1}}</td>
+                    <td>{{e.name}}</td>
+                    <td>{{e.gender == 1 ? '男' : '女'}}</td>
+                    <!-- 插值表达式是不能出现在标签内部的 -->
+                    <td><img class="avatar" v-bind:src="e.image" :alt="e.name"></td>
+                    
+                    <!-- v-if: 控制元素的显示与隐藏 -->
+                    <td>
+                        <span v-if="e.job == 1">班主任</span>
+                        <span v-else-if="e.job == 2">讲师</span>
+                        <span v-else-if="e.job == 3">学工主管</span>
+                        <span v-else-if="e.job == 4">教研主管</span>
+                        <span v-else-if="e.job == 5">咨询师</span>
+                        <span v-else>其他</span>
+                    </td>
+
+                    <!-- v-show: 控制元素的显示与隐藏 -->
+                    <!-- <td>
+                        <span v-show="e.job == 1">班主任</span>
+                        <span v-show="e.job == 2">讲师</span>
+                        <span v-show="e.job == 3">学工主管</span>
+                        <span v-show="e.job == 4">教研主管</span>
+                        <span v-show="e.job == 5">咨询师</span>
+                    </td> -->
+                    <td>{{e.entrydate}}</td>
+                    <td>{{e.updatetime}}</td>
+                    <td class="action-buttons">
+                        <button type="button">编辑</button>
+                        <button type="button">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 页脚版权区域 -->
+        <footer class="footer">
+            <p>江苏传智播客教育科技股份有限公司</p>
+            <p>版权所有 Copyright 2006-2024 All Rights Reserved</p>
+        </footer>
+    </div>
+    
+    <script src="js/axios.js"></script>
+    <script type="module">
+      import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+
+      createApp({
+        data() {
+          return {
+            searchForm: {   // 封装用户输入的查询条件
+                name: '',
+                gender: '',
+                job: ''
+            },
+            empList: []
+          }
+        },
+        // 方法
+        methods: {
+            async search() {
+                // 发送 Ajax 请求，获取数据
+                // axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`).then((result) => {
+                //     this.empList = result.data.data;
+                // });
+                // console.log('=================================');
+
+                let result = await axios.get(`https://web-server.itheima.net/emps/list?name=${this.searchForm.name}&gender=${this.searchForm.gender}&job=${this.searchForm.job}`);
+                this.empList = result.data.data;
+            },
+            clear() {
+                // 清空表单项数据
+                this.searchForm = {name:'', gender:'', job:''};
+                this.search();
+            }
+        },
+        // 钩子函数
+        mounted() {
+            // 页面加载完成之后，发送 Ajax 请求，获取数据
+            this.search();
+        },
+      }).mount('#container');
+    </script>
+
+</body>
+</html>
+```
+
+到此，员工列表查询的功能我们就已经完成了。关于 Vue 的其他高级用法，我们将在后面的前端 Web 实战中来详细讲解。
+
+## 七、附录
+
+Chrome 浏览器插件地址：[Chrome 浏览器插件地址](https://chrome.zzzmh.cn/#/index "Chrome 浏览器插件地址")。
