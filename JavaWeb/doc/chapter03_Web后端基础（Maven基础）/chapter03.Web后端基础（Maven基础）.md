@@ -1003,3 +1003,26 @@ public class UserService2Test {
 | `test` | - | Y | - | junit |
 | `provided` | Y | Y | - | servlet-api |
 | `runtime` | - | Y | Y | jdbc 驱动 |
+
+## 六、Maven 常见问题
+
+![Maven 常见问题](./images/03_Maven常见问题.png "Maven 常见问题")
+
+**问题现象：** Maven 项目中添加的依赖，未正确下载，造成右侧 Maven 面板中的依赖报红，再次 reload 重新加载也不会再下载。
+
+**产生原因：** 由于网络原因依赖没有下载完整导致的，在 Maven 仓库中生成了 **xxx.lastUpdated** 文件，该文件不删除，不会再重新下载。
+
+![问题产生原因](./images/03_问题产生原因.png "问题产生原因")
+
+**解决方案：**
+1. 根据 Maven 依赖的坐标，找到仓库中对应的 xxx.lastUpdated 文件，删除；删除之后重新加载项目即可。
+2. 通过命令（`del /s*.lastUpdated`）批量递归删除指定目录下的 xxx.lastUpdated 文件，删除之后重新加载项目即可。
+3. 重新加载依赖，依赖下载了之后，Maven 面板可能还会报红，此时可以关闭 IDEA，重新打开 IDEA 加载此项目即可。
+
+以下提供 del.bat 批处理脚本，拷贝到 Maven 的安装目录下（Maven 仓库所在目录，不一定在 Maven 安装目录），双击这个文件，就可以递归删除该目录下所有的 xxx.lastUpdated 文件。放置目录如下所示：
+![批处理脚本放置目录示意图](./images/03_批处理脚本放置目录示意图.png "批处理脚本放置目录示意图")
+
+del.bat 批处理脚本：
+```bat
+del /s *.lastUpdated
+```
