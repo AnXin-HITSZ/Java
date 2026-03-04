@@ -1,0 +1,30 @@
+package com.anxin_hitsz.dao.impl;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.dao.UserDao;
+import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * ClassName: UserDaoImpl
+ * Package: com.anxin_hitsz.dao.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:21
+ * @Version 1.0
+ */
+@Component  // 将当前类交给 IOC 容器管理
+public class UserDaoImpl implements UserDao {
+    @Override
+    public List<String> findAll() {
+        // 1. 加载并读取 user.txt 文件，获取用户数据
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
+        ArrayList<String> lines = IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>());
+        return lines;
+    }
+}

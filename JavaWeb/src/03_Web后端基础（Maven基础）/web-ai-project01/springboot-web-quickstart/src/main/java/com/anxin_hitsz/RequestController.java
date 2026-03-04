@@ -22,6 +22,8 @@ public class RequestController {
         String method = request.getMethod();    // GET
         System.out.println("请求方式：" + method);
 
+//        int i = 1 / 0;    // 响应状态码：500
+
         // 2. 获取请求 url 地址
         String url = request.getRequestURI().toString();    // http://localhost:8080/request
         System.out.println("请求 url 地址：" + url);
