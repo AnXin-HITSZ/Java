@@ -258,12 +258,12 @@ drop database db03;
 
 语法格式：
 ```sql
-create table 表名 (
-    字段1 字段1类型 [约束] [comment 字段1注释],
-    字段2 字段2类型 [约束] [comment 字段2注释],
+create table 表名(
+    字段1 字段1类型 [约束] [comment '字段1注释'],
+    字段2 字段2类型 [约束] [comment '字段2注释'],
     ...
-    字段n 字段n类型 [约束] [comment 字段n注释]
-) [comment 表注释];
+    字段n 字段n类型 [约束] [comment '字段n注释']
+) [comment '表注释'];
 ```
 
 > 注意：
@@ -284,9 +284,410 @@ create table 表名 (
 
 在 MySQL 数据库当中，提供了以下 5 种约束：
 | 约束 | 描述 | 关键字 |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| :--: | :--: | :--: |
+| 非空约束 | 限制该字段值不能为 null | `not null` |
+| 唯一约束 | 保证字段的所有数据都是唯一的、不重复的 | `unique` |
+| 主键约束 | 主键是一行数据的唯一标识，要求非空且唯一 | `primary key` |
+| 默认约束 | 保存数据时，如果未指定该字段值，则采用默认值 | `default` |
+| 外键约束 | 让两张表的数据建立连接，保证数据的一致性和完整性 | `foreign key` |
+
+> 注意：
+>
+> 约束是作用于表中字段上的，可以在创建表 / 修改表的时候添加约束。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- -----------------------> DDL 表操作 <-----------------------
+-- 创建表（约束）
+create table user(
+    id int primary key comment 'ID，唯一标识',  -- 主键约束
+    username varchar(50) not null unique comment '用户名',    -- 非空 唯一
+    name varchar(10) not null comment '姓名',    -- 非空
+    age int comment '年龄',
+    gender char(1) default '男' comment '性别'    -- 默认
+) comment '用户信息表';
+```
+
+MySQL 提供关键字：`auto_increment`（自动增长）。
+
+主键自增 - `auto_increment`：
+* 每次插入新的行记录时，数据库自动生成 id 字段（主键）下的值。
+* 具有 `auto_increment` 的数据列是一个正数序列开始增长（从 1 开始自增）。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- -----------------------> DDL 表操作 <-----------------------
+-- 创建表（约束）
+create table user(
+    id int primary key auto_increment comment 'ID，唯一标识',  -- 主键约束 auto_increment
+    username varchar(50) not null unique comment '用户名',    -- 非空 唯一
+    name varchar(10) not null comment '姓名',    -- 非空
+    age int comment '年龄',
+    gender char(1) default '男' comment '性别'    -- 默认
+) comment '用户信息表';
+```
+
+##### 3.1.3.3 数据类型
+
+MySQL 中的数据类型有很多，主要分为三类：数值类型、字符串类型、日期时间类型。
+
+###### 3.1.3.3.1 数值类型
+
+| 类型 | 大小 | 有符号（SIGNED）范围 | 无符号（UNSIGNED）范围 | 描述 | 备注 |
+| :--: | :--: | :--: | :--: | :--: | :--: |
+| `TINYINT` | 1 byte | [-128, 127] | [0, 255] | 小整数值 | - |
+| `SMALLINT` | 2 bytes | [-32768, 32767] | [0, 65535] | 大整数值 | - |
+| `MEDIUMINT` | 3 bytes | [-8388608, 8388607] | [0, 16777215] | 大整数值 | - |
+| `INT` / `INTEGER` | 4 bytes | [-2147483648, 2147483647] | [0, 4294967295] | 大整数值 | - |
+| `BIGINT` | 8 bytes | [-2^63, 2^63 - 1] | [0, 2^64 - 1] | 极大整数值 | - |
+| `FLOAT` | 4 bytes | [-3.402823466 E+38, 3.402823466351 E+38] | 0 和 [1.175494351 E-38, 3.402823466 E+38] | 单精度浮点数值 | `float(5, 2)`：`5` 表示整个数字长度，`2` 表示小数位个数 |
+| `DOUBLE` | 8 bytes | [-1.7976931348623157 E+308, 1.7976931348623157 E+308] | 0 和 [2.2250738585072014 E-308, 1.7976931348623157 E+308] | 双精度浮点数值 | `double(5, 2)`：`5` 表示整个数字长度，`2` 表示小数位个数 |
+| `DECIMAL` | - | 依赖于 M（精度）和 D（标度）的值 | 依赖于 M（精度）和 D（标度）的值 | 小数值（精确定点数） | `decimal(5, 2)`：`5` 表示整个数字长度，`2` 表示小数位个数 |
+
+数值类型的选取原则：在满足业务需求的前提下，尽可能选择占用磁盘空间小的数据类型。
+
+示例代码：
+```sql
+-- 年龄字段 -> 不会出现负数，而且人的年龄不会太大
+  age tinyint unsigned
+
+-- ID 字段 -> 不会出现负数，而且 ID 字段可能较大
+  id int unsigned
+
+-- 分数 -> 总分 100 分，最多出现一位小数
+  score double(4, 1)
+```
+
+###### 3.1.3.3.2 字符串类型
+
+| 类型 | 大小 | 描述 |
+| :--: | :--: | :--: |
+| `CHAR` | 0-255 bytes | 定长字符串（需要指定长度） |
+| `VARCHAR` | 0-65535 bytes | 变长字符串（需要指定长度） |
+| `TINYBLOB` | 0-255 bytes | 不超过 255 个字符的二进制数据 |
+| `TINYTEXT` | 0-255 bytes | 短文本字符串 |
+| `BLOB` | 0-65535 bytes | 二进制形式的长文本数据 |
+| `TEXT` | 0-65535 bytes | 长文本数据 |
+| `MEDIUMBLOB` | 0-16777215 bytes | 二进制形式的中等长度文本数据 |
+| `MEDIUMTEXT` | 0-16777215 bytes | 中等长度文本数据 |
+| `LONGBLOB` | 0-4294967295 bytes | 二进制形式的极大文本数据 |
+| `LONGTEXT` | 0-4294967295 bytes | 极大文本数据 |
+
+`CHAR` 与 `VARCHAR` 都可以描述字符串。`CHAR` 是定长字符串，指定长度多长，就占用多少个字符，和字段值的长度无关；而 `VARCHAR` 是变长字符串，指定的长度为最大占用长度。相对来说，`CHAR` 的性能会更高些，但浪费磁盘空间；而 `VARCHAR` 节约磁盘空间，但性能略低。
+
+示例代码：
+```sql
+-- 定长字符串（需要指定长度）
+  char(10)  -- 固定占用 10 个字符空间
+
+-- 变长字符串（需要指定长度）
+  varchar(10) -- 最多占用 10 个字符空间
+
+-- 示例：
+  username varchar(50)
+  idcard  char(18)
+  phone char(11)
+```
+
+###### 3.1.3.3.3 日期时间类型
+
+| 类型 | 大小 | 范围 | 格式 | 描述 |
+| :--: | :--: | :--: | :--: | :--: |
+| `DATE` | 3 | 1000-01-01 至 9999-12-31 | YYYY-MM-DD | 日期值 |
+| `TIME` | 3 | -838:59:59 至 838:59:59 | HH:MM:SS | 时间值或持续时间 |
+| `YEAR` | 1 | 1901 至 2155 | YYYY | 年份值 |
+| `DATETIME` | 8 | 1000-01-01 00:00:00 至 9999-12-31 23:59:59 | YYYY-MM-DD HH:MM:SS | 混合日期和时间值 |
+| `TIMESTAMP` | 4 | 1970-01-01 00:00:01 至 2038-01-19 03:14:07 | YYYY-MM-DD HH:MM:SS | 混合日期和时间值，时间戳 |
+
+示例代码：
+```sql
+-- 示例：
+
+-- 生日字段
+  birthday date -- 生日只需要年月日
+
+-- 操作时间
+  operateTime datetime  -- 操作时间需要精确到时分秒
+```
+
+##### 3.1.3.4 表结构设计 - 案例
+
+**需求：** 根据产品原型 / 需求创建表（设计合理的数据类型、长度、约束）。
+
+**产品原型及需求如下：**
+
+1). 列表展示
+
+![表结构设计 - 案例 - 列表展示](./images/05_表结构设计-案例-列表展示.png "表结构设计 - 案例 - 列表展示")
+
+2). 新增员工
+
+![表结构设计 - 案例 - 新增员工](./images/05_表结构设计-案例-新增员工.png "表结构设计 - 案例 - 新增员工")
+
+3). 需求说明及字段限制
+
+![表结构设计 - 案例 - 需求说明及字段限制](./images/05_表结构设计-案例-需求说明及字段限制.png "表结构设计 - 案例 - 需求说明及字段限制")
+
+步骤：
+1. 阅读产品原型及需求文档，查看数据表涉及到哪些字段。
+2. 查看需求文档说明，确认各个字段的类型以及字段存储数据的长度限制。
+3. 在页面原型中描述的基础字段的基础上，再增加额外的基础字段。
+
+使用 SQL 创建表：
+```sql
+-- MySQL01.sql
+
+-- 案例：设计员工表 emp
+-- 基础字段：id - 主键；create_time - 创建时间；update_time - 修改时间
+create table emp(
+    id int unsigned primary key auto_increment comment 'ID：主键',
+    username varchar(20) not null unique comment '用户名',
+    password varchar(32) default '123456' comment '密码',
+    name varchar(10) not null comment '姓名',
+    gender tinyint unsigned not null comment '性别：1 - 男；2 - 女',
+    phone char(11) not null unique comment '手机号',
+    job tinyint unsigned comment '职位：1 - 班主任；2 - 讲师；3 - 学工主管；4 - 教研主管；5 - 咨询师',
+    salary int unsigned comment '薪资',
+    entry_date date comment '入职日期',
+    image varchar(255) comment '头像',
+    create_time datetime comment '创建时间',
+    update_time datetime comment '修改时间'
+) comment '员工表';
+```
+
+> 注意：
+>
+> 在定义数据库字段时，多个单词之间使用下划线 “`_`” 分隔。
+
+除了使用 SQL 语句创建表外，我们还可以借助于图形化界面来创建表结构，这种创建方式会更加直观、更加方便。
+
+> **设计表流程：**
+> 1. 阅读页面原型及需求文档。
+> 2. 基于页面原型和需求文档，确定原型字段（类型、长度限制、约束）。
+> 3. 再增加表设计所需要的业务基础字段（id、create_time、update_time）：
+>     * create_time：记录当前这条数据插入的时间。
+>     * update_time：记录当前这条数据最后更新的时间。
+
+##### 3.1.3.5 表操作 - 其他操作
+
+以下讲解表结构的查询、修改、删除操作。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- 查询当前数据库所有表
+show tables;
+
+-- 查看表结构
+desc emp;
+
+-- 查看建表语句
+show create table emp;
+
+-- 字段：添加字段 qq varchar(13)
+alter table emp add qq varchar(13) comment 'QQ 号码';
+
+-- 字段：修改字段类型 qq varchar(15)
+alter table emp modify qq varchar(15) comment 'QQ 号码';
+
+-- 字段：修改字段名 qq -> qq_num varchar(15)
+alter table emp change qq qq_num varchar(15) comment 'QQ 号码';
+
+-- 字段：删除字段 qq_num
+alter table emp drop column qq_num;
+
+-- 修改表名
+alter table emp rename to employee;
+
+-- 删除表
+drop table employee;
+```
+
+###### 3.1.3.5.1 查询数据库表
+
+语法格式：
+```sql
+-- 查询当前数据库的所有表
+show tables;
+
+-- 查看指定的表结构
+desc 表名;  -- 可以查看指定表的字段、字段的类型、是否可以为 null、是否存在 默认值等信息
+
+-- 查询指定表的建表语句
+show create table 表名;
+```
+
+###### 3.1.3.5.2 修改数据库表
+
+添加字段：
+```sql
+-- 添加字段
+alter table 表名 add 字段名 类型(长度) [comment '注释'] [约束];
+
+-- 例如：为 tb_emp 表添加字段 qq，字段类型为 varchar(11)
+alter table tb_emp add qq varchar(11) comment 'QQ 号码';
+```
+
+修改字段：
+```sql
+-- 修改字段类型
+alter table 表名 modify 字段名 新数据类型（长度）;
+-- 例如：修改 QQ 字段的字段类型，将其长度由 11 修改为 13
+alter table tb_emp modify qq varchar(13) comment 'QQ 号码';
+
+-- 修改字段名与字段类型
+alter table 表名 change 旧字段名 新字段名 类型(长度) [comment '注释'] [约束];
+-- 例如：修改 qq 字段名为 qq_num，字段类型 varchar(13)
+alter table tb_emp change qq qq_num varchar(13) comment 'QQ 号码';
+```
+
+删除字段：
+```sql
+-- 删除字段
+alter table 表名 drop column 字段名;
+
+-- 例如：删除 tb_emp 表中的 qq_num 字段
+alter table tb_emp drop column qq_num;
+```
+
+修改表名：
+```sql
+-- 修改表名
+rename table 表名 to 新表名;
+-- 或：
+alter table 表名 rename to 新表名;
+
+-- 例如：将当前的 emp 表的表名修改为 tb_emp
+rename table emp to tb_emp;
+-- 或：
+alter table emp rename to tb_emp;
+```
+
+###### 3.1.3.5.2 删除数据库表
+
+删除表结构：
+```sql
+-- 删除表
+drop table [if exists] 表名;
+
+-- 例如：如果 tb_emp 表存在，则删除 tb_emp 表
+drop table if exists tb_emp;  -- 在删除表时，表中的全部数据也会被删除
+```
+
+> 注意：
+>
+> 关于表结构的查看、修改、删除操作，工作中一般都是直接基于图形化界面操作。
+
+### 3.2 DML 语句
+
+DML 英文全称是 Data Manipulation Language（数据操作语言），用来对数据库中表的数据记录进行增、删、改操作。
+* 添加数据（`INSERT`）。
+* 修改数据（`UPDATE`）。
+* 删除数据（`DELETE`）。
+
+#### 3.2.1 增加（`insert`）
+
+向指定字段添加数据：
+```sql
+insert into 表名 (字段名1, 字段名2) values (值1, 值2);
+```
+
+全部字段添加数据：
+```sql
+insert into 表名 values (值1, 值2, ...);
+```
+
+批量添加数据（指定字段）：
+```sql
+insert into 表名 (字段名1, 字段名2) values (值1, 值2), (值1, 值2);
+```
+
+批量添加数据（全部字段）：
+```sql
+insert into 表名 values (值1, 值2, ...), (值1, 值2, ...);
+```
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- -----------------------> DML : 数据操作语言 <-----------------------
+-- DML : 插入数据 - insert
+-- 1. 为 emp 表的 username, password, name, gender, phone 字段插入值
+insert into emp (username, password, name, gender, phone) values ('songjiang', '12345678', '宋江', '1', '13300001111');
+
+-- insert into emp (username, password, name, gender, phone) values ('songjiang2songjiang222', '12345678', '宋江2', '1', '13300001117');
+
+-- 2. 为 emp 表的 所有字段插入值
+-- 方式 1：
+insert into emp (id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time)
+    values (null, 'linchong', '12345678', '林冲', '1', '13300001112', 1, 6000, '2020-01-01', '1.jpg', now(), now());
+-- 方式 2：
+insert into emp values (null, 'likui', '12345678', '李逵', '1', '13300001113', 1, 6000, '2020-01-01', '1.jpg', now(), now());
+
+-- 3. 批量为 emp 表的 username, password, name, gender, phone  字段插入数据
+insert into emp (username, password, name, gender, phone) values
+    ('ruanxiaoer', '12345678', '阮小二', '1', '13300001114'), ('ruanxiaowu', '12345678', '阮小五', '1', '13300001115');
+```
+
+> 注意：
+>
+> `insert` 操作的注意事项：
+> * 插入数据时，指定的字段顺序需要与值的顺序是一一对应的。
+> * 字符串和日期型数据应该包含在引号中（单引号、双引号都可以运行，但是 DataGrip 中建议使用单引号）。
+> * 插入的数据大小 / 长度，应该在字段的规定范围内。
+
+#### 3.2.2 修改（`update`）
+
+语法格式：
+```sql
+update 表名 set 字段名1 = 值1, 字段名2 = 值2, ... [where 条件];
+```
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- -----------------------> DML : 数据操作语言 <-----------------------
+-- DML : 更新数据 - update
+-- 1. 将 emp 表的ID为1员工 用户名更新为 'zhangsan', 姓名name字段更新为 '张三'
+update emp set username = 'zhangsan', name = '张三' where id = 1;
+
+-- 2. 将 emp 表的所有员工的入职日期更新为 '2010-01-01'
+update emp set entry_date = '2010-01-01';
+```
+
+> 注意：
+> * 修改语句的条件可以有，也可以没有；如果没有条件，则会修改整张表的所有数据。
+> * 在修改数据时，一般需要同时修改公共字段 update_time，将其修改为当前操作时间。
+> * 当进行修改全部数据操作时，会提示询问是否确认修改所有数据，直接点击 Execute 即可。
+
+#### 3.2.3 删除（`delete`）
+
+语法格式：
+```sql
+delete from 表名 [where 条件];
+```
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+-- -----------------------> DML : 数据操作语言 <-----------------------
+-- DML : 删除数据 - delete
+-- 1. 删除 emp 表中 ID为1的员工
+delete from emp where id = 1;
+
+-- 2. 删除 emp 表中的所有员工
+delete from emp;
+```
+
+> 注意：
+> * `delete` 语句的条件可以有，也可以没有；如果没有条件，则会删除整张表的所有数据。
+> * `delete` 语句不能删除某一个字段的值（可以使用 `update`，将该字段值置为 `null` 即可）。
+> * 当进行删除全部数据操作时，会提示询问是否确认删除所有数据，直接点击 Execute 即可。
