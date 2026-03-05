@@ -6,12 +6,6 @@
 
 ---
 
-> 课程内容：
-> * SpringBootWeb 入门。
-> * HTTP 协议。
-> * SpringBootWeb 案例。
-> * 分层解耦。
-
 前端页面资料可以部署在服务器上，然后打开浏览器就可以直接访问服务器上部署的前端页面了。
 
 ![前端页面资料的部署与访问](./images/04_前端页面资料的部署与访问.PNG "前端页面资料的部署与访问")
@@ -950,51 +944,12 @@ Service 中调用 Dao，也是类似的问题。
 
 ### 4.3 IOC&DI 入门
 
-1). 将 Service 及 Dao 层的实现类，交给 IOC 容器管理
-
-在实现类加上 `@Component` 注解，就代表把当前类产生的对象交给 IOC 容器管理。
-
-示例代码：
-```java
-
-```
-
-2). 为 Controller 及 Service 注入运行时所依赖的对象
+实现步骤：
+1. 将 Service 及 Dao 层的实现类，交给 IOC 容器管理。
+   * 在实现类加上 `@Component` 注解，就代表把当前类产生的对象交给 IOC 容器管理。
+2. 为 Controller 及 Service 注入运行时所依赖的对象。
 
 示例代码：
-```java
-
-```
-
-启动服务，运行测试。打开浏览器，地址栏直接访问：[访问地址](http://localhost:8080/user.html "访问地址")。
-
-依然正常访问，就说明入门程序完成了；且已经完成了层与层之间的解耦。
-
-### 4.4 IOC 详解
-
-通过 IOC 和 DI 的入门程序，我们已经基本了解了 IOC 和 DI 的基础操作。接下来，我们需要学习 IOC 控制反转和 DI 依赖注入的细节。
-
-#### 4.4.1 Bean 的声明
-
-前面我们提到 IOC 控制反转，就是将对象的控制权交给 Spring 的 IOC 容器，由 IOC 容器创建及管理对象。IOC 容器创建的对象称为 Bean 对象。
-
-在之前的入门案例中，要把某个对象交给 IOC 容器管理，需要在类上添加一个注解：`@Component`。
-
-> 注意：
->
-> 将一个类交给 IOC 容器管理时，`@Component` 是要加在实现类上，而非接口上。
-
-而 Spring 框架为了更好地标识 Web 应用程序开发当中 Bean 对象到底归属于哪一层，又提供了 `@Component` 的衍生注解：
-| 注解 | 说明 | 位置 |
-| :--: | :--: | :--: |
-| `@Component` | 声明 Bean 的基础注解 | 不属于以下三类时，用此注解 |
-| `@Controller` | `@Component` 的衍生注解 | 标注在控制层类上 |
-| `@Service` | `@Component` 的衍生注解 | 标注在业务层类上 |
-| `@Repository` | `@Component` 的衍生注解 | 标注在数据访问层类上（由于与 MyBatis 整合，因此不常使用） |
-
-那么此时，我们就可以使用 `@Service` 注解声明 Service 层的 Bean，使用 `@Repository` 注解声明 Dao 层的 Bean。
-
-代码实现如下。
 
 * Controller 层：
 
@@ -1148,6 +1103,246 @@ public class UserDaoImpl implements UserDao {
 
 ```
 
+启动服务，运行测试。打开浏览器，地址栏直接访问：[访问地址](http://localhost:8080/user.html "访问地址")。
+
+依然正常访问，就说明入门程序完成了；且已经完成了层与层之间的解耦。
+
+### 4.4 IOC 详解
+
+通过 IOC 和 DI 的入门程序，我们已经基本了解了 IOC 和 DI 的基础操作。接下来，我们需要学习 IOC 控制反转和 DI 依赖注入的细节。
+
+#### 4.4.1 Bean 的声明
+
+前面我们提到 IOC 控制反转，就是将对象的控制权交给 Spring 的 IOC 容器，由 IOC 容器创建及管理对象。IOC 容器创建的对象称为 Bean 对象。
+
+在之前的入门案例中，要把某个对象交给 IOC 容器管理，需要在类上添加一个注解：`@Component`。
+
+> 注意：
+>
+> 将一个类交给 IOC 容器管理时，`@Component` 是要加在实现类上，而非接口上。
+
+而 Spring 框架为了更好地标识 Web 应用程序开发当中 Bean 对象到底归属于哪一层，又提供了 `@Component` 的衍生注解：
+| 注解 | 说明 | 位置 |
+| :--: | :--: | :--: |
+| `@Component` | 声明 Bean 的基础注解 | 不属于以下三类时，用此注解 |
+| `@Controller` | `@Component` 的衍生注解 | 标注在控制层类上 |
+| `@Service` | `@Component` 的衍生注解 | 标注在业务层类上 |
+| `@Repository` | `@Component` 的衍生注解 | 标注在数据访问层类上（由于与 MyBatis 整合，因此不常使用） |
+
+那么此时，我们就可以使用 `@Service` 注解声明 Service 层的 Bean，使用 `@Repository` 注解声明 Dao 层的 Bean。
+
+代码实现如下。
+
+* Controller 层：
+
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    private UserService userService;
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
+* Service 层：
+
+```java
+/* service/UserService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.User;
+
+import java.util.List;
+
+/**
+ * ClassName: UserService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:21
+ * @Version 1.0
+ */
+public interface UserService {
+
+    /**
+     * 查询所有用户信息
+     */
+    public List<User> findAll();
+
+}
+
+
+/* service/impl/UserServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.dao.UserDao;
+import com.anxin_hitsz.dao.impl.UserDaoImpl;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+/**
+ * ClassName: UserServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:22
+ * @Version 1.0
+ */
+@Service
+//@Component  // 将当前类交给 IOC 容器管理
+public class UserServiceImpl implements UserService {
+
+    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    private UserDao userDao;
+
+    @Override
+    public List<User> findAll() {
+        // 1. 调用 Dao，获取数据
+        List<String> lines = userDao.findAll();
+
+        // 2. 解析用户信息，封装为 User 对象 -> list 集合
+        List<User> userList = lines.stream().map(line -> {
+            String[] parts = line.split(",");
+            Integer id = Integer.parseInt(parts[0]);
+            String username = parts[1];
+            String password = parts[2];
+            String name = parts[3];
+            Integer age = Integer.parseInt(parts[4]);
+            LocalDateTime updateTime = LocalDateTime.parse(parts[5], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            return new User(id, username, password, name, age, updateTime);
+        }).toList();
+
+        return userList;
+    }
+}
+
+```
+
+* Dao 层：
+
+```java
+/* dao/UserDao.java */
+
+package com.anxin_hitsz.dao;
+
+import com.anxin_hitsz.pojo.User;
+
+import java.util.List;
+
+/**
+ * ClassName: UserDao
+ * Package: com.anxin_hitsz.dao
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:20
+ * @Version 1.0
+ */
+public interface UserDao {
+
+    /**
+     * 加载用户数据
+     */
+    public List<String> findAll();
+
+}
+
+
+/* dao/impl/UserDaoImpl.java */
+
+package com.anxin_hitsz.dao.impl;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.dao.UserDao;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * ClassName: UserDaoImpl
+ * Package: com.anxin_hitsz.dao.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:21
+ * @Version 1.0
+ */
+@Repository//("userDao")
+//@Component  // 将当前类交给 IOC 容器管理
+public class UserDaoImpl implements UserDao {
+    @Override
+    public List<String> findAll() {
+        // 1. 加载并读取 user.txt 文件，获取用户数据
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("user.txt");
+        ArrayList<String> lines = IoUtil.readLines(in, StandardCharsets.UTF_8, new ArrayList<>());
+        return lines;
+    }
+}
+
+```
+
 > 注意：
 > 1. 声明 Bean 的时候，可以通过注解的 `value` 属性指定 Bean 的名字；如果没有指定，默认为类名首字母小写。
 > 2. 使用以上四个注解都可以声明 Bean，但是在 SpringBoot 集成 Web 开发中，声明控制器 Bean 只能用 `@Controller`。
@@ -1207,6 +1402,64 @@ public class UserController {
 
 缺点：隐藏了类之间的依赖关系，可能会破坏类的封装性。
 
+示例代码：
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    // 方式一：属性注入
+    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    private UserService userService;
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
 ##### 4.5.1.2 构造函数注入
 
 语法格式：
@@ -1233,6 +1486,71 @@ public class UserController {
 >
 > 如果只有一个构造函数，`@Autowired` 注解可以省略。（通常来说，也只有一个构造函数。）
 
+示例代码：
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    // 方式一：属性注入
+//    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+//    private UserService userService;
+
+    // 方式二：构造器注入
+    private final UserService userService;
+    //@Autowired    -> 如果当前类中只存在一个构造函数，@Autowired 可以省略
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
 ##### 4.5.1.3 setter 注入
 
 语法格式：
@@ -1258,6 +1576,348 @@ public class UserController {
 
 缺点：需要额外编写 setter 方法，增加了代码量。
 
+示例代码：
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    // 方式一：属性注入
+//    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+//    private UserService userService;
+
+    // 方式二：构造器注入
+//    private final UserService userService;
+//    //@Autowired    -> 如果当前类中只存在一个构造函数，@Autowired 可以省略
+//    public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    // 方式三：setter 注入
+    private UserService userService;
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
 #### 4.5.2 注意事项
 
 那么，如果在 IOC 容器中，存在多个相同类型的 Bean 对象，会出现什么情况呢？
+
+在下面的例子中，我们准备了两个 UserService 的实现类，并且都交给了 IOC 容器管理。代码如下：
+![准备两个 UserServer 的实现类并交给 IOC 容器管理](./images/04_准备两个UserServer的实现类并交给IOC容器管理.png "准备两个 UserServer 的实现类并交给 IOC 容器管理")
+
+此时，我们启动项目会发现，控制台报错了：
+![控制台报错](./images/04_控制台报错.png "控制台报错")
+
+出现错误的原因：在 Spring 的容器中，UserService 这个类型的 Bean 存在两个，框架不知道具体要注入哪个 Bean 使用，所以就报错了。
+
+如何解决上述问题呢？Spring 提供了以下 几种解决方案：
+* `@Primary`。
+* `@Qualifier`。
+* `@Resource`。
+
+##### 4.5.2.1 方案一：使用 `@Primary` 注解
+
+当存在多个相同类型的 Bean 注入时，加上 `@Primary` 注解，来确定默认的实现。
+
+语法格式：
+```java
+@Primary
+@Service
+public class UserServiceImpl implements UserService {
+    ...
+}
+```
+
+示例代码：
+```java
+/* service/impl/UserServiceImpl2.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.dao.UserDao;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+/**
+ * ClassName: UserServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 22:22
+ * @Version 1.0
+ */
+@Primary
+@Service
+//@Component  // 将当前类交给 IOC 容器管理
+public class UserServiceImpl2 implements UserService {
+
+    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    private UserDao userDao;
+
+    @Override
+    public List<User> findAll() {
+        // 1. 调用 Dao，获取数据
+        List<String> lines = userDao.findAll();
+
+        // 2. 解析用户信息，封装为 User 对象 -> list 集合
+        List<User> userList = lines.stream().map(line -> {
+            String[] parts = line.split(",");
+            Integer id = Integer.parseInt(parts[0]);
+            String username = parts[1];
+            String password = parts[2];
+            String name = parts[3];
+            Integer age = Integer.parseInt(parts[4]);
+            LocalDateTime updateTime = LocalDateTime.parse(parts[5], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            return new User(id + 200, username, password, name, age, updateTime);
+        }).toList();
+
+        return userList;
+    }
+}
+
+```
+
+##### 4.5.2.2 方案二：使用 `@Qualifier` 注解
+
+指定当前要注入的 Bean 对象：在 `@Qualifier` 的 `value` 属性中，指定注入的 Bean 的名称。
+
+`@Qualifier` 注解不能单独使用，必须配合 `@Autowired` 使用。
+
+语法格式：
+```java
+@RestController
+public class UserController {
+
+    @Qualifier("userServiceImpl")
+    @Autowired
+    private UserService userService;
+    ...
+}
+```
+
+示例代码：
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    // 方式一：属性注入
+    @Qualifier("userServiceImpl")
+    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    private UserService userService;
+
+    // 方式二：构造器注入
+//    private final UserService userService;
+//    //@Autowired    -> 如果当前类中只存在一个构造函数，@Autowired 可以省略
+//    public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    // 方式三：setter 注入
+//    private UserService userService;
+//    @Autowired
+//    public void setUserService(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
+##### 4.5.2.3 方案三：使用 `@Resource` 注解
+
+按照 Bean 的名称进行注入：通过 `name` 属性指定要注入的 Bean 名称。
+
+语法格式：
+```java
+@RestController
+public class UserController {
+
+    @Resource(name = "userServiceImpl")
+    private UserService userService;
+    ...
+}
+```
+
+示例代码：
+```java
+/* controller/UserController.java */
+
+package com.anxin_hitsz.controller;
+
+import cn.hutool.core.io.IoUtil;
+import com.anxin_hitsz.pojo.User;
+import com.anxin_hitsz.service.UserService;
+import com.anxin_hitsz.service.impl.UserServiceImpl;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * ClassName: UserController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/4 20:46
+ * @Version 1.0
+ */
+
+/**
+ * 用户信息 Controller
+ */
+@RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
+public class UserController {
+
+    // 方式一：属性注入
+    @Resource(name = "userServiceImpl2")
+    private UserService userService;
+
+    // 方式二：构造器注入
+//    private final UserService userService;
+//    //@Autowired    -> 如果当前类中只存在一个构造函数，@Autowired 可以省略
+//    public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    // 方式三：setter 注入
+//    private UserService userService;
+//    @Autowired
+//    public void setUserService(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    @RequestMapping("/list")
+    public List<User> list() throws Exception {
+        // 1. 调用 Service，获取数据
+        List<User> userList = userService.findAll();
+
+        // 2. 返回数据（JSON 格式）
+        return userList;
+    }
+
+}
+
+```
+
+> 面试题：
+>
+> `@Autowored` 与 `@Resource` 的区别：
+> * `@Autowired` 是 Spring 框架提供的注解，而 `@Resource` 是 JDK（JavaEE 规范）提供的注解。
+> * `@Autowired` 默认是按照类型注入，而 `@Resource` 是按照名称注入。

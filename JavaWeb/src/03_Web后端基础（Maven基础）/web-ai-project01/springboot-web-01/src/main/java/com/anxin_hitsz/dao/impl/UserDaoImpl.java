@@ -3,6 +3,7 @@ package com.anxin_hitsz.dao.impl;
 import cn.hutool.core.io.IoUtil;
 import com.anxin_hitsz.dao.UserDao;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +19,8 @@ import java.util.List;
  * @Create 2026/3/4 22:21
  * @Version 1.0
  */
-@Component  // 将当前类交给 IOC 容器管理
+@Repository//("userDao")
+//@Component  // 将当前类交给 IOC 容器管理
 public class UserDaoImpl implements UserDao {
     @Override
     public List<String> findAll() {

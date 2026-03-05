@@ -4,7 +4,9 @@ import cn.hutool.core.io.IoUtil;
 import com.anxin_hitsz.pojo.User;
 import com.anxin_hitsz.service.UserService;
 import com.anxin_hitsz.service.impl.UserServiceImpl;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,8 +37,23 @@ import java.util.stream.Collectors;
 @RestController // @ResponseBody - 作用：将 Controller 的返回值直接作为响应体的数据直接响应；如果返回值是对象 / 集合 -> JSON 后响应
 public class UserController {
 
-    @Autowired  // 应用程序运行时，会自动地查询该类型的 Bean 对象，并赋值给该成员变量
+    // 方式一：属性注入
+    @Resource(name = "userServiceImpl2")
     private UserService userService;
+
+    // 方式二：构造器注入
+//    private final UserService userService;
+//    //@Autowired    -> 如果当前类中只存在一个构造函数，@Autowired 可以省略
+//    public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+
+    // 方式三：setter 注入
+//    private UserService userService;
+//    @Autowired
+//    public void setUserService(UserService userService) {
+//        this.userService = userService;
+//    }
 
     @RequestMapping("/list")
     public List<User> list() throws Exception {
