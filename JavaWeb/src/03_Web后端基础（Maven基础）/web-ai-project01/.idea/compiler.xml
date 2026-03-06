@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -9,6 +10,7 @@
         <module name="maven-project01" />
         <module name="maven-project02" />
         <module name="maven-project03" />
+        <module name="jdbc-demo" />
         <module name="springboot-web-quickstart" />
       </profile>
       <profile name="Annotation profile for springboot-web-01" enabled="true">

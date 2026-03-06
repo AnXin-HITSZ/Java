@@ -646,7 +646,7 @@ insert into emp (username, password, name, gender, phone) values
 
 语法格式：
 ```sql
-update 表名 set 字段名1 = 值1, 字段名2 = 值2, ... [where 条件];
+update 表名 set 字段名1 = 值1, 字段名2 = 值2[, ...] [where 条件];
 ```
 
 示例代码：
@@ -691,3 +691,342 @@ delete from emp;
 > * `delete` 语句的条件可以有，也可以没有；如果没有条件，则会删除整张表的所有数据。
 > * `delete` 语句不能删除某一个字段的值（可以使用 `update`，将该字段值置为 `null` 即可）。
 > * 当进行删除全部数据操作时，会提示询问是否确认删除所有数据，直接点击 Execute 即可。
+
+### 3.3 DQL 语句
+
+#### 3.3.1 介绍
+
+DQL 英文全称是 Data Query Language（数据查询语言），用来查询数据库表中的记录。
+
+查询关键字：`SELECT`。
+
+#### 3.3.2 语法
+
+DQL 查询语句，语法格式如下：
+```sql
+SELECT
+  字段列表
+FROM
+  表名列表
+WHERE
+  条件列表
+GROUP BY
+  分组字段列表
+HAVING
+  分组后条件列表
+ORDER BY
+  排序字段列表
+LIMIT
+  分页参数;
+```
+
+将上面的完整语法拆分为以下部分学习：
+* 基本查询（不带任何条件）。
+* 条件查询（`where`）。
+* 分组查询（`group by`）。
+* 排序查询（`order by`）。
+* 分页查询（`limit`）。
+
+#### 3.3.3 基本查询
+
+在基本查询的 DQL 语句中，不带任何的查询条件。
+
+语法格式：
+
+* 查询多个字段：
+
+```sql
+select 字段1, 字段2, 字段3 from 表名;
+```
+
+* 查询所有字段（通配符）：
+
+```sql
+select * from 表名;
+```
+
+> 注意：
+>
+> `*` 号代表查询所有字段，在实际开发中尽量少用（不直观、影响效率）。
+
+* 为查询字段设置别名，`as` 关键字可以省略：
+
+```sql
+select 字段1 [as 别名1], 字段2 [as 别名2] from 表名;
+```
+
+> 注意：
+> 
+> 此处的“`别名`”可以不使用引号引起；但当“`别名`”中间存在空格时，必须使用引号引起。
+
+* 去除重复记录：
+
+```sql
+select distinct 字段列表 from 表名;
+```
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 基本查询 ======================
+-- 1. 查询指定字段 name、entry_date 并返回
+select name, entry_date from emp;
+
+-- 2. 查询返回所有字段
+-- 方式 1：推荐
+select id, username, password, name, gender, phone, job, salary, entry_date, image, create_time, update_time from emp;
+-- 方式 2：不推荐
+select * from emp;
+
+-- 3. 查询所有员工的 name、entry_date，并起别名（姓名、入职日期）
+select name as '姓名', entry_date as '入职日期' from emp;
+
+select name 姓名, entry_date 入职日期 from emp;
+
+-- 4. 查询已有的员工关联了哪几种职位（不要重复）
+select distinct job from emp;
+```
+
+#### 3.3.4 条件查询
+
+语法格式：
+```sql
+select 字段列表 from 表名 where 条件列表; -- 条件列表：意味着可以有多个条件
+```
+
+学习条件查询就是学习条件的构建方式，而在 SQL 语句当中，构造条件的运算符分为两类：
+* 比较运算符。
+* 逻辑运算符。
+
+常用的比较运算符如下：
+| 比较运算符 | 功能 |
+| :--: | :--: |
+| `>` | 大于 |
+| `>=` | 大于等于 |
+| `<` | 小于 |
+| `<=` | 小于等于 |
+| `=` | 等于 |
+| `<>` 或 `!=` | 不等于 |
+| `between ... and ...` | 在某个范围之内（含最小、最大值） |
+| `in(...)` | 在 `in` 之后的列表中的值，多选一 |
+| `like 占位符` | 模糊匹配（`_` 匹配单个字符，`%` 匹配任意个字符） |
+| `is null` | 是 `null` |
+
+常用的逻辑运算符如下：
+| 逻辑运算符 | 功能 |
+| :--: | :--: |
+| `and` 或 `&&` | 并且（多个条件同时成立） |
+| `or` 或 `\|\|` | 或者（多个条件任意一个成立） |
+| `not` 或 `!` | 非（即：不是） |
+
+> 注意：
+>
+> 查询为 `null` 的数据时，不能使用 `= null` 或 `!= null`，需要使用 `is null` 或 `is not null`。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 条件查询 ======================
+-- 1. 查询 姓名 为 柴进 的员工
+select * from emp where name = '柴进';
+
+-- 2. 查询 薪资小于等于5000 的员工信息
+select * from emp where salary <= 5000;
+
+-- 3. 查询 没有分配职位 的员工信息
+select * from emp where job is null;
+
+-- 4. 查询 有职位 的员工信息
+select * from emp where job is not null;
+
+-- 5. 查询 密码不等于 '123456' 的员工信息
+select * from emp where password != '123456';
+
+select * from emp where password <> '123456';
+
+-- 6. 查询 入职日期 在 '2000-01-01'（包含）到 '2010-01-01'（包含）之间的员工信息
+select * from emp where entry_date between '2000-01-01' and '2010-01-01';
+
+-- select * from emp where entry_date between '最小值' and '最大值';
+
+-- 7. 查询 入职时间 在 '2000-01-01'（包含）到 '2010-01-01'（包含）之间 且 性别为女 的员工信息
+select * from emp where entry_date between '2000-01-01' and '2010-01-01' and gender = 2;
+
+select * from emp where (entry_date between '2000-01-01' and '2010-01-01') and gender = 2;
+
+-- 8. 查询 职位是 2（讲师）, 3（学工主管）, 4（教研主管）的员工信息
+select * from emp where job = 2 or job = 3 or job = 4;
+
+select * from emp where job in (2, 3, 4);
+
+-- 9. 查询 姓名 为两个字的员工信息（_：单个字符；%：任意个字符）
+select * from emp where name like '__';
+
+-- 10. 查询 姓 '李' 的员工信息
+select * from emp where name like '李%';
+
+-- 11. 查询 姓名中包含 '二' 的员工信息
+select * from emp where name like '%二%';
+```
+
+#### 3.3.5 聚合函数
+
+之前我们做的查询都是横向查询，即根据条件一行一行地进行判断。而使用聚合函数查询为纵向查询，是对一列的值进行计算，然后返回一个结果值（即将一列数据作为一个整体，进行纵向计算）。
+
+常用聚合函数：
+| 函数 | 功能 | 说明 |
+| :--: | :--: | :--: |
+| `count` | 统计数量 | 按照列去统计有多少行数据；在根据指定的列统计的时候，如果这一列中有 `null` 的行，该行不会被统计在其中 |
+| `max` | 最大值 | 计算指定列的最大值 |
+| `min` | 最小值 | 计算指定列的最小值 |
+| `avg` | 平均值 | 计算指定列的平均值 |
+| `sum` | 求和 | 计算指定列的数值和；如果不是数值类型，那么计算结果为 `0` |
+
+> 注意：
+>
+> * 聚合函数会忽略空值，对 `null` 值不作为统计。（即：null 值不参与所有聚合函数的运算。）
+> * 统计数量可以使用：`count(*)`、`count(字段)`、`count(常量)`，推荐使用 `count(*)`。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 分组查询 ======================
+-- 聚合函数
+-- 注意：所有的聚合函数不参与 null 的统计
+
+-- 1. 统计该企业员工数量 - count
+-- count(字段)
+select count(id) from emp;
+
+-- count(*)：推荐
+select count(*) from emp;
+
+-- count(常量)：推荐
+select count(1) from emp;
+
+-- 2. 统计该企业员工的平均薪资 - avg
+select avg(salary) from emp;
+
+-- 3. 统计该企业员工的最低薪资 - min
+select min(salary) from emp;
+
+-- 4. 统计该企业员工的最高薪资 - max
+select max(salary) from emp;
+
+-- 5. 统计该企业每月要给员工发放的薪资总额（薪资之和） - sum
+select sum(salary) from emp;
+```
+
+#### 3.3.6 分组查询
+
+分组：按照某一列或者某几列，把相同的数据进行合并输出。
+* 分组其实就是按列进行分类（指定列下相同的数据归为一类），然后可以对分类完的数据进行合并计算。
+* 分组查询通常会使用聚合函数进行计算。
+
+语法格式：
+```sql
+select 字段列表 from 表名 [where 条件] group by 分组字段名 [having 分组后过滤条件];
+```
+
+> 注意：
+> * 分组之后，查询的字段一般为聚合函数和分组字段，查询其他字段无任何意义。
+> * 执行顺序：`where` -> 聚合函数 -> `having`。
+
+> 面试题：
+>
+> `where` 与 `having` 的区别：
+> * 执行时机不同：`where` 是分组之前进行过滤，不满足 `where` 条件，不参与分组；而 `having` 是分组之后对结果进行过滤。
+> * 判断条件不同：`where` 不能对聚合函数进行判断，而 `having` 可以。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 分组查询 ======================
+-- 分组
+-- 注意：分组之后，select 后的字段列表不能随意书写，能写的一般是 分组字段 + 聚合函数
+
+-- 1. 根据性别分组，统计男性和女性员工的数量
+select gender, count(*) from emp group by gender;
+
+-- 2. 先查询入职时间在 '2015-01-01'（包含）以前的员工，并对结果根据职位分组，获取员工数量大于等于 2 的职位
+select job, count(*) from emp where entry_date <= '2015-01-01' group by job having count(*) >= 2;
+```
+
+#### 3.3.7 排序查询
+
+排序在日常开发中是非常常见的一个操作，有升序排序，也有降序排序。
+
+语法格式：
+```sql
+select 字段列表
+from 表名
+[where 条件列表]
+[group by 分组字段]
+order by 字段1 排序方式1[, 字段2, 排序方式2[, ...]];
+```
+* 排序方式：
+  * `ASC`：升序（默认值）。
+  * `DESC`：降序。
+
+> 注意：
+> * 如果是升序，可以不指定排序方式 `ASC`。
+> * 如果是多字段排序，当第一个字段值相同时，才会根据第二个字段进行排序。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 排序查询 ======================
+-- 1. 根据入职时间，对员工进行升序排序 - asc
+select * from emp order by entry_date asc;
+
+select * from emp order by entry_date;
+
+-- 2. 根据入职时间，对员工进行降序排序
+select * from emp order by entry_date desc;
+
+-- 3. 根据 入职时间 对公司的员工进行 升序排序；入职时间相同，再按照 更新时间 进行降序排序
+select * from emp order by entry_date asc, update_time desc;
+```
+
+#### 3.3.8 分页查询
+
+分页操作在业务系统开发时，也是非常常见的一个功能。
+
+语法格式：
+```sql
+select 字段列表 from 表名 limit 起始索引, 查询记录数;
+```
+
+> 注意：
+> * 起始索引从 0 开始。
+>   * 计算公式：$起始索引 = (查询页码 - 1) \times 每页显示记录数$。
+> * 分页查询是数据库的方言，不同的数据库有不同的实现，MySQL 中是 `LIMIT`。
+> * 如果查询的是第一页数据（即起始索引为 0），起始索引可以省略，直接简写为 `limit 条数`。
+
+示例代码：
+```sql
+-- MySQL01.sql
+
+--  =================== DQL: 分页查询 ======================
+-- 1. 从起始索引 0 开始查询员工数据，每页展示 5 条记录
+select * from emp limit 0, 5;
+
+select * from emp limit 5;
+
+-- 2. 查询 第 1 页 员工数据，每页展示 5 条记录
+select * from emp limit 0, 5;
+
+-- 3. 查询 第 2 页 员工数据，每页展示 5 条记录
+select * from emp limit 5, 5;
+
+-- 4. 查询 第 3 页 员工数据，每页展示 5 条记录
+select * from emp limit 10, 5;
+
+-- 页码
+-- 起始索引 = (页码 - 1) * 每页展示记录数
+```
