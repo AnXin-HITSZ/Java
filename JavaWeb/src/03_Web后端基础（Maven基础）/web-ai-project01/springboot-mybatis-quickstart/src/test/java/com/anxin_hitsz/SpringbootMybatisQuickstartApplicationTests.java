@@ -20,4 +20,40 @@ class SpringbootMybatisQuickstartApplicationTests {
         userList.forEach(System.out::println);
     }
 
+    /**
+     * 测试删除
+     */
+    @Test
+    public void testDeleteById() {
+        Integer cnt = userMapper.deleteById(4);
+        System.out.println("执行完毕，影响的记录数：" + cnt);
+    }
+
+    /**
+     * 测试新增
+     */
+    @Test
+    public void testInsert() {
+        User user = new User(null, "Tom", "123456", "汤姆", 20);
+        userMapper.insert(user);
+    }
+
+    /**
+     * 测试更新
+     */
+    @Test
+    public void testUpdate() {
+        User user = new User(1, "Tom", "123456", "汤姆", 20);
+        userMapper.update(user);
+    }
+
+    /**
+     * 测试查询
+     */
+    @Test
+    public void testFindByUsernameAndPassword() {
+        User user = userMapper.findByUsernameAndPassword("Tom", "123456");
+        System.out.println(user);
+    }
+
 }

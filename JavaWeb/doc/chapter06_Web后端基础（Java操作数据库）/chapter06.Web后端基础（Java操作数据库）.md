@@ -662,3 +662,401 @@ JDBC 程序的**缺点**：
         public List<User> list();
     }
     ```
+
+#### 3.1.4 数据库连接池
+
+在前面我们所讲解的 MyBatis 中，使用了数据库连接池技术，避免频繁地创建连接、销毁连接带来的资源浪费。下面我们就具体了解一下数据库连接池。
+
+##### 3.1.4.1 介绍
+
+1). 没有数据库连接池的情况
+
+![没有数据库连接池的情况](./images/06_没有数据库连接池的情况.png "没有数据库连接池的情况")
+
+客户端执行 SQL 语句：要先创建一个新的连接对象，然后执行 SQL 语句，SQL 语句执行后又需要关闭连接对象从而释放资源；每次执行 SQL 时都需要创建连接、销毁连接。这种频繁的重复创建销毁的过程比较耗费计算机的性能。
+
+2). 有数据库连接池的情况
+
+![有数据库连接池的情况](./images/06_有数据库连接池的情况.png "有数据库连接池的情况")
+
+数据库连接池是一个容器，负责分配、管理数据库连接（Connection）。
+* 程序在启动时，会在数据库连接池（容器）中，创建一定数量的 Connection 对象。
+
+允许应用程序重复使用一个现有的数据库连接，而不是再重新建立一个。
+* 客户端在执行 SQL 时，先从连接池中获取一个 Connection 对象，然后再执行 SQL 语句；SQL 语句执行完之后，释放 Connection 时就会把 Connection 对象归还给连接池（Connection 对象可以复用）。
+
+释放空闲时间超过最大空闲时间的连接，来避免因为没有释放连接而引起的数据库连接遗漏。
+* 客户端获取到 Connection 对象了，但是 Connection 对象并没有去访问数据库（处于空闲）；数据库连接池发现 Connection 对象的空闲时间 > 连接池中预设的最大空闲时间，此时数据库连接池就会自动释放掉这个连接对象。
+
+数据库连接池的好处：
+* 资源重用。
+* 提升系统响应速度。
+* 避免数据库连接遗漏。
+
+##### 3.1.4.2 产品
+
+官方（Sun）提供了数据库连接池的标准（`javax.sql.DataSource` 接口）。
+
+功能 - 获取连接：
+```java
+public Connection getConnection() throws SQLException;
+```
+
+第三方组织必须按照 `DataSource` 接口实现。
+
+常见的数据库连接池：C3P0、DBCP、Druid、Hikari（SpringBoot 默认）。
+
+现在使用更多的是：Hikari、Druid（性能更优越）。
+
+###### 3.1.4.2.1 Hikari（追光者）- 默认的连接池
+
+![Hikari - 默认的连接池](./images/06_Hikari-默认的连接池.png "Hikari - 默认的连接池")
+
+从控制台输出的日志，我们也可以看出，SpringBoot 底层默认使用的数据库连接池就是 Hikari。
+
+###### 3.1.4.2.2 Druid（德鲁伊）
+
+Druid 连接池是阿里巴巴开源的数据库连接池项目。
+
+功能强大，性能优秀，是 Java 语言最好的数据库连接池之一。
+
+如果我们想把默认的数据库连接池切换为 Druid 数据库连接池，只需要完成以下两步操作即可：
+> 参考官方地址：[Druid 官方地址](https://github.com/alibaba/druid/tree/master/druid-spring-boot-starter "Druid 官方地址")。
+
+1). 在 pom.xml 文件中引入依赖
+```xml
+<dependency>
+    <!-- Druid 连接池依赖 -->
+    <groupId>com.alibaba</groupId>
+    <artifactId>druid-spring-boot-starter</artifactId>
+    <version>1.2.19</version>
+</dependency>
+```
+2). 在 application.properties 中引入数据库连接配置
+```properties
+spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+spring.datasource.druid.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.druid.url=jdbc:mysql://localhost:3306/web
+spring.datasource.druid.username=root
+spring.datasource.druid.password=1234
+```
+
+#### 3.1.5 增删改查操作
+
+##### 3.1.5.1 删除
+
+需求：根据 ID 删除用户信息。
+
+SQL 语句：
+```sql
+delete from user where id = 5;
+```
+
+Mapper 接口方法：
+```java
+/**
+ * 根据 id 删除用户
+ */
+@Delete("delete from user where id  = #{id}")
+public void deleteById(Integer id);
+```
+
+在 MyBatis 中，我们可以通过参数占位符号 “`#{...}`” 来占位，在调用 `deleteById` 方法时，传递的参数值最终会替换占位符。
+
+DML 语句执行完毕，是有返回值的，我们可以为 Mapper 接口方法定义返回值来接收，如下所示：
+```java
+/**
+ * 根据 id 删除用户
+ */
+@Delete("delete from user where id = #{id}")
+public Integer deleteById(Integer id);
+```
+
+`Integer` 类型的返回值，表示 DML 语句执行完毕影响的记录数。
+
+MyBatis 提供的符号有两个，一个是 `#{...}`，另一个是 `${...}`。区别如下：
+| 符号 | 说明 | 场景 | 优缺点 |
+| :--: | :--: | :--: | :--: |
+| `#{...}` | 占位符：执行时，会将 `#{...}` 替换为 `?`，生成预编译 SQL | 参数值传递 | 安全、性能高（推荐） |
+| `${...}` | 拼接符：直接将参数拼接在 SQL 语句中，存在 SQL 注入问题 | 表名、字段名动态设置时使用 | 不安全、性能低 |
+
+> 注意：
+>
+> `${...}` 的使用场景示例：
+> ```java
+> @Select("select id, name, score from ${tableName} order by ${sortField}")
+> ```
+>
+> 尽管如此，`${...}` 仍然不常用。
+
+在企业项目开发中，强烈建议使用 `#{...}`。
+
+##### 3.1.5.2 新增
+
+需求：添加一个用户。
+
+SQL 语句：
+```sql
+insert into user (username, password, name, age) values('Tom', '123456', '汤姆', 20);
+```
+
+Mapper 接口：
+```java
+/**
+ * 添加用户
+ */
+@Insert("insert into user (username, password, name, age) values (#{username}, #{password}, #{name}, #{age})")
+public void insert(User user);
+```
+
+如果在 SQL 语句中，我们需要传递多个参数，我们可以把多个参数封装到一个对象中；之后在 SQL 语句中，我们可以通过 “`#{对象属性名}`” 的方式，获取到对象中封装的属性值。
+
+##### 3.1.5.3 修改
+
+需求：根据 ID 更新用户信息。
+
+SQL 语句：
+```sql
+update user set username = 'Tom', password = '123456', name = '汤姆', age = 20 where id = 1;
+```
+
+Mapper 接口方法：
+```java
+/**
+ * 根据 id 更新用户信息
+ */
+@Update("update user set username = #{username}, password = #{password}, name = #{name}, age = #{age} where id = #{id}")
+public void update(User user);
+```
+
+如果在 SQL 语句中，我们需要传递多个参数，我们可以把多个参数封装到一个对象中；之后在 SQL 语句中，我们可以通过 “`#{对象属性名}`” 的方式，获取到对象中封装的属性值。
+
+##### 3.1.5.4 查询
+
+需求：根据用户名和密码查询用户信息。
+
+SQL 语句：
+```sql
+select * from  user where username = 'Tom' and password = '123456';
+```
+
+Mapper 接口方法：
+```java
+/**
+ * 根据用户名和密码查询用户信息
+ */
+@Select("select * from user where username = #{username} and password = #{password}")
+public User findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
+```
+
+`@Param` 注解的作用是为接口的方法形参起名称的；即如果接口方法形参中，需要传递多个参数，则需要通过 `@Param` 注解为参数起名字。使用 `@Param` 起的名称需要与 `@Select` 注解中 SQL 语句所包含的 `#{...}` 中的名称所对应。
+
+由于用户名唯一，所以查询返回的结果最多只有一个，可以直接封装到一个对象中。
+
+> 注意：
+>
+> 基于官方骨架创建的 SpringBoot 项目中，接口编译时会保留方法形参名，`@Param` 注解可以省略（以 `#{形参名}` 替代）；此时 `@Select` 注解中 SQL 语句所包含的 `#{...}` 中的名称需要与方法的形参名对应。
+>
+> 示例：
+> ![省略 @Param 注解的情况](./images/06_省略@Param注解的情况.png "省略 @Param 注解的情况")
+>
+> 即：`@Param` 注解在多个形参、非官方骨架创建的 SpringBoot 项目中需要添加。
+
+#### 3.1.6 XML 映射配置
+
+MyBatis 的开发有两种方式：
+* 注解。
+* XML。
+
+##### 3.1.6.1 XML 配置文件规范
+
+使用 MyBatis 的注解方式，主要是来完成一些简单的增删改查功能。如果需要实现复杂的 SQL 功能，建议使用 XML 来配置映射语句，也就是将 SQL 语句写在 XML 配置文件中。
+
+官方说明：[MyBatis 官方说明](https://mybatis.net.cn/getting-started.html "MyBatis 官方说明")。
+
+![MyBatis 官方说明](./images/06_MyBatis官方说明.png "MyBatis 官方说明")
+
+> 注意：
+>
+> 在 MyBatis 中使用 XML 映射文件方式开发，需要符合一定的规范：
+> 1. XML 映射文件的名称与 Mapper 接口名称一致，并且将 XML 映射文件和 Mapper 接口放置在相同包下（同包同名）。
+>       * 也可通过如下方式进行 XML 映射文件的辅助配置，配置 XML 映射文件的位置：
+>           ```properties
+>           # 指定 XML 映射配置文件的位置
+>           mybatis.mapper-locations=classpath:mapper/*.xml
+>           ```
+> 2. XML 映射文件的 `namespace` 属性为 Mapper 接口全限定名一致。
+> 3. XML 映射文件中 SQL 语句的 `id` 与 Mapper 接口中的方法名一致，并保持返回类型一致。
+
+![XML 配置文件规范](./images/06_XML配置文件规范.png "XML 配置文件规范")
+
+> 注意：
+>
+> `<select>` 标签：用于编写 select 查询语句。
+> * `resultType` 属性，指的是查询返回的单条记录所封装的类型。
+
+##### 3.1.6.2 XML 配置文件实现
+
+1). 创建 XML 映射文件
+
+![XML 配置文件实现 - 创建 XML 映射文件 - 1](./images/06_XML配置文件实现-创建XML映射文件-1.png "XML 配置文件实现 - 创建 XML 映射文件 - 1")
+
+![XML 配置文件实现 - 创建 XML 映射文件 - 2](./images/06_XML配置文件实现-创建XML映射文件-2.png "XML 配置文件实现 - 创建 XML 映射文件 - 2")
+
+2). 编写 XML 映射文件
+
+> 注意：
+>
+> XML 映射文件中的 dtd 约束，直接从 MyBatis 官网复制即可。
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+ 
+</mapper>
+```
+
+3). 配置
+
+a. XML 映射文件的 `namespace` 属性为 Mapper 接口全限定名
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.UserMapper">
+
+</mapper>
+```
+
+b. XML 映射文件中 SQL 语句的 `id` 与 Mapper 接口中的方法名一致，并保持返回类型一致
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.mapper.EmpMapper">
+
+    <!-- 查询操作 -->
+    <!-- resultType：查询返回的单条记录所封装的类型 -->
+    <select id="findAll" resultType="com.itheima.pojo.User">
+        select * from user
+    </select>
+    
+</mapper>
+```
+
+`resultType` 属性的值，与查询返回的单条记录封装的类型一致。
+
+> 注意：
+>
+> 一个接口方法对应的 SQL 语句，要么使用注解配置，要么使用 XML 配置，切不可同时配置。
+
+##### 3.1.6.3 MyBatisX 的使用
+
+MyBatisX 是一款基于 IDEA 的快速开发 MyBatis 的插件，为效率而生。
+
+在 IDEA 中的 File - Settings - Plugins 中即可下载并安装 MyBatisX 插件。
+
+可通过 MyBatisX 快速定位：
+![可通过 MyBatisX 快速定位](./images/06_可通过MyBatisX快速定位.png "可通过 MyBatisX 快速定位")
+
+## 四、SpringBoot 配置文件
+
+### 4.1 介绍
+
+前面我们一直使用 SpringBoot 项目创建完毕后自带的 application.properties 进行属性的配置；而如果在项目中，我们需要配置大量的属性，采用 properties 配置文件这种 `key=value` 的配置形式，就会显得配置文件的层级结构不清晰，也比较臃肿。
+
+其实，在 SpringBoot 项目当中是支持多种配置方式的。除了支持 properties 配置文件以外，还支持另一种类型的配置文件，即 yml 格式的配置文件。
+
+yml 格式配置文件的名字为 application.yaml 或 application.yml，这两个配置文件的后缀名虽然不一样，但是里面配置的内容形式都是一模一样的。
+
+> 注意：
+>
+> 在项目开发中，我们推荐使用 application.yml 配置文件来配置信息，简洁、明了、以数据为中心。
+
+### 4.2 语法
+
+yml 配置文件的基本语法：
+* 大小写敏感。
+* 数值前边必须有空格，作为分隔符。
+* 使用缩进表示层级关系；缩进时，不允许使用 `Tab` 键，只能用空格（IDEA 中会自动将 `Tab` 转换为空格）。
+* 缩进的空格数目不重要，只要相同层级的元素左侧对齐即可。
+* `#` 表示注释，从这个字符一直到行尾，都会被解析器忽略。
+
+示例：
+![yml 配置文件示例](./images/06_yml配置文件示例.png "yml 配置文件示例")
+
+yml 文件中最为常见的数据格式有两类：
+* 定义对象或 Map 集合。
+* 定义数组、List 或 Set 集合。
+
+对象 / Map 集合：
+```yaml
+user:
+  name: Tom
+  age: 18
+  password: 123456
+```
+
+数组 / List / Set 集合：
+```yaml
+hobby:
+  - java
+  - game
+  - sport
+```
+
+> 注意：
+>
+> 在 yml 格式的配置文件中，如果配置项的值是以 `0` 开头的，值需要使用 “`''`” 引起来，因为以 `0` 开头在 yml 中表示八进制的数据。
+
+示例代码：
+```yaml
+# application.yml
+
+# 定义对象 / Map 集合
+user:
+  name: Tom
+  age: 18
+  gender: 男
+
+# 定义数组 / List / Set 集合
+hobby:
+  - Java
+  - Game
+  - Sport
+```
+
+### 4.3 案例
+
+我们修改之前案例中使用的配置文件，变更为 application.yml 配置方式：
+1). 修改 application.properties 名称为 _application.properties
+
+* 名称可以随意更换，只要加载不到即可。
+
+2). 创建新的配置文件：application.yml
+
+* 原有的 application.properties 配置文件：
+![原有的 properties 配置文件](./images/06_原有的properties配置文件.png "原有的 properties 配置文件")
+
+* 新建的 application.yml 配置文件：
+![新建的 yml 配置文件](./images/06_新建的yml配置文件.png "新建的 yml 配置文件")
+
+配置文件的内容如下：
+```yaml
+# 数据源配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/web01
+    username: root
+    password: root@1234
+# MyBatis 配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+```
