@@ -1083,7 +1083,7 @@ public interface DeptMapper {
 
 ### 4.3 思路分析
 
-明确了新增部门的需求之后，再来梳理一下实现该功能时三层架构每一层的职责：
+明确了新增部门的需求之后，再来梳理一下实现该功能时，三层架构每一层的职责：
 ![新增部门 - 三层架构每一层的职责](./images/07_新增部门-三层架构每一层的职责.png "新增部门 - 三层架构每一层的职责")
 
 ### 4.4 JSON 参数接收
@@ -1349,3 +1349,1132 @@ public interface DeptMapper {
 代码编写完毕之后，我们就可以启动服务，进行测试了。
 
 ## 五、修改部门
+
+对于任何业务的修改功能来说，一般都会分为两步进行：查询回显、修改数据。
+
+![修改部门](./images/07_修改部门.png "修改部门")
+
+### 5.1 查询回显
+
+#### 5.1.1 需求
+
+当我们点击“编辑”的时候，需要根据 ID 查询部门数据，然后用于页面回显展示。
+
+![修改部门 - 查询回显 - 需求](./images/07_修改部门-查询回显-需求.png "修改部门 - 查询回显 - 需求")
+
+了解了需求之后，我们再去查看接口文档中关于根据 ID 查询部门的接口的描述，然后根据接口文档进行服务端接口的开发。
+
+#### 5.1.2 接口描述
+
+参照接口文档。
+
+#### 5.1.3 思路分析
+
+明确了根据 ID 查询部门的需求之后，再来梳理一下实现该功能时，三层架构每一层的职责：
+![查询回显 - 三层架构每一层的职责](./images/07_查询回显-三层架构每一层的职责.png "查询回显 - 三层架构每一层的职责")
+
+#### 5.1.4 路径参数接收
+
+`/depts/1`、`/depts/2` 这种在 url 中传递的参数，我们称之为路径参数。那么如何接收这样的路径参数呢？
+
+路径参数：通过请求 URL 直接传递参数，使用 `{...}` 来标识该路径参数，需要使用 `@PathVariable` 获取路径参数。
+
+如下所示：
+![获取路径参数](./images/07_获取路径参数.png "获取路径参数")
+
+如果路径参数名与 Controller 方法形参名称一致，`@PathVariable` 注解的 `value` 属性是可以省略的。
+
+如果 url 中携带多个路径参数（例如：`/depts/1/0`），接收方式如下：
+```java
+@Getmapping("/depts/{id}/{sta}")
+public Result getInfo(@PathVariable Integer id, @PathVariable Integer sta) {
+    ...
+}
+```
+
+#### 5.1.5 代码实现
+
+##### 5.1.5.1 Controller 层
+
+示例代码：
+```java
+/* controller/DeptController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.DeptService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:23
+ * @Version 1.0
+ */
+@RestController
+public class DeptController {
+
+    @Autowired
+    private DeptService deptService;
+
+    /**
+     * 查询部门列表
+     */
+//    @RequestMapping(value = "/depts", method = RequestMethod.GET) // method：指定请求方式
+    @GetMapping("/depts")
+    public Result list() {
+        System.out.println("查询全部部门数据");
+        List<Dept> deptList = deptService.findAll();
+        return Result.success(deptList);
+    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式一（HttpServletRequest 获取请求参数）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(HttpServletRequest request) {
+//        String idStr = request.getParameter("id");
+//        int id = Integer.parseInt(idStr);
+//
+//        System.out.println("根据 ID 删除部门：" + id);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式二（通过 @RequestParam 注解获取请求参数）
+     * 注意事项：一旦声明了 @RequestParam，该参数在请求时必须传递，如果不传递将会报错（默认 required 为 true）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(@RequestParam(value = "id", required = false) Integer deptId) {
+//        System.out.println("根据 ID 删除部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式三（省略 @RequestParam - 前端传递的请求参数名与服务端方法形参名一致）
+     */
+    @DeleteMapping("/depts")
+    public Result delete(Integer id) {
+        System.out.println("根据 ID 删除部门：" + id);
+        deptService.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 新增部门
+     */
+    @PostMapping("/depts")
+    public Result add(@RequestBody Dept dept) {
+        System.out.println("新增部门：" + dept);
+        deptService.add(dept);
+        return Result.success();
+    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+//    @GetMapping("/depts/{id}")
+//    public Result getInfo(@PathVariable("id") Integer deptId) {
+//        System.out.println("根据 ID 查询部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+    @GetMapping("/depts/{id}")
+    public Result getInfo(@PathVariable Integer id) {
+        System.out.println("根据 ID 查询部门：" + id);
+        Dept dept = deptService.getById(id);
+        return Result.success(dept);
+    }
+
+}
+
+```
+
+##### 5.1.5.2 Service 层
+
+示例代码：
+```java
+/* service/DeptService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.Dept;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:22
+ * @Version 1.0
+ */
+public interface DeptService {
+    /**
+     * 查询所有部门
+     */
+    List<Dept> findAll();
+
+    /**
+     * 根据 ID 删除部门
+     */
+    void deleteById(Integer id);
+
+    /**
+     * 新增部门
+     */
+    void add(Dept dept);
+
+    /**
+     * 根据 ID 查询部门
+     */
+    Dept getById(Integer id);
+}
+
+
+/* service/impl/DeptServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.DeptMapper;
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.service.DeptService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * ClassName: DeptServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:22
+ * @Version 1.0
+ */
+@Service
+public class DeptServiceImpl implements DeptService {
+
+    @Autowired
+    private DeptMapper deptMapper;
+
+    @Override
+    public List<Dept> findAll() {
+        return deptMapper.findAll();
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        deptMapper.deleteById(id);
+    }
+
+    @Override
+    public void add(Dept dept) {
+        // 1. 补全基础属性 - createTime、updateTime
+        dept.setCreateTime(LocalDateTime.now());
+        dept.setUpdateTime(LocalDateTime.now());
+
+        // 2. 调用 Mapper 接口方法插入数据
+        deptMapper.insert(dept);
+    }
+
+    @Override
+    public Dept getById(Integer id) {
+        return deptMapper.getById(id);
+    }
+}
+
+```
+
+##### 5.1.5.3 Mapper 层
+
+示例代码：
+```java
+/* mapper/DeptMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+import com.anxin_hitsz.pojo.Dept;
+import org.apache.ibatis.annotations.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:21
+ * @Version 1.0
+ */
+@Mapper
+public interface DeptMapper {
+    /**
+     * 查询所有部门数据
+     */
+    // 方式一：手动结果映射
+//    @Results({
+//            @Result(column = "create_time", property = "createTime"),
+//            @Result(column = "update_time", property = "updateTime")
+//    })
+//    @Select("select id, name, create_time, update_time from dept order by update_time desc")
+//    List<Dept> findAll();
+
+    // 方式二：起别名
+//    @Select("select id, name, create_time createTime, update_time updateTime from dept order by update_time desc")
+//    List<Dept> findAll();
+
+    // 方式三：开启驼峰命名
+    @Select("select id, name, create_time, update_time from dept order by update_time desc")
+    List<Dept> findAll();
+
+    /**
+     * 根据 ID 删除部门
+     */
+    @Delete("delete from dept where id = #{id}")
+    void deleteById(Integer id);
+
+    /**
+     * 新增部门
+     */
+    @Insert("insert into dept (name, create_time, update_time) values (#{name}, #{createTime}, #{updateTime})")
+    void insert(Dept dept);
+
+    /**
+     * 根据 ID 查询部门数据
+     */
+    @Select("select id, name, create_time, update_time from dept where id = #{id}")
+    Dept getById(Integer id);
+}
+
+```
+
+代码编写完毕之后，我们就可以启动服务，进行测试了。
+
+### 5.2 修改数据
+
+#### 5.2.1 需求
+
+查询回显回来之后，就可以对部门的信息进行修改了。修改完毕之后，点击确定，此时就需要根据 ID 修改部门的数据。
+
+![修改部门 - 修改数据 - 需求](./images/07_修改部门-修改数据-需求.png "修改部门 - 修改数据 - 需求")
+
+了解了需求之后，我们再去查看接口文档中关于修改部门的接口的描述，然后根据接口文档进行服务端接口的开发。
+
+#### 5.2.2 接口描述
+
+参照接口文档。
+
+#### 5.2.3 思路分析
+
+参照接口文档，梳理三层架构每一层的职责：
+![修改数据 - 三层架构每一层的职责](./images/07_修改数据-三层架构每一层的职责.png "修改数据 - 三层架构每一层的职责")
+
+通过接口文档，我们可以看到前端传递的请求参数是 JSON 格式的请求参数。在 Controller 方法中，我们可以通过 `@RequestBody` 注解来接收，并将其封装到一个对象中。
+
+#### 5.2.4 代码实现
+
+##### 5.2.4.1 Controller 层
+
+示例代码：
+```java
+/* controller/DeptController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.DeptService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:23
+ * @Version 1.0
+ */
+@RestController
+public class DeptController {
+
+    @Autowired
+    private DeptService deptService;
+
+    /**
+     * 查询部门列表
+     */
+//    @RequestMapping(value = "/depts", method = RequestMethod.GET) // method：指定请求方式
+    @GetMapping("/depts")
+    public Result list() {
+        System.out.println("查询全部部门数据");
+        List<Dept> deptList = deptService.findAll();
+        return Result.success(deptList);
+    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式一（HttpServletRequest 获取请求参数）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(HttpServletRequest request) {
+//        String idStr = request.getParameter("id");
+//        int id = Integer.parseInt(idStr);
+//
+//        System.out.println("根据 ID 删除部门：" + id);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式二（通过 @RequestParam 注解获取请求参数）
+     * 注意事项：一旦声明了 @RequestParam，该参数在请求时必须传递，如果不传递将会报错（默认 required 为 true）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(@RequestParam(value = "id", required = false) Integer deptId) {
+//        System.out.println("根据 ID 删除部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式三（省略 @RequestParam - 前端传递的请求参数名与服务端方法形参名一致）
+     */
+    @DeleteMapping("/depts")
+    public Result delete(Integer id) {
+        System.out.println("根据 ID 删除部门：" + id);
+        deptService.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 新增部门
+     */
+    @PostMapping("/depts")
+    public Result add(@RequestBody Dept dept) {
+        System.out.println("新增部门：" + dept);
+        deptService.add(dept);
+        return Result.success();
+    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+//    @GetMapping("/depts/{id}")
+//    public Result getInfo(@PathVariable("id") Integer deptId) {
+//        System.out.println("根据 ID 查询部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+    @GetMapping("/depts/{id}")
+    public Result getInfo(@PathVariable Integer id) {
+        System.out.println("根据 ID 查询部门：" + id);
+        Dept dept = deptService.getById(id);
+        return Result.success(dept);
+    }
+
+    /**
+     * 修改部门
+     */
+    @PutMapping("/depts")
+    public Result update(@RequestBody Dept dept) {
+        System.out.println("修改部门：" + dept);
+        deptService.update(dept);
+        return Result.success();
+    }
+
+}
+
+```
+
+##### 5.2.4.2 Service 层
+
+示例代码：
+```java
+/* controller/DeptService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.Dept;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:22
+ * @Version 1.0
+ */
+public interface DeptService {
+    /**
+     * 查询所有部门
+     */
+    List<Dept> findAll();
+
+    /**
+     * 根据 ID 删除部门
+     */
+    void deleteById(Integer id);
+
+    /**
+     * 新增部门
+     */
+    void add(Dept dept);
+
+    /**
+     * 根据 ID 查询部门
+     */
+    Dept getById(Integer id);
+
+    /**
+     * 修改部门
+     */
+    void update(Dept dept);
+}
+
+
+/* service/impl/DeptServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.DeptMapper;
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.service.DeptService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * ClassName: DeptServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:22
+ * @Version 1.0
+ */
+@Service
+public class DeptServiceImpl implements DeptService {
+
+    @Autowired
+    private DeptMapper deptMapper;
+
+    @Override
+    public List<Dept> findAll() {
+        return deptMapper.findAll();
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        deptMapper.deleteById(id);
+    }
+
+    @Override
+    public void add(Dept dept) {
+        // 1. 补全基础属性 - createTime、updateTime
+        dept.setCreateTime(LocalDateTime.now());
+        dept.setUpdateTime(LocalDateTime.now());
+
+        // 2. 调用 Mapper 接口方法插入数据
+        deptMapper.insert(dept);
+    }
+
+    @Override
+    public Dept getById(Integer id) {
+        return deptMapper.getById(id);
+    }
+
+    @Override
+    public void update(Dept dept) {
+        // 1. 补全基础属性 - updateTime
+        dept.setUpdateTime(LocalDateTime.now());
+
+        // 2. 调用 Mapper 接口方法更新部门
+        deptMapper.update(dept);
+    }
+}
+
+```
+
+##### 5.2.4.3 Mapper 层
+
+示例代码：
+```java
+/* mapper/DeptMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+import com.anxin_hitsz.pojo.Dept;
+import org.apache.ibatis.annotations.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:21
+ * @Version 1.0
+ */
+@Mapper
+public interface DeptMapper {
+    /**
+     * 查询所有部门数据
+     */
+    // 方式一：手动结果映射
+//    @Results({
+//            @Result(column = "create_time", property = "createTime"),
+//            @Result(column = "update_time", property = "updateTime")
+//    })
+//    @Select("select id, name, create_time, update_time from dept order by update_time desc")
+//    List<Dept> findAll();
+
+    // 方式二：起别名
+//    @Select("select id, name, create_time createTime, update_time updateTime from dept order by update_time desc")
+//    List<Dept> findAll();
+
+    // 方式三：开启驼峰命名
+    @Select("select id, name, create_time, update_time from dept order by update_time desc")
+    List<Dept> findAll();
+
+    /**
+     * 根据 ID 删除部门
+     */
+    @Delete("delete from dept where id = #{id}")
+    void deleteById(Integer id);
+
+    /**
+     * 新增部门
+     */
+    @Insert("insert into dept (name, create_time, update_time) values (#{name}, #{createTime}, #{updateTime})")
+    void insert(Dept dept);
+
+    /**
+     * 根据 ID 查询部门数据
+     */
+    @Select("select id, name, create_time, update_time from dept where id = #{id}")
+    Dept getById(Integer id);
+
+    /**
+     * 更新部门
+     */
+    @Update("update dept set name = #{name}, update_time = #{updateTime} where id = #{id}")
+    void update(Dept dept);
+}
+
+```
+
+代码编写完毕之后，我们就可以启动服务，进行测试了。
+
+#### 5.2.5 `@RequestMapping`
+
+到此，关于基本的部门的增删改查功能，我们已经实现了。我们会发现，我们在 `DeptController` 中所定义的方法，所有的请求路径都是 `/depts` 开头的；即只要操作的是部门数据，请求路径都是 `/depts` 开头。
+
+那么这个时候，我们其实是可以把这个公共的路径 `/depts` 抽取到类上的，从而在各个方法上就可以省略了这个 `/depts` 路径。
+
+代码如下：
+![利用 @RequestMapping 将公共路径抽取到类上](./images/07_利用@RequestMapping将公共路径抽取到类上.png "利用 @RequestMapping 将公共路径抽取到类上")
+
+> 注意：
+>
+> @RequestMapping 注解可以加在类上（可选的）和方法上。一个完整的请求路径，应该是类上的 `@RequestMapping` 的 `value` 属性 + 方法上的 `@RequestMapping` 的 `value` 属性。
+
+示例代码：
+```java
+/* controller/DeptController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.DeptService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:23
+ * @Version 1.0
+ */
+@RequestMapping("/depts")
+@RestController
+public class DeptController {
+
+    @Autowired
+    private DeptService deptService;
+
+    /**
+     * 查询部门列表
+     */
+//    @RequestMapping(value = "/depts", method = RequestMethod.GET) // method：指定请求方式
+    @GetMapping
+    public Result list() {
+        System.out.println("查询全部部门数据");
+        List<Dept> deptList = deptService.findAll();
+        return Result.success(deptList);
+    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式一（HttpServletRequest 获取请求参数）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(HttpServletRequest request) {
+//        String idStr = request.getParameter("id");
+//        int id = Integer.parseInt(idStr);
+//
+//        System.out.println("根据 ID 删除部门：" + id);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式二（通过 @RequestParam 注解获取请求参数）
+     * 注意事项：一旦声明了 @RequestParam，该参数在请求时必须传递，如果不传递将会报错（默认 required 为 true）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(@RequestParam(value = "id", required = false) Integer deptId) {
+//        System.out.println("根据 ID 删除部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式三（省略 @RequestParam - 前端传递的请求参数名与服务端方法形参名一致）
+     */
+    @DeleteMapping
+    public Result delete(Integer id) {
+        System.out.println("根据 ID 删除部门：" + id);
+        deptService.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 新增部门
+     */
+    @PostMapping
+    public Result add(@RequestBody Dept dept) {
+        System.out.println("新增部门：" + dept);
+        deptService.add(dept);
+        return Result.success();
+    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+//    @GetMapping("/depts/{id}")
+//    public Result getInfo(@PathVariable("id") Integer deptId) {
+//        System.out.println("根据 ID 查询部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+    @GetMapping("/{id}")
+    public Result getInfo(@PathVariable Integer id) {
+        System.out.println("根据 ID 查询部门：" + id);
+        Dept dept = deptService.getById(id);
+        return Result.success(dept);
+    }
+
+    /**
+     * 修改部门
+     */
+    @PutMapping
+    public Result update(@RequestBody Dept dept) {
+        System.out.println("修改部门：" + dept);
+        deptService.update(dept);
+        return Result.success();
+    }
+
+}
+
+```
+
+## 六、日志技术
+
+### 6.1 概述
+
+程序中的日志，是用来记录应用程序的运行信息、状态信息、错误信息的。
+
+在现在的项目开发中，我们一般都会使用专业的日志框架。
+
+### 6.2 日志框架
+
+![日志框架](./images/07_日志框架.png "日志框架")
+
+java.util.logging：这是 JavaSE 平台提供的官方日志框架，也被称为 JUL；配置相对简单，但不够灵活，性能较差。
+
+Log4j：一个流行的日志框架，提供了灵活的配置选项，支持多种输出目标。
+
+Logback：基于 Log4j 升级而来，提供了更多的功能和配置选项，性能优于 Log4j。
+
+Slf4j（Simple Logging Facade for Java）：简单日志门面，提供了一套日志操作的标准接口及抽象类，允许应用程序使用不同的底层日志框架。
+
+### 6.3 Logback 入门
+
+1). 准备工作：引入 Logback 的依赖（SpringBoot 中无需引入，在 SpringBoot 中已经传递了此依赖）
+
+```xml
+<dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.4.11</version>
+</dependency>
+```
+
+2). 引入配置文件 logback.xml，放在 src/main/resources 目录下
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示 5 个字符宽度，%logger{50} 表示日志记录器的名称最长 50 个字符（超出则简化该日志记录器的名称），%msg 表示日志消息，%n 表示换行符 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 日志输出级别 -->
+    <root level="debug">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
+```
+
+3). 记录日志：定义日志记录对象 `Logger`，记录日志
+
+```java
+/* LogTest.java */
+
+package com.anxin_hitsz;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+
+public class LogTest {
+
+    private static final Logger log = LoggerFactory.getLogger(LogTest.class);
+
+    @Test
+    public void testLog(){
+//        System.out.println(LocalDateTime.now() + " - 开始计算 ……");
+        log.debug("开始计算 ……");
+
+        int sum = 0;
+        int[] nums = {1, 5, 3, 2, 1, 4, 5, 4, 6, 7, 4, 34, 2, 23};
+        for (int num : nums) {
+            sum += num;
+        }
+        
+//        System.out.println("计算结果为："+sum);
+        log.info("计算结果为：" + sum);
+//        System.out.println(LocalDateTime.now() + " - 结束计算 ……");
+        log.debug("结束计算 ……");
+    }
+
+}
+
+```
+
+运行单元测试，可以在控制台中看到输出的日志。
+
+我们可以看到在输出的日志信息中，不仅输出了日志的信息，还包括日志的输出时间、线程名、具体在哪个类中输出的。
+
+### 6.4 Logback 配置文件
+
+Logback 日志框架的配置文件叫 logback.xml。
+
+该配置文件是对 Logback 日志框架输出的日志进行控制的，可以来配置输出的格式、位置及日志开关等。
+
+常用的两种输出日志的位置：控制台、系统文件。
+
+1). 输出日志到控制台
+
+如果需要输出日志到控制台，添加如下配置：
+```xml
+<!-- 控制台输出 -->
+<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+    </encoder>
+</appender>
+```
+
+2). 输出日志到文件
+
+如果需要输出日志到文件，添加如下配置：
+```xml
+<!-- 按照每天生成日志文件 -->
+<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <!-- 日志文件输出的文件名，%i 表示序号 -->
+        <FileNamePattern>D:/tlias-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+        <!-- 最多保留的历史日志文件数量 -->
+        <MaxHistory>30</MaxHistory>
+        <!-- 最大文件大小，超过这个大小会触发滚动到新文件，默认为 10MB -->
+        <maxFileSize>10MB</maxFileSize>
+    </rollingPolicy>
+
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <!--格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
+        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+    </encoder>
+</appender>
+```
+
+3). 日志开关配置（开启日志 - ALL，取消日志 - OFF）
+
+```xml
+<!-- 日志输出级别 -->
+<root level="ALL">
+    <!-- 输出到控制台 -->
+    <appender-ref ref="STDOUT" />
+    <!-- 输出到文件 -->
+    <appender-ref ref="FILE" />
+</root>
+```
+
+完整 logback.xml：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示 5 个字符宽度，%logger 显示日志记录器的名称，%msg 表示日志消息，%n 表示换行符 -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 系统文件输出 -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<!-- 日志文件输出的文件名，%i 表示序号 -->
+			<FileNamePattern>D:/tlias-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+			<!-- 最多保留的历史日志文件数量 -->
+			<MaxHistory>30</MaxHistory>
+			<!-- 最大文件大小，超过这个大小会触发滚动到新文件，默认为 10MB -->
+			<maxFileSize>10MB</maxFileSize>
+		</rollingPolicy>
+
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 日志输出级别 -->
+	<root level="ALL">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>
+
+```
+
+### 6.5 Logback 日志级别
+
+日志级别指的是日志信息的类型。日志都会分级别，常见的日志级别如下（优先级由低到高）：
+| 日志级别 | 说明 | 记录方式 |
+| :--: | :--: | :--: |
+| trace | 追踪，记录程序运行轨迹【使用很少】 | `log.trace("...")` |
+| debug | 调试，记录程序调试过程中的信息，实际应用中一般将其视为最低级别【使用较多】 | `log.debug("...")` |
+| info | 记录一般信息，描述程序运行的关键事件【使用较多】<br>例如：网络连接、IO 操作 | `log.info("...")` |
+| warn | 警告信息，记录潜在有害的情况【使用较多】 | `log.warn("...")` |
+| error | 错误信息【使用较多】 | `log.error("...")` |
+
+可以在配置文件 logback.xml 中，灵活地控制输出哪些类型的日志（大于等于配置的日志级别的日志才会输出）：
+```xml
+<!-- 日志输出级别 -->
+<root level="info">
+    <!-- 输出到控制台 -->
+    <appender-ref ref="STDOUT" />
+    <!-- 输出到文件 -->
+    <appender-ref ref="FILE" />
+</root>
+```
+
+### 6.6 案例日志记录
+
+示例代码：
+```java
+/* controller/DeptController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Dept;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.DeptService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * ClassName: DeptController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/8 13:23
+ * @Version 1.0
+ */
+@Slf4j
+@RequestMapping("/depts")
+@RestController
+public class DeptController {
+
+//    private static final Logger log = LoggerFactory.getLogger(DeptController.class);    // 固定的
+
+    @Autowired
+    private DeptService deptService;
+
+    /**
+     * 查询部门列表
+     */
+//    @RequestMapping(value = "/depts", method = RequestMethod.GET) // method：指定请求方式
+    @GetMapping
+    public Result list() {
+//        System.out.println("查询全部部门数据");
+        log.info("查询全部部门数据");
+        List<Dept> deptList = deptService.findAll();
+        return Result.success(deptList);
+    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式一（HttpServletRequest 获取请求参数）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(HttpServletRequest request) {
+//        String idStr = request.getParameter("id");
+//        int id = Integer.parseInt(idStr);
+//
+//        System.out.println("根据 ID 删除部门：" + id);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式二（通过 @RequestParam 注解获取请求参数）
+     * 注意事项：一旦声明了 @RequestParam，该参数在请求时必须传递，如果不传递将会报错（默认 required 为 true）
+     */
+//    @DeleteMapping("/depts")
+//    public Result delete(@RequestParam(value = "id", required = false) Integer deptId) {
+//        System.out.println("根据 ID 删除部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 删除部门 - 简单参数接收：方式三（省略 @RequestParam - 前端传递的请求参数名与服务端方法形参名一致）
+     */
+    @DeleteMapping
+    public Result delete(Integer id) {
+//        System.out.println("根据 ID 删除部门：" + id);
+        log.info("根据 ID 删除部门：{}", id);
+        deptService.deleteById(id);
+        return Result.success();
+    }
+
+    /**
+     * 新增部门
+     */
+    @PostMapping
+    public Result add(@RequestBody Dept dept) {
+//        System.out.println("新增部门：" + dept);
+        log.info("新增部门：{}", dept);
+        deptService.add(dept);
+        return Result.success();
+    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+//    @GetMapping("/depts/{id}")
+//    public Result getInfo(@PathVariable("id") Integer deptId) {
+//        System.out.println("根据 ID 查询部门：" + deptId);
+//        return Result.success();
+//    }
+
+    /**
+     * 根据 ID 查询部门
+     */
+    @GetMapping("/{id}")
+    public Result getInfo(@PathVariable Integer id) {
+//        System.out.println("根据 ID 查询部门：" + id);
+        log.info("根据 ID 查询部门：{}", id);
+        Dept dept = deptService.getById(id);
+        return Result.success(dept);
+    }
+
+    /**
+     * 修改部门
+     */
+    @PutMapping
+    public Result update(@RequestBody Dept dept) {
+//        System.out.println("修改部门：" + dept);
+        log.info("修改部门：{}", dept);
+        deptService.update(dept);
+        return Result.success();
+    }
+
+}
+
+```
+
+> 注意：
+>
+> Lombok 中提供的 `@Slf4j` 注解，可以简化定义日志记录器这步操作。添加了该注解，就相当于在类中定义了日志记录器，即下面这句代码：
+> ```java
+> private static Logger log = LoggerFactory.getLogger(Xxx.class);
+> ```
+>
+> 且日志记录器名称即为 `log`。
