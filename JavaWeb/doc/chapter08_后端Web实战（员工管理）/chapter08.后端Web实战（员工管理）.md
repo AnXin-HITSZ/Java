@@ -1,0 +1,481 @@
+# 第八章：后端 Web 实战（员工管理）
+
+**目录：**
+
+[TOC]
+
+---
+
+实现了部门管理的功能之后，接下来我们再来实现员工管理的功能。
+
+![员工管理](./images/08_员工管理.PNG "员工管理")
+
+从页面原型中，我们可以看到，在查询员工信息的时候，除了要展示姓名、性别、头像、职位、入职日期、最后操作时间这些员工信息外，还要展示出所属部门。那此时就需要从两张表中查询数据，一张是部门表，一张是员工表；此时就会涉及到多表操作。
+
+## 一、多表关系
+
+由于业务之间相互关联，所以各个表结构之间也存在着各种联系，基本上分为三种：
+* 一对多（多对一）。
+* 多对多。
+* 一对一。
+
+### 1.1 一对多
+
+场景：部门与员工的关系（一个部门下有多个员工）。
+
+部门管理的页面原型：
+![部门管理的页面原型](./images/08_部门管理的页面原型.PNG "部门管理的页面原型")
+
+员工管理的页面原型：
+![员工管理的页面原型](./images/08_员工管理的页面原型.PNG "员工管理的页面原型")
+
+由于一个部门下，会关联多个员工，而一个员工是归属于某一个部门的。那么此时，我们就需要在 emp 表中增加一个字段 `dept_id` `来标识这个员工属于哪一个部门，dept_id` 关联的是 `dept` 的 `id`。如下所示：
+![emp 表中新增 dept_id 字段](./images/08_emp表中新增dept_id字段.PNG "emp 表中新增 dept_id 字段")
+
+上述的 emp 员工表的 `dept_id` 字段，关联的是 dept 部门表的 `id`。部门表是“一”一方，也称为**父表**；员工表是“多”的一方，称之为**子表**。如下所示：
+![父表与子表](./images/08_父表与子表.png "父表与子表")
+
+那么接下来，我们就可以将上述的两张表创建出来。
+
+> 注意：
+>
+> 问题：一对多的表关系，在数据库层面该如何实现？
+> * 在数据库表中“多”的一方添加字段，来关联“一”的一方的主键。
+
+### 1.2 多表问题分析
+
+现象：部门数据可以直接删除，然而还有部分员工归属于该部门下，此时就出现了数据的不完整、不一致的问题。
+
+原因：目前上述的两张表，在数据库层面，并未建立关联，所以是无法保证数据的一致性和完整性的。
+
+解决方案：通过数据库中的**外键约束**来解决。
+![外键约束](./images/08_外键约束.png "外键约束")
+
+**外键约束：** 让两张表的数据建立连接，保证数据的一致性和完整性。
+* 对应的关键字：`foreign key`。
+
+外键约束语法：
+```sql
+-- 创建表时指定
+create_table 表名 (
+    字段名 数据类型,
+    ...
+    [constraint] [外键名称] foreign key (外键字段名) references 主表 (主表列名（字段名）)
+);
+
+-- 建完表后，添加外键
+alter table 表名 add constraint 外键名称 foreign key (外键字段名) references 主表 (主表列名（字段名）);
+```
+
+接下来，我们就为员工表的 `dept_id` 建立外键约束，来关联部门表的主键。
+1). 方式一：通过 SQL 语句操作
+```sql
+-- 修改表：添加外键约束
+alter table emp add constraint fk_dept_id foreign key (dept_id) references dept(id);
+```
+2). 方式二：图形化界面操作
+在左侧菜单栏，在 emp 表上右键，选择 Modify Table...：
+![建立外键约束 - 图形化界面操作](./images/08_建立外键约束-图形化界面操作.png "建立外键约束 - 图形化界面操作")
+
+外键约束（foreign key）：保证了数据的完整性和一致性。
+
+> 注意：
+>
+> 外键命名规范：外键命名一般以 `fk_` 开头。
+
+#### 1.2.3 物理外键与逻辑外键
+
+物理外键：
+* 概念：使用 `foreign key` 定义外键关联另外一张表。
+* 缺点：
+  * 影响增、删、改的效率（需要检查外键关系）。
+  * 仅用于单节点数据库，不适用于分布式、集群场景。
+  * 容易引发数据库的死锁问题，消耗性能。
+
+逻辑外键：
+* 概念：在业务层逻辑中，解决外键关联。
+* 功能：通过逻辑外键，就可以很方便地解决上述问题。
+
+> 注意：
+>
+> 在现在的企业开发中，很少会使用物理外键，都是使用逻辑外键。甚至在一些数据库开发规范中，会明确指出禁止使用物理外键 `foreign key`。
+
+### 1.3 一对一
+
+一对一关系表在实际开发中应用起来比较简单，通常是用来做单表的拆分，也就是将一张大表拆分成两张小表，将大表中的一些基础字段放在一张表当中，将其他的字段放在另外一张表当中，以此来提高数据的操作效率。
+
+一对一的应用场景：用户表（基本信息 + 身份信息）。
+
+如果在业务系统当中，对用户的基本信息查询频率特别高，但是对于用户的身份信息查询频率很低，此时出于提高查询效率的考虑，我们就可以将这张大表拆分成两张小表，第一张表存放的是用户的基本信息，而第二张表存放的就是用户的身份信息。它们两者之间为一对一的关系，即一个用户只能对应一个身份证，而一个身份证也只能关联一个用户。
+
+那么在数据库层面怎么去体现上述两者之间是一对一的关系呢？
+
+其实，一对一我们可以看成一种特殊的一对多。因此，我们同样也可以通过通过外键来体现一对一之间的关系，只需要在任意一方来添加一个外键就可以了，并且设置外键为唯一的（`UNIQUE`）。
+
+> 注意：
+>
+> 一对一：在任意一方加入外键，关联另外一方的主键，并且设置外键为唯一的（`UNIQUE`）。
+
+### 1.4 多对多
+
+多对多的关系在开发中也是比较常见的。例如：学生和课程的关系，一个学生可以选修多门课程，一门课程也可以供多个学生选修。
+
+实现多对多关系：建立第三张中间表，中间表至少包含两个外键，分别关联两方主键。
+
+> 注意：
+>
+> 多对多：需要建立一张中间表，中间表中有两个外键字段，分别关联两方的主键。
+
+### 1.5 案例
+
+下面通过一个综合案例加深对于多表关系的理解，并掌握多表设计的流程。
+
+需求：
+* 根据页面原型，设计员工管理模块涉及到的表结构。
+
+步骤：
+* 阅读页面原型及需求文档，分析各个模块涉及到的表结构，及表结构之间的关系。
+* 根据页面原型及需求文档，分析各个表结构中具体的字段及约束。
+
+分析可知，总共会涉及三张表，分别是：部门表、员工表、员工工作经历表。
+
+最终，具体的表结构如下：
+```sql
+-- MySQL02.sql
+
+-- 多表设计：案例
+-- 表：dept(1) -> emp(n)；emp(1) -> emp_expr(n)
+create table emp_expr (
+    id int unsigned primary key auto_increment comment 'ID，主键',
+    begin date comment '开始时间',
+    end date comment '结束时间',
+    company varchar(50) comment '公司名称',
+    job varchar(50) comment '职位',
+    emp_id int unsigned comment '关联的员工 ID'
+) comment '工作经历表';
+```
+
+> 注意：
+>
+> 在上述的表结构设计中，我们使用的都是逻辑外键。
+
+## 二、多表查询
+
+### 2.1 概述
+
+#### 2.1.1 数据准备
+
+创建数据库，执行 SQL 脚本，此处不再赘述。
+
+#### 2.1.2 介绍
+
+多表查询：查询时从多张表中获取所需数据。
+> 单表查询的 SQL 语句：
+> ```sql
+> select 字段列表 from 表名;
+> ```
+>
+> 多表查询的 SQL 语句：
+> ```sql
+> select 字段列表 from 表1, 表2;
+> ```
+>
+> 因此，要执行多表查询，只需要使用逗号分隔多张表即可。
+
+查询用户表和部门表中的数据：
+```sql
+select * from emp, dept;
+```
+
+此时，将会列出员工表所有记录与部门表所有记录的所有组合情况，这种现象称之为 **笛卡尔积**。
+
+**笛卡尔积：** 笛卡尔乘积是指在数学中，两个集合（A 集合和 B 集合）的所有组合情况。
+![笛卡尔积](./images/08_笛卡尔积.png "笛卡尔积")
+
+在多表查询时，需要消除无效的笛卡尔积，只保留表关联部分的数据：
+![多表查询时消除无效的笛卡尔积](./images/08_多表查询时消除无效的笛卡尔积.png "多表查询时消除无效的笛卡尔积")
+
+在 SQL 语句中，只需要给多表查询加上连接查询的条件即可去除无效的笛卡尔积：
+```sql
+select * from emp, dept where emp.dept_id = dept.id;
+```
+
+#### 2.1.3 分类
+
+多表查询可以分为：
+![多表查询数据关系](./images/08_多表查询数据关系.png "多表查询数据关系")
+* 连接查询：
+  * 内连接：基于“连接条件”匹配行（**并不是集合意义上的“交集”**）。
+  * 外连接：
+    * 左外连接：查询左表所有数据（包括两张表交集部分数据）。
+    * 右外连接：查询右表所有数据（包括两张表交集部分数据）。
+* 子查询。
+
+### 2.2 内连接
+
+内连接查询：基于“连接条件”匹配行，查询两表或多表中交集部分数据。
+
+内连接从语法上可以分为：
+* 隐式内连接。
+* 显式内连接。
+
+隐式内连接语法格式：
+```sql
+select 字段列表 from 表1, 表2 where 连接条件 ...;
+```
+
+显式内连接语法格式：
+```sql
+select 字段列表 from 表1 [inner] join 表2 on 连接条件 ...;
+```
+
+> 注意：
+>
+> 在多表联查时，我们指定字段时，需要在字段名前面加上表名，来指定具体是哪一张表的字段；例如：`emp.dept_id`。
+
+给表起别名简化书写：
+```sql
+select 字段列表 from 表1 [as] 别名1, 表2 [as] 别名2 where 条件 ...;
+
+select 字段列表 from 表1 别名1, 表2 别名2 where 条件 ...;   -- as 可以省略
+```
+
+> 注意：
+>
+> 一旦为表起了别名，就不能再使用表名来指定对应的字段了，此时只能够使用别名来指定字段。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 内连接 =============================
+-- A. 查询所有员工的 ID、姓名及所属的部门名称（隐式、显式内连接实现）
+-- 隐式
+select emp.id, emp.name, dept.name from emp, dept where emp.dept_id = dept.id;
+
+-- 显式
+select emp.id, emp.name, dept.name from emp inner join dept on emp.dept_id = dept.id;
+
+-- 显式（inner 关键字可以省略）
+select emp.id, emp.name, dept.name from emp join dept on emp.dept_id = dept.id;
+
+
+-- B. 查询性别为男且工资高于 8000 的员工的 ID、姓名及所属的部门名称（隐式、显式内连接实现）
+-- 隐式
+select emp.id, emp.name, dept.name from emp, dept where emp.dept_id = dept.id and emp.gender = 1 and emp.salary > 8000;
+
+-- 显式
+select emp.id, emp.name, dept.name from emp join dept on emp.dept_id = dept.id where emp.gender = 1 and emp.salary > 8000;
+
+-- 为表起别名
+select e.id, e.name, d.name from emp e join dept d on e.dept_id = d.id where e.gender = 1 and e.salary > 8000;
+```
+
+### 2.3 外连接
+
+外连接分为两种：左外连接和右外连接。
+
+左外连接语法格式：
+```sql
+-- 左外连接：以 left join 关键字左边的表为主表，查询主表中所有数据，以及和主表匹配的右边表中的数据
+select 字段列表 from 表1 left [outer] join 表2 on 连接条件 ...;
+```
+* 左外连接相当于查询表 1（左表）的所有数据，当然也包含表 1 和表 2 交集部分的数据。
+
+右外连接语法格式：
+```sql
+-- 右外连接：以 right join 关键字右边的表为主表，查询主表中所有数据，以及和主表匹配的左边表中的数据
+select 字段列表 from 表1 right [outer] join 表2 on 连接条件 ...;
+```
+* 右外连接相当于查询表 2（右表）的所有数据，当然也包括表 1 和表 2 交集部分的数据。
+
+> 注意：
+>
+> 左外连接和右外连接是可以相互替换的，只需要调整连接查询时 SQL 语句中表的先后顺序就可以了。而我们在日常开发使用时，更偏向于左外连接。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 外连接 =============================
+-- A. 查询员工表所有员工的姓名和对应的部门名称（左外连接）
+select e.name, d.name from emp e left outer join dept d on e.dept_id = d.id;
+
+-- B. 查询部门表所有部门的名称和对应的员工名称（右外连接）
+select d.name, e.name from emp e right outer join dept d on e.dept_id = d.id;
+
+-- outer 关键字可以省略
+select d.name, e.name from emp e right join dept d on e.dept_id = d.id;
+
+-- C. 查询工资高于 8000 的所有员工的姓名和对应的部门名称（左外连接）
+-- 方式一：左外连接
+select e.name, d.name from emp e left join dept d on e.dept_id = d.id where e.salary > 8000;
+
+-- 方式二：右外连接
+select e.name, d.name from dept d right join emp e on e.dept_id = d.id where e.salary > 8000;
+```
+
+### 2.4 子查询
+
+#### 2.4.1 介绍
+
+SQL 语句中嵌套 select 语句，称为嵌套查询，又称为子查询。
+
+语法格式：
+```sql
+SELECT * FROM t1 WHERE column1 = (SELECT column1 FROM t2 ...);
+```
+
+子查询外部的语句可以是 insert / update / delete / select 的任何一个，最常见的是 select。
+
+根据子查询结果的不同分为：
+* 标量子查询（子查询结果为单个值（一行一列））。
+* 列子查询（子查询结果为一列，但可以是多行）。
+* 行子查询（子查询结果为一行，但可以是多列）。
+* 表子查询（子查询结果为多行多列（相当于子查询结果是一张表））。
+
+子查询可以书写的位置：
+* where 之后。
+* from 之后。
+* select 之后。
+
+> 注意：
+>
+> 子查询的要点是：先对需求做拆分，明确具体的步骤；然后再逐条编写 SQL 语句；最终将多条 SQL 语句合并为一条。
+
+#### 2.4.2 标量子查询
+
+子查询返回的结果是单个值（数字、字符串、日期等），最简单的形式，这种子查询称为 **标量子查询**。
+
+常用的操作符：`=`、`<>`、`>`、`>=`、`<`、`<=`。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 子查询 =============================
+-- 标量子查询
+-- A. 查询最早入职的员工信息
+-- a. 获取到最早入职时间
+select min(entry_date) from emp;
+
+-- b. 查询最早入职的员工信息
+select * from emp where entry_date = (select min(entry_date) from emp);
+
+
+-- B. 查询在“阮小五”入职之后入职的员工信息
+-- a. 查询“阮小五”的入职时间
+select entry_date from emp where name = '阮小五';
+
+-- b. 查询在该时间之后入职的员工信息
+select * from emp where entry_date > (select entry_date from emp where name = '阮小五');
+```
+
+#### 2.4.3 列子查询
+
+子查询返回的结果是一列（可以是多行），这种子查询称为 **列子查询**。
+
+常用的操作符：
+| 操作符 | 描述 |
+| :--: | :--: |
+| `in` | 在指定的集合范围之内，多选一 |
+| `not in` | 不在指定的集合范围之内 |
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 子查询 =============================
+-- 列子查询
+-- A. 查询“教研部”和“咨询部”的所有员工信息
+-- a. 查询“教研部”和“咨询部”的部门 ID
+select id from dept where name = '教研部' or name = '咨询部';
+
+-- b. 查询指定部门 ID 的员工信息
+select * from emp where dept_id in (select id from dept where name = '教研部' or name = '咨询部');
+```
+
+#### 2.4.4 行子查询
+
+子查询返回的结果是一行（可以是多列），这种子查询称为 **行子查询**。
+
+常用的操作符：`=`、`<>`、`IN`、`NOT IN`。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 子查询 =============================
+-- 行子查询
+-- A. 查询与“李忠”的薪资及职位都相同的员工信息
+-- a. 查询“李忠”的薪资及职位
+select salary, job from emp where name = '李忠';
+
+-- b. 查询指定薪资和职位的员工信息
+select * from emp where salary = (select salary from emp where name = '李忠') and job = (select job from emp where name = '李忠');
+
+-- 优化：
+select * from emp where (salary, job) = (select salary, job from emp where name = '李忠');
+```
+
+#### 2.4.5 表子查询
+
+子查询返回的结果是多行多列，常作为临时表，这种子查询称为 **表子查询**。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- ============================= 子查询 =============================
+-- 表子查询
+-- A. 获取每个部门中薪资最高的员工信息
+-- a. 获取每个部门的最高薪资
+select dept_id, max(salary) from emp group by dept_id;
+
+-- b. 查询每个部门中薪资最高的员工信息
+select * from emp e, (select dept_id, max(salary) max_sal from emp group by dept_id) a
+    where e.dept_id = a.dept_id and e.salary = a.max_sal;
+```
+
+#### 2.4.6 案例
+
+根据需求，完成多表查询的 SQL 语句的编写。
+
+示例代码：
+```sql
+-- MySQL03.sql
+
+-- 需求:
+-- 1. 查询“教研部”性别为男，且在“2011-05-01”之后入职的员工信息
+-- 表：dept、emp
+select e.* from emp e, dept d where e.dept_id = d.id and d.name = '教研部' and e.gender = 1 and e.entry_date > '2011-05-01';
+
+
+-- 2. 查询工资低于公司平均工资的且性别为男的员工信息
+-- 表：emp
+-- 2.1 查询公司平均工资
+select avg(salary) from emp;
+
+-- 2.2 查询工资低于公司平均工资的且性别为男的员工信息
+select * from emp where salary < (select avg(salary) from emp) and gender = 1;
+
+
+-- 3. 查询部门人数超过 10 人的部门名称
+-- 表：dept、emp
+select d.name, count(*) from emp e, dept d where e.dept_id = d.id group by d.name having count(*) > 10;
+
+
+-- 4. 查询在“2010-05-01”后入职，且薪资高于 10000 的“教研部”员工信息，并根据薪资倒序排序
+-- 表：dept、emp
+select e.* from emp e, dept d where e.dept_id = d.id and e.entry_date > '2010-05-01'
+                                and e.salary > 10000 and d.name = '教研部' order by e.salary desc;
+
+
+-- 5. 查询工资低于本部门平均工资的员工信息
+-- 5.1 查询每个部门的平均工资
+select dept_id, avg(salary) avg_sal from emp group by dept_id;
+
+-- 5.2 查询工资低于本部门平均工资的员工信息
+select e.* from emp e, (select dept_id, avg(salary) avg_sal from emp group by dept_id) as a
+           where e.dept_id = a.dept_id and e.salary < a.avg_sal;
+```
