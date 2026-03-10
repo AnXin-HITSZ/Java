@@ -503,6 +503,68 @@ select e.* from emp e, (select dept_id, avg(salary) avg_sal from emp group by de
 
 示例代码：
 ```java
+/* pojo/Emp.java */
+
+package com.anxin_hitsz.pojo;
+
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+/**
+ * ClassName: Emp
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:24
+ * @Version 1.0
+ */
+@Data
+public class Emp {
+    private Integer id; // ID，主键
+    private String username;    // 用户名
+    private String password;    // 密码
+    private String name;    // 姓名
+    private Integer gender; // 性别：1 - 男；2 - 女
+    private String phone;   // 手机号
+    private Integer job;    // 职位：1 - 班主任；2 - 讲师；3 - 学工主管；4 - 教研主管；5 - 咨询师
+    private Integer salary; // 薪资
+    private String image;   // 头像
+    private LocalDate entryDate;    // 入职日期
+    private Integer deptId; // 关联的部门 ID
+    private LocalDateTime createTime;   // 创建时间
+    private LocalDateTime updateTime;   // 修改时间
+}
+
+
+/* pojo/EmpExpr.java */
+
+package com.anxin_hitsz.pojo;
+
+import lombok.Data;
+
+import java.time.LocalDate;
+
+/**
+ * ClassName: EmpExpr
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:28
+ * @Version 1.0
+ */
+@Data
+public class EmpExpr {
+    private Integer id; // ID
+    private Integer empId;  // 员工 ID
+    private LocalDate begin;    // 开始时间
+    private LocalDate end;  // 结束时间
+    private String company; // 公司名称
+    private String job; // 职位
+}
 
 ```
 
@@ -512,16 +574,126 @@ select e.* from emp e, (select dept_id, avg(salary) avg_sal from emp group by de
 
 * Mapper 层：
 ```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import org.apache.ibatis.annotations.Mapper;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+}
+
+
+/* mapper/EmpExprMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+import org.apache.ibatis.annotations.Mapper;
+
+/**
+ * ClassName: EmpExprMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+/**
+ * 员工工作经历
+ */
+@Mapper
+public interface EmpExprMapper {
+}
 
 ```
 
 * Service 层：
 ```java
+/* service/EmpService.java */
+
+package com.anxin_hitsz.service;
+
+/**
+ * ClassName: EmpService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+public interface EmpService {
+}
+
+
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.service.EmpService;
+import org.springframework.stereotype.Service;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+}
 
 ```
 
+> 注意：
+>
+> 此处不需要构建 `EmpExpr` 类对应的 Service 层，因为 `EmpExpr` 类所涉及的表为 `Emp` 类所涉及的表的附属表。因此，只需要构建 `Emp` 类对应的 Service 层即可。
+
 * Controller 层：
 ```java
+/* controller/EmpController.java */
+
+package com.anxin_hitsz.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * ClassName: EmpController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:33
+ * @Version 1.0
+ */
+
+/**
+ * 员工管理 Controller
+ */
+@Slf4j
+@RestController
+public class EmpController {
+}
 
 ```
 
@@ -533,25 +705,57 @@ select e.* from emp e, (select dept_id, avg(salary) avg_sal from emp group by de
 
 所以，这里需要用左外连接实现。具体 SQL 语句如下：
 ```sql
+-- MySQL04.sql
 
+-- 查询所有的员工信息，以及员工归属的部门名称
+select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id;
 ```
 
 2). Mapper 接口方法定义
 
-定义一个员工管理的 Mapper 接口 `EmpMapper`，并在其中完成员工信息的查询。具体代码如下：
-```java
-
-```
+定义一个员工管理的 Mapper 接口 `EmpMapper`，并在其中完成员工信息的查询。
 
 注意，上述 SQL 语句中，给部门名称起了别名 `deptName`，是因为在接口文档中，要求部门名称给前端返回的数据中，就必须叫 `deptName`。而这里，我们需要将查询返回的每一条记录都封装到 `Emp` 对象中，那么就必须保证查询返回的字段名与属性名是一一对应的。
 
-此时，我们就需要在 Emp 中定义一个属性 deptName 用来封装部门名称。具体如下：
+此时，我们就需要在 `Emp` 中定义一个属性 `deptName` 用来封装部门名称。具体如下：
 ```java
+/* pojo/Emp.java */
 
-```
+package com.anxin_hitsz.pojo;
 
-代码编写完毕后，我们可以编写一个单元测试，对上述的程序进行测试：
-```java
+import lombok.Data;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+/**
+ * ClassName: Emp
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:24
+ * @Version 1.0
+ */
+@Data
+public class Emp {
+    private Integer id; // ID，主键
+    private String username;    // 用户名
+    private String password;    // 密码
+    private String name;    // 姓名
+    private Integer gender; // 性别：1 - 男；2 - 女
+    private String phone;   // 手机号
+    private Integer job;    // 职位：1 - 班主任；2 - 讲师；3 - 学工主管；4 - 教研主管；5 - 咨询师
+    private Integer salary; // 薪资
+    private String image;   // 头像
+    private LocalDate entryDate;    // 入职日期
+    private Integer deptId; // 关联的部门 ID
+    private LocalDateTime createTime;   // 创建时间
+    private LocalDateTime updateTime;   // 修改时间
+
+    // 封装部门名称
+    private String deptName;
+}
 
 ```
 
@@ -567,3 +771,263 @@ select e.* from emp e, (select dept_id, avg(salary) avg_sal from emp group by de
 ![员工管理 - 分页查询 - 页面原型](./images/08_员工管理-分页查询-页面原型.png "员工管理 - 分页查询 - 页面原型")
 
 要想从数据库中进行分页查询，我们要使用 `LIMIT` 关键字，格式为 `limit 开始索引 每页显示的条数`，且开始索引的计算公式为 $开始索引 = (当前页码 - 1) \times 每页显示条数$。
+
+我们继续基于页面原型进行分析，得出以下结论：
+* 前端在请求服务端时，传递的参数：
+  * 当前页码 page；
+  * 每页显示条数 pageSize。
+* 后端需要响应什么数据给前端：
+  * 所查询到的数据列表（存储到 List 集合中）；
+  * 总记录数 total。
+
+![分页查询 - 分析](./images/08_分页查询-分析.png "分页查询 - 分析")
+
+后端给前端返回的两部分数据我们通常封装到 `PageResult` 对象中，并将该对象转换为 JSON 格式的数据响应回给浏览器：
+```java
+/* pojo/PageResult.java */
+
+package com.anxin_hitsz.pojo;
+
+/**
+ * ClassName: PageResult
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 17:18
+ * @Version 1.0
+ */
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * 分页结果封装类
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageResult<T> {
+    private Long total;
+    private List<T> rows;
+}
+
+```
+
+#### 3.2.2 接口描述
+
+1). 基本信息
+
+* 请求路径：/emps。
+* 请求方式：GET。
+* 接口描述：该接口用于员工列表数据的条件分页查询。
+
+2). 请求参数
+
+详见接口文档。
+
+3). 响应数据
+
+参数格式：application/json。
+
+详见接口文档。
+
+#### 3.2.3 原始方式
+
+##### 3.2.3.1 代码实现
+
+通过查看接口文档 - 员工列表查询：
+* 请求路径：/emps。
+* 请求方式：GET。
+* 请求参数：跟随在请求路径后的参数字符串；例如：/emps?page=1&pageSize=10。
+* 响应数据：JSON 格式。
+
+示例代码：
+
+* Controller 层：
+```java
+/* controller/EmpController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.EmpService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * ClassName: EmpController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:33
+ * @Version 1.0
+ */
+
+/**
+ * 员工管理 Controller
+ */
+@RequestMapping("/emps")
+@Slf4j
+@RestController
+public class EmpController {
+
+    @Autowired
+    private EmpService empService;
+
+    /**
+     * 分页查询
+     */
+    @GetMapping
+    public Result page(@RequestParam(defaultValue = "1") Integer page,
+                       @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("分页查询: {}, {}", page, pageSize);
+        PageResult<Emp> pageResult = empService.page(page, pageSize);
+        return Result.success(pageResult);
+    }
+
+}
+
+```
+
+> 注意：
+>
+> `@RequestParam(defaultValue="默认值")` 可设置请求参数默认值。
+
+* Service 层：
+```java
+/* service/EmpService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+
+/**
+ * ClassName: EmpService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+public interface EmpService {
+    /**
+     * 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+    PageResult<Emp> page(Integer page, Integer pageSize);
+
+}
+
+
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    @Override
+    public PageResult<Emp> page(Integer page, Integer pageSize) {
+        // 1. 调用 Mapper 接口，查询总记录数
+        Long total = empMapper.count();
+
+        // 2. 调用 Mapper 接口，查询结果列表
+        Integer start = (page - 1) * pageSize;
+        List<Emp> rows = empMapper.list(start, pageSize);
+
+        // 3. 封装结果 PageResult
+        return new PageResult<Emp>(total, rows);
+    }
+}
+
+```
+
+* Mapper 层：
+```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    /**
+     * 查询总记录数
+     */
+    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+    public Long count();
+
+    /**
+     * 分页查询
+     */
+    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+            "order by e.update_time desc limit #{start}, #{pageSize}")
+    public List<Emp> list(Integer start, Integer pageSize);
+
+}
+
+```
+
+##### 3.2.3.2 功能测试
+
+功能开发完成后，重新启动项目，使用 Apifox，发起 GET 请求。
+
+##### 3.2.3.3 前后端联调
+
+打开浏览器，测试后端功能接口。
+
+点击下面的页码，可以正常地查询出对应的数据。
