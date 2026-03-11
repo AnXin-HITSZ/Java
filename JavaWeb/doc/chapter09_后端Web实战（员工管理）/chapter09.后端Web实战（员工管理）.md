@@ -651,3 +651,571 @@ rollback;
 ```
 
 ### 2.4 Spring 事务管理
+
+#### 2.4.1 分析
+
+Spring 框架当中已经把事务控制的代码都封装好了，并不需要我们手动实现。我们使用了 Spring 框架，只需要通过一个简单的注解 `@Transactional` 即可。
+
+#### 2.4.2 `@Transactional` 注解
+
+注解：`@Transactional`。
+
+作用：在当前方法执行开始之前开启事务，方法执行完毕之后提交事务；如果在这个方法执行的过程当中出现了异常，就会进行事务的回滚操作。
+
+位置：业务层（Service）的方法上、类上、接口上。
+* 方法上（推荐）：当前方法交给 Spring 进行事务管理。
+* 类上：当前类中所有的方法都交由 Spring 进行事务管理。
+* 接口上：接口下所有的实现类中所有的方法都交给 Spring 进行事务管理。
+
+示例代码：
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpExprMapper;
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpExpr;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+    @Autowired
+    private EmpExprMapper empExprMapper;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * 注意事项：
+     *         1. 定义的 SQL 语句结尾不能加分号 “;”
+     *         2. PageHelper 仅仅能够对紧跟在其后的第一个查询语句进行分页处理
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end) {
+//        // 1. 设置分页参数（PageHelper）
+//        PageHelper.startPage(page, pageSize);
+//
+//        // 2. 执行查询
+//        List<Emp> empList = empMapper.list(name, gender, begin, end);
+//
+//        // 3. 解析查询结果，并封装
+//        Page<Emp> p = (Page<Emp>) empList;
+//        return new PageResult<Emp>(p.getTotal(), p.getResult());
+//    }
+
+    @Override
+    public PageResult<Emp> page(EmpQueryParam empQueryParam) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(empQueryParam.getPage(), empQueryParam.getPageSize());
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list(empQueryParam);
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+    @Transactional  // 事务管理
+    @Override
+    public void save(Emp emp) {
+        // 1. 保存员工基本信息
+        emp.setCreateTime(LocalDateTime.now());
+        emp.setUpdateTime(LocalDateTime.now());
+        empMapper.insert(emp);
+
+        // 2. 保存员工工作经历信息
+        List<EmpExpr> exprList = emp.getExprList();
+        if (!CollectionUtils.isEmpty(exprList)) {
+            // 遍历集合，为 empId 赋值
+            exprList.forEach(empExpr -> {
+                empExpr.setEmpId(emp.getId());
+            });
+            empExprMapper.insertBatch(exprList);
+        }
+    }
+
+}
+
+```
+
+我们一般会在业务层中通过 `@Transactional` 注解来控制事务。因为在业务层中，一个业务功能可能会包含多个数据访问的操作，因此在业务层来控制事务，我们就可以将多个数据访问操作控制在一个事务范围内。
+
+> 注意：
+>
+> 可以在 application.yml 配置文件中开启事务管理日志：
+> ```yaml
+> # 配置 Spring 事务管理日志级别
+> logging: 
+>   level: 
+>     org.springframework.jdbc.support.JdbcTransactionManager: debug
+> ```
+>
+> 这样就可以在控制台看到和事务相关的日志信息了。
+>
+> 同时，我们也可以启用 Grep Console 插件，对日志信息进行高亮。
+
+#### 2.4.3 事务进阶
+
+前面我们通过 Spring 事务管理注解 `@Transactional` 已经控制了业务层方法的事务。接下来，我们详细介绍一下 `@Transactional` 事务管理注解的使用细节，这里主要介绍 `@Transactional` 注解中的两个常见的属性：
+* 异常回滚的属性：`rollbackFor`。
+* 事务传播行为：`propagation`。
+
+##### 2.4.3.1 `rollbackFor`
+
+默认情况下，只有出现 RuntimeException（运行时异常）才会回滚事务。
+
+假设我们想让所有的异常都回滚，需要来配置 `@Transactional` 注解中的 `rollbackFor` 属性，通过 `rollbackFor` 属性可以指定出现何种异常类型回滚事务。
+
+示例代码：
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpExprMapper;
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpExpr;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+    @Autowired
+    private EmpExprMapper empExprMapper;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * 注意事项：
+     *         1. 定义的 SQL 语句结尾不能加分号 “;”
+     *         2. PageHelper 仅仅能够对紧跟在其后的第一个查询语句进行分页处理
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end) {
+//        // 1. 设置分页参数（PageHelper）
+//        PageHelper.startPage(page, pageSize);
+//
+//        // 2. 执行查询
+//        List<Emp> empList = empMapper.list(name, gender, begin, end);
+//
+//        // 3. 解析查询结果，并封装
+//        Page<Emp> p = (Page<Emp>) empList;
+//        return new PageResult<Emp>(p.getTotal(), p.getResult());
+//    }
+
+    @Override
+    public PageResult<Emp> page(EmpQueryParam empQueryParam) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(empQueryParam.getPage(), empQueryParam.getPageSize());
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list(empQueryParam);
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+    @Transactional(rollbackFor = {Exception.class})  // 事务管理 - 默认出现运行时异常 RuntimeException 才会回滚
+    @Override
+    public void save(Emp emp) {
+        // 1. 保存员工基本信息
+        emp.setCreateTime(LocalDateTime.now());
+        emp.setUpdateTime(LocalDateTime.now());
+        empMapper.insert(emp);
+
+        // 2. 保存员工工作经历信息
+        List<EmpExpr> exprList = emp.getExprList();
+        if (!CollectionUtils.isEmpty(exprList)) {
+            // 遍历集合，为 empId 赋值
+            exprList.forEach(empExpr -> {
+                empExpr.setEmpId(emp.getId());
+            });
+            empExprMapper.insertBatch(exprList);
+        }
+    }
+
+}
+
+```
+
+> 结论：
+> * 在 Spring 的事务管理中，默认只有运行时异常 RuntimeException 才会回滚。
+> * 如果还需要回滚指定类型的异常，可以通过 `rollbackFor` 属性来指定。
+
+##### 2.4.3.2 `propagation`
+
+###### 2.4.3.2.1 介绍
+
+`propagation` 属性用来配置事务的传播行为。
+
+事务的传播行为是指，当一个事务方法被另一个事务方法调用时，这个事务方法应该如何进行事务控制。
+
+我们要想控制事务的传播行为，就需要在 `@Transactional` 注解的后面指定一个属性 `propagation`，通过 `propagation` 属性来指定传播行为。
+
+常见的事务传播行为如下表所示：
+| 属性值 | 含义 |
+| :--: | :--: |
+| `REQUIRED` | 【默认值】需要事务，有则加入，无则创建新事务 |
+| `REQUIRES_NEW` | 需要新事物，无论有无，总是创建新事物 |
+| `SUPPORTS` | 支持事务，有则加入，无则在无事务状态中运行 |
+| `NOT_SUPPORTED` | 不支持事务，在无事务状态下运行，如果当前存在已有事务，则挂起当前事务 |
+| `MANDATORY` | 必须有事务，否则抛异常 |
+| `NEVER` | 必须无事务，否则抛异常 |
+| ... | ... |
+
+###### 2.4.3.2.2 案例
+
+接下来，我们通过一个案例来演示事务传播行为 `propagation` 属性的使用。
+
+**需求：** 在新增员工信息时，无论是成功还是失败，都要记录操作日志。
+
+**步骤：**
+1. 准备日志表 emp_log、实体类 `EmpLog`、Mapper 接口 `EmpLogMapper`。
+2. 在新增员工时记录日志。
+
+**准备工作：**
+
+1). 创建数据库表 emp_log 日志表
+
+```sql
+-- MySQL04.sql
+
+-- 创建员工日志表
+create table emp_log(
+                        id int unsigned primary key auto_increment comment 'ID，主键',
+                        operate_time datetime comment '操作时间',
+                        info varchar(2000) comment '日志信息'
+) comment '员工日志表';
+```
+
+2). 创建实体类 `EmpLog`
+
+```java
+/* pojo/EmpLog.java */
+
+package com.anxin_hitsz.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EmpLog {
+    private Integer id; //ID
+    private LocalDateTime operateTime; //操作时间
+    private String info; //详细信息
+}
+
+```
+
+3). 实现 Mapper 接口 `EmpLogMapper`
+
+```java
+/* mapper/EmpLogMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+import com.anxin_hitsz.pojo.EmpLog;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@Mapper
+public interface EmpLogMapper {
+
+    @Insert("insert into emp_log (operate_time, info) values (#{operateTime}, #{info})")
+    public void insert(EmpLog empLog);
+
+}
+
+```
+
+4). 创建业务接口 `EmpLogService`
+
+```java
+/* service/EmpLogService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.EmpLog;
+
+public interface EmpLogService {
+
+    public void insertLog(EmpLog empLog);
+
+}
+
+```
+
+5). 实现业务实现类 `EmpLogServiceImpl`
+
+```java
+/* service/impl/EmpLogServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpLogMapper;
+import com.anxin_hitsz.mapper.EmpLogMapper;
+import com.anxin_hitsz.pojo.EmpLog;
+import com.anxin_hitsz.service.EmpLogService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class EmpLogServiceImpl implements EmpLogService {
+
+    @Autowired
+    private EmpLogMapper empLogMapper;
+    
+    @Transactional(propagation = Propagation.REQUIRES_NEW)  // 需要在一个新的事务中运行
+    @Override
+    public void insertLog(EmpLog empLog) {
+        empLogMapper.insert(empLog);
+    }
+}
+
+```
+
+**代码实现：**
+
+业务实现类 `EmpServiceImpl`：
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpExprMapper;
+import com.anxin_hitsz.mapper.EmpLogMapper;
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.*;
+import com.anxin_hitsz.service.EmpLogService;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+    @Autowired
+    private EmpExprMapper empExprMapper;
+    @Autowired
+    private EmpLogService empLogService;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * 注意事项：
+     *         1. 定义的 SQL 语句结尾不能加分号 “;”
+     *         2. PageHelper 仅仅能够对紧跟在其后的第一个查询语句进行分页处理
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end) {
+//        // 1. 设置分页参数（PageHelper）
+//        PageHelper.startPage(page, pageSize);
+//
+//        // 2. 执行查询
+//        List<Emp> empList = empMapper.list(name, gender, begin, end);
+//
+//        // 3. 解析查询结果，并封装
+//        Page<Emp> p = (Page<Emp>) empList;
+//        return new PageResult<Emp>(p.getTotal(), p.getResult());
+//    }
+
+    @Override
+    public PageResult<Emp> page(EmpQueryParam empQueryParam) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(empQueryParam.getPage(), empQueryParam.getPageSize());
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list(empQueryParam);
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+    @Transactional(rollbackFor = {Exception.class})  // 事务管理 - 默认出现运行时异常 RuntimeException 才会回滚
+    @Override
+    public void save(Emp emp) {
+        try {
+            // 1. 保存员工基本信息
+            emp.setCreateTime(LocalDateTime.now());
+            emp.setUpdateTime(LocalDateTime.now());
+            empMapper.insert(emp);
+
+            // 2. 保存员工工作经历信息
+            List<EmpExpr> exprList = emp.getExprList();
+            if (!CollectionUtils.isEmpty(exprList)) {
+                // 遍历集合，为 empId 赋值
+                exprList.forEach(empExpr -> {
+                    empExpr.setEmpId(emp.getId());
+                });
+                empExprMapper.insertBatch(exprList);
+            }
+        } finally {
+            // 记录操作日志
+            EmpLog empLog = new EmpLog(null, LocalDateTime.now(), "新增员工：" + emp);
+            empLogService.insertLog(empLog);
+        }
+    }
+
+}
+
+```
+
+**测试：**
+
+重新启动 SpringBoot 服务，测试新增员工的操作，查看输出日志。
+
+此时，EmpServiceImpl 中的 save 方法运行时，会开启一个业务；当调用 empLogService.insertLog(empLog) 时，也会创建一个新的业务。此时，当 insertLog 方法运行完毕之后，事务就已经提交了，即使外部的事务出现异常，内部已经提交的事务也不会回滚了，因为是两个独立的事务。
+
+> 注意：
+> * REQUIRED：大部分情况下都是用该传播行为即可。
+> * REQUIRES_NEW：当我们不希望事务之间相互影响时，可以使用该传播行为；例如：下订单前需要记录日志，不论订单保存成功与否，都需要保证日志记录能够记录成功。
+
+### 2.5 事务四大特性
+
+事务的四大特性：
+* 原子性（Atomicity）：事务是不可分割的最小单元，要么全部成功，要么全部失败。
+* 一致性（Consistency）：事务完成时，必须使所有的数据都保持一致状态。
+* 隔离性（Isolation）：数据库系统提供的隔离机制，保证事务在不受外部并发操作影响的独立环境下运行。
+* 持久性（Durability）：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的。
+
+事务的四大特性简称为：ACID。

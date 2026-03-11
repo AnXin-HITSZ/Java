@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/tlias-web-management/src/main/java/com/anxin_hitsz/mapper/EmpLogMapper.java" value="784bebe5-de46-419a-b71c-2183e94ce1b8" />
     <file url="file://$PROJECT_DIR$/tlias-web-management/src/main/java/com/anxin_hitsz/mapper/EmpMapper.java" value="784bebe5-de46-419a-b71c-2183e94ce1b8" />
   </component>
 </project>
