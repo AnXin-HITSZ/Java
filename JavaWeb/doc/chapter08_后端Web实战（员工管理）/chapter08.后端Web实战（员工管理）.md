@@ -1031,3 +1031,835 @@ public interface EmpMapper {
 打开浏览器，测试后端功能接口。
 
 点击下面的页码，可以正常地查询出对应的数据。
+
+#### 3.2.4 PageHelper 分页插件
+
+##### 3.2.4.1 介绍
+
+分页查询的思路、步骤是比较固定的。在 Mapper 接口中定义两个方法执行两条不同的 SQL 语句：
+1. 查询总记录数。
+2. 指定页码的数据列表。
+
+在 Service 中调用 Mapper 接口的两个方法，分别获取总记录数和查询结果列表，然后再将获取的数据结果封装到 PageBean 对象中。
+
+因此，可以使用一些现成的分页插件来完成分页查询操作。对于 MyBatis 来讲，现在最主流的就是 PageHelper。
+
+PageHelper 是第三方提供的 MyBatis 框架中的一款功能强大、方便易用的分页插件，支持任何形式的单表、多表的分页查询。
+
+PageHelper 官网：[PageHelper 官网](https://pagehelper.github.io/ "PageHelper 官网")
+
+##### 3.2.4.2 代码实现
+
+当使用了 PageHelper 分页插件进行分页后，就无需在 Mapper 中进行手动分页了。在 Mapper 中，我们只需要进行正常的列表查询即可；在 Service 层中，调用 Mapper 的方法之前设置分页参数，在调用 Mapper 方法执行查询之后，解析分页结果，并将结果封装到 `PageResult` 对象中返回。
+
+具体步骤：
+
+1). 在 pom.xml 中引入依赖
+
+```xml
+<!-- 分页插件 PageHelper -->
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper-spring-boot-starter</artifactId>
+    <version>1.4.7</version>
+</dependency>
+```
+
+2). `EmpMapper`
+
+```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    // ------------------------------ 原始分页查询实现 ------------------------------
+    /**
+     * 查询总记录数
+     */
+//    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+//    public Long count();
+
+    /**
+     * 分页查询
+     */
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+//            "order by e.update_time desc limit #{start}, #{pageSize}")
+//    public List<Emp> list(Integer start, Integer pageSize);
+
+
+    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id order by e.update_time desc")
+    public List<Emp> list();
+
+}
+
+```
+
+3). `EmpServiceImpl`
+
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     */
+    @Override
+    public PageResult<Emp> page(Integer page, Integer pageSize) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(page, pageSize);
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list();
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+}
+
+```
+
+##### 3.2.4.3 功能测试
+
+功能开发完成后，我们重启项目工程，打开 Apifox，发起 GET 请求，访问 http://localhost:8080/emps?page=1&pageSize=5。
+
+我们可以看到数据可以正常查询返回，是可以正常实现分页查询的。
+
+##### 3.2.4.4 实现机制
+
+我们打开 IDEA 的控制台，可以看到在进行分页查询时，输出的 SQL 语句：
+![PageHelper 实现机制 - 进行分页查询时输出的 SQL 语句](./images/08_PageHelper实现机制-进行分页查询时输出的SQL语句.png "PageHelper 实现机制 - 进行分页查询时输出的 SQL 语句")
+
+我们看到执行了两条 SQL 语句，而这两条 SQL 语句，其实是从我们在 Mapper 接口中定义的 SQL 演变而来的。
+* 第一条 SQL 语句，用来查询总记录数：
+![PageHelper 实现机制 - 第一条 SQL 语句](./images/08_PageHelper实现机制-第一条SQL语句.png "PageHelper 实现机制 - 第一条 SQL 语句")
+  * 其实就是将我们编写的 SQL 语句进行的改造增强，将查询返回的字段列表替换成了 `count(0)` 来统计总记录数。
+* 第二条 SQL 语句，用来进行分页查询，查询指定页码对应的数据列表：
+![PageHelper 实现机制 - 第二条 SQL 语句](./images/08_PageHelper实现机制-第二条SQL语句.png "PageHelper 实现机制 - 第二条 SQL 语句")
+* 其实就是将我们编写的 SQL 语句进行的改造增强，在 SQL 语句之后拼接上了 `limit` 进行分页查询，而由于测试时查询的是第一页，起始索引是 0，所以简写为 `limit ?`。
+
+而 PageHelper 在进行分页查询时，会执行上述两条 SQL 语句，并将查询到的总记录数与数据列表封装到了 `Page<Emp>` 对象中。我们在获取查询结果时，只需要调用 `Page` 对象的方法就可以获取。
+
+> 注意：
+> * PageHelper 实现分页查询时，SQL 语句的结尾一定不要加分号（`;`）。
+> * PageHelper 只会对紧跟在其后的第一条 SQL 语句进行分页处理。
+
+### 3.3 条件分页查询
+
+完成了分页查询后，下面我们需要在分页查询的基础上，添加条件。
+
+#### 3.3.1 需求
+
+![条件分页查询 - 员工列表页面的查询 - 页面原型](./images/08_条件分页查询-员工列表页面的查询-页面原型.png "条件分页查询 - 员工列表页面的查询 - 页面原型")
+
+通过员工管理的页面原型，我们可以看到，员工列表页面的查询，不仅仅需要考虑分页，还需要考虑查询条件。
+
+因此，接下来，我们需要考虑在之前实现的分页查询的基础上，再加上查询条件。
+
+我们看到页面原型及需求中描述，搜索栏的搜索条件有三个，分别是：
+* 姓名：模糊匹配。
+* 性别：精确匹配。
+* 入职日期：范围匹配。
+
+#### 3.3.2 接口描述
+
+参照接口文档。
+
+#### 3.3.3 思路分析
+
+![条件分页查询 - 三层架构每一层的职责](./images/08_条件分页查询-三层架构每一层的职责.png "条件分页查询 - 三层架构每一层的职责")
+
+#### 3.3.4 功能开发
+
+查看接口文档 - 员工列表查询。
+
+在原有分页查询的代码的基础上进行改造。
+
+1). 在 `EmpController` 方法中通过多个方法形参，依次接收请求参数
+
+```java
+/* controller/EmpController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.EmpService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * ClassName: EmpController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:33
+ * @Version 1.0
+ */
+
+/**
+ * 员工管理 Controller
+ */
+@RequestMapping("/emps")
+@Slf4j
+@RestController
+public class EmpController {
+
+    @Autowired
+    private EmpService empService;
+
+    /**
+     * 分页查询
+     */
+    @GetMapping
+    public Result page(@RequestParam(defaultValue = "1") Integer page,
+                       @RequestParam(defaultValue = "10") Integer pageSize,
+                       String name,
+                       Integer gender,
+                       @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+                       @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+        log.info("分页查询: {}, {}, {}, {}, {}, {}", page, pageSize, name, gender, begin, end);
+        PageResult<Emp> pageResult = empService.page(page, pageSize, name, gender, begin, end);
+        return Result.success(pageResult);
+    }
+
+}
+
+```
+
+2). 修改 `EmpService` 及 `EmpServiceImpl` 中的代码逻辑
+
+* `EmpService`：
+```java
+/* service/EmpService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+
+import java.time.LocalDate;
+
+/**
+ * ClassName: EmpService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+public interface EmpService {
+    /**
+     * 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+    PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end);
+
+}
+
+```
+
+* `EmpServiceImpl`：
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * 注意事项：
+     *         1. 定义的 SQL 语句结尾不能加分号 “;”
+     *         2. PageHelper 仅仅能够对紧跟在其后的第一个查询语句进行分页处理
+     */
+    @Override
+    public PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(page, pageSize);
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list(name, gender, begin, end);
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+}
+
+```
+
+3). 调整 `EmpMapper` 接口方法
+
+```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    // ------------------------------ 原始分页查询实现 ------------------------------
+    /**
+     * 查询总记录数
+     */
+//    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+//    public Long count();
+
+    /**
+     * 分页查询
+     */
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+//            "order by e.update_time desc limit #{start}, #{pageSize}")
+//    public List<Emp> list(Integer start, Integer pageSize);
+
+
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id order by e.update_time desc")
+    public List<Emp> list(String name, Integer gender, LocalDate begin, LocalDate end);
+
+}
+
+```
+
+由于 SQL 语句比较复杂，建议将 SQL 语句配置在 XML 映射文件中。
+
+4). 新增 Mapper 映射文件 EmpMapper.xml
+
+```xml
+<!-- EmpMapper.xml -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anxin_hitsz.mapper.EmpMapper">
+
+    <select id="list" resultType="com.anxin_hitsz.pojo.Emp">
+        select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id
+        where
+            e.name like concat('%', #{name}, '%')
+            and e.gender = #{gender}
+            and e.entry_date between #{begin} and #{end}
+        order by e.update_time desc
+    </select>
+
+</mapper>
+```
+
+> 注意：
+>
+> 在SQL 语句中 `#{...}` 不可以被包括在 引号 `''` 之内，否则会被视为普通的字符而非占位符。因此，需要使用 `concat` 函数先完成字符串的拼接，再将其作为 `name` 字段的匹配条件。
+
+开发完成后，进行功能测试。
+
+测试时，需要注意传递的查询条件，有些查询条件是查不到数据的，因为数据库中没有符合条件的记录。
+
+#### 3.3.5 程序优化 1
+
+在上述分页条件查询中，请求参数比较多，因此在 Controller 层方法中接收请求参数的时候，也需要直接在 Controller 方法中声明与分页条件查询中请求参数数量一致的较多数量的参数。这样做，功能可以实现，但是不方便维护和管理。
+
+因此，我们可以针对上述问题进行优化。
+
+优化思路：定义一个实体类，来封装涉及到的请求参数。**需要保证，前端传递的请求参数和实体类的属性名是一样的。**
+
+1). 定义实体类：`EmpQueryParam`
+
+```java
+/* pojo/EmpQueryParam.java */
+
+package com.anxin_hitsz.pojo;
+
+import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+
+/**
+ * ClassName: EmpQueryParam
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 21:39
+ * @Version 1.0
+ */
+@Data
+public class EmpQueryParam {
+    private Integer page = 1;   // 页码
+    private Integer pageSize = 10;  // 每页展示记录数
+    private String name;    // 姓名
+    private Integer gender; // 性别
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate begin;    // 入职时间 - 开始
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate end;  // 入职时间 - 结束
+}
+
+```
+
+2). `EmpController` 接收请求参数
+
+```java
+/* controller/EmpController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.EmpService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * ClassName: EmpController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:33
+ * @Version 1.0
+ */
+
+/**
+ * 员工管理 Controller
+ */
+@RequestMapping("/emps")
+@Slf4j
+@RestController
+public class EmpController {
+
+    @Autowired
+    private EmpService empService;
+
+    /**
+     * 分页查询
+     */
+//    @GetMapping
+//    public Result page(@RequestParam(defaultValue = "1") Integer page,
+//                       @RequestParam(defaultValue = "10") Integer pageSize,
+//                       String name,
+//                       Integer gender,
+//                       @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+//                       @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+//        log.info("分页查询: {}, {}, {}, {}, {}, {}", page, pageSize, name, gender, begin, end);
+//        PageResult<Emp> pageResult = empService.page(page, pageSize, name, gender, begin, end);
+//        return Result.success(pageResult);
+//    }
+
+    /**
+     * 分页查询
+     */
+    @GetMapping
+    public Result page(EmpQueryParam empQueryParam) {
+        log.info("分页查询: {}", empQueryParam);
+        PageResult<Emp> pageResult = empService.page(empQueryParam);
+        return Result.success(pageResult);
+    }
+
+}
+
+```
+
+3). 修改 `EmpService` 接口方法
+
+```java
+/* service/EmpService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import com.anxin_hitsz.pojo.PageResult;
+
+import java.time.LocalDate;
+
+/**
+ * ClassName: EmpService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+public interface EmpService {
+
+    /**
+     * 分页查询
+     */
+    PageResult<Emp> page(EmpQueryParam empQueryParam);
+
+    /**
+     * 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     */
+//    PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end);
+
+}
+
+```
+
+4). 修改 `EmpServiceImpl` 中的 `page` 方法
+
+```java
+/* service/impl/EmpServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import com.anxin_hitsz.pojo.PageResult;
+import com.anxin_hitsz.service.EmpService;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * ClassName: EmpServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:31
+ * @Version 1.0
+ */
+@Service
+public class EmpServiceImpl implements EmpService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    /**
+     * 原始分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * @return
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize) {
+//        // 1. 调用 Mapper 接口，查询总记录数
+//        Long total = empMapper.count();
+//
+//        // 2. 调用 Mapper 接口，查询结果列表
+//        Integer start = (page - 1) * pageSize;
+//        List<Emp> rows = empMapper.list(start, pageSize);
+//
+//        // 3. 封装结果 PageResult
+//        return new PageResult<Emp>(total, rows);
+//    }
+
+    /**
+     * PageHelper 分页查询
+     * @param page 页码
+     * @param pageSize 每页记录数
+     * 注意事项：
+     *         1. 定义的 SQL 语句结尾不能加分号 “;”
+     *         2. PageHelper 仅仅能够对紧跟在其后的第一个查询语句进行分页处理
+     */
+//    @Override
+//    public PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end) {
+//        // 1. 设置分页参数（PageHelper）
+//        PageHelper.startPage(page, pageSize);
+//
+//        // 2. 执行查询
+//        List<Emp> empList = empMapper.list(name, gender, begin, end);
+//
+//        // 3. 解析查询结果，并封装
+//        Page<Emp> p = (Page<Emp>) empList;
+//        return new PageResult<Emp>(p.getTotal(), p.getResult());
+//    }
+
+    @Override
+    public PageResult<Emp> page(EmpQueryParam empQueryParam) {
+        // 1. 设置分页参数（PageHelper）
+        PageHelper.startPage(empQueryParam.getPage(), empQueryParam.getPageSize());
+
+        // 2. 执行查询
+        List<Emp> empList = empMapper.list(empQueryParam);
+
+        // 3. 解析查询结果，并封装
+        Page<Emp> p = (Page<Emp>) empList;
+        return new PageResult<Emp>(p.getTotal(), p.getResult());
+    }
+
+}
+
+```
+
+5). 修改 `EmpMapper` 接口方法
+
+```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    // ------------------------------ 原始分页查询实现 ------------------------------
+    /**
+     * 查询总记录数
+     */
+//    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+//    public Long count();
+
+    /**
+     * 分页查询
+     */
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+//            "order by e.update_time desc limit #{start}, #{pageSize}")
+//    public List<Emp> list(Integer start, Integer pageSize);
+
+
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id order by e.update_time desc")
+//    public List<Emp> list(String name, Integer gender, LocalDate begin, LocalDate end);
+
+    /**
+     * 条件查询员工信息
+     */
+    public List<Emp> list(EmpQueryParam empQueryParam);
+
+}
+
+```
+
+EmpMapper.xml 中的配置无需修改。
+
+代码优化完毕之后，重新启动运行测试，依然正常运行。
+
+但是，当我们在测试的时候，页码输入负数，查询是有问题的，查不到对应的数据了。那其实在 PageHelper 中，我们可以通过合理化参数配置，来解决这个问题。直接在 application.yml 中，引入如下配置即可：
+```yaml
+pagehelper:
+  reasonable: true
+  helper-dialect: mysql
+```
+
+其中，`reasonable` 为分页合理化参数，默认值为 `false`。当该参数设置为 `true` 时，pageNum <= 0 时会查询第一页，pageNum > pages（即超过总数时）会查询最后一页；默认 `false` 时，直接根据参数进行查询。
+
+#### 3.3.6 程序优化 2
+
+当前，我们在查询的时候，Mapper 映射配置文件中的 SQL 语句中，查询条件是写死的。而我们在员工管理中，根据条件查询员工信息时，查询条件是可选的，可以输入也可以不输入。如下所示：
+![根据条件查询员工信息 - 查询条件是可选的](./images/08_根据条件查询员工信息-查询条件是可选的.png "根据条件查询员工信息 - 查询条件是可选的")
+
+因此，上述 SQL 语句不应该是写死的，而应该根据用户输入的条件的变化而变化。
+
+这里需要通过 MyBatis 中的 **动态 SQL** 来实现。
+
+所谓动态 SQL，指的就是随着用户的输入或外部的条件的变化而变化的 SQL 语句。
+
+具体的代码实现如下：
+```xml
+<!-- EmpMapper.xml -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anxin_hitsz.mapper.EmpMapper">
+
+    <select id="list" resultType="com.anxin_hitsz.pojo.Emp">
+        select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id
+        <where>
+            <if test="name != null and name != ''">
+                e.name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and e.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and e.entry_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by e.update_time desc
+    </select>
+
+</mapper>
+```
+
+上述代码中，涉及到两个动态 SQL 标签的使用，分别为 `<if>` 和 `<where>`。这两个标签的具体作用如下：
+* `<if>`：判断条件是否成立，如果条件为 `true`，则拼接 SQL。
+* `<where>`：根据查询条件，来生成 `where` 关键字，并会自动去除条件前面多余的 `and` 或 `or`。
+
+代码优化完毕后，重新启动服务，进行测试。我们可以看到，当我们输入不同的搜索条件时，会根据查询条件动态地拼接 SQL 语句。

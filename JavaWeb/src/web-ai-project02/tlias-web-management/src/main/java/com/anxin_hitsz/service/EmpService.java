@@ -1,7 +1,10 @@
 package com.anxin_hitsz.service;
 
 import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
 import com.anxin_hitsz.pojo.PageResult;
+
+import java.time.LocalDate;
 
 /**
  * ClassName: EmpService
@@ -13,12 +16,22 @@ import com.anxin_hitsz.pojo.PageResult;
  * @Version 1.0
  */
 public interface EmpService {
+
+    /**
+     * 分页查询
+     */
+    PageResult<Emp> page(EmpQueryParam empQueryParam);
+
+    /**
+     * 新增员工信息
+     */
+    void save(Emp emp);
+
     /**
      * 分页查询
      * @param page 页码
      * @param pageSize 每页记录数
-     * @return
      */
-    PageResult<Emp> page(Integer page, Integer pageSize);
+//    PageResult<Emp> page(Integer page, Integer pageSize, String name, Integer gender, LocalDate begin, LocalDate end);
 
 }
