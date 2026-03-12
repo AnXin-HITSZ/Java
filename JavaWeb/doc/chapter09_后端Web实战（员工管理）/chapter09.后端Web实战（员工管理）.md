@@ -1219,3 +1219,299 @@ public class EmpServiceImpl implements EmpService {
 * 持久性（Durability）：事务一旦提交或回滚，它对数据库中的数据的改变就是永久的。
 
 事务的四大特性简称为：ACID。
+
+## 三、文件上传
+
+### 3.1 简介
+
+文件上传，是指将本地图片、视频、音频等文件上传到服务器，供其他用户浏览或下载的过程。
+
+文件上传前端代码形式如下：
+```html
+<!-- static/upload.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传文件</title>
+</head>
+<body>
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        姓名: <input type="text" name="name"><br>
+        年龄: <input type="text" name="age"><br>
+        头像: <input type="file" name="file"><br>
+        <input type="submit" value="提交">
+    </form>
+
+</body>
+</html>
+
+```
+
+上传文件的原始 form 表单，要求表单必须具备以下三点（上传文件页面三要素）：
+* 表单必须有 file 域，用于选择要上传的文件。
+* 表单提交方式必须为 POST：通常上传的文件会比较大，所以需要使用 POST 提交方式。
+* 表单的编码类型 `enctype` 必须要设置为 `multipart/form-data`：普通默认的编码格式是不适合传输大型的二进制数据的，所以在文件上传时，表单的编码格式必须设置为 `multipart/form-data`。
+
+服务端代码形式如下：
+```java
+/* controller/UploadController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Result;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * ClassName: UploadController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/12 13:46
+ * @Version 1.0
+ */
+@Slf4j
+@RestController
+public class UploadController {
+
+    @PostMapping("/upload")
+    public Result upload(String name, Integer age, MultipartFile file) {
+        log.info("接收参数: {}, {}, {}", name, age, file);
+        return Result.success();
+    }
+
+}
+
+```
+
+> 注意：
+>
+> Spring 中提供了一个 API：`MultipartFile`。使用这个 API 就可以来接收到上传的文件。
+
+若表单项的名字和方法中形参名不一致，则需要使用 `@RequestParam` 注解进行参数绑定：
+```java
+public Result upload(String username,
+                     Integer age,
+                     @RequestParam("file") MultipartFile image)
+```
+
+### 3.2 本地存储
+
+在 3.1 简介 中实现的文件上传功能，上传的文件只会在临时文件目录下存放；一旦上传操作执行结束，上传的文件就会被删除。
+
+为了解决这一问题，修改 Controller 层代码如下：
+```java
+/* controller/UploadController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Result;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * ClassName: UploadController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/12 13:46
+ * @Version 1.0
+ */
+@Slf4j
+@RestController
+public class UploadController {
+
+    @PostMapping("/upload")
+    public Result upload(String name, Integer age, MultipartFile file) throws IOException {
+        log.info("接收参数: {}, {}, {}", name, age, file);
+        // 获取原始文件名
+        String originalFilename = file.getOriginalFilename();
+        // 保存文件
+        file.transferTo(new File("D:/Temp/images/" + originalFilename));
+        return Result.success();
+    }
+
+}
+
+```
+
+以上我们已经完成了文件上传最基本的功能实现，可以在服务端接收到上传的文件，并将文件保存在本地服务器的磁盘目录中了。但是，经过测试，我们发现，如果上传的文件名相同，后面上传的文件会覆盖前面上传的文件。
+
+以下，解决文件的覆盖问题：
+```java
+/* controller/UploadController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Result;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
+/**
+ * ClassName: UploadController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/12 13:46
+ * @Version 1.0
+ */
+@Slf4j
+@RestController
+public class UploadController {
+
+    @PostMapping("/upload")
+    public Result upload(String name, Integer age, MultipartFile file) throws IOException {
+        log.info("接收参数: {}, {}, {}", name, age, file);
+        // 获取原始文件名
+        String originalFilename = file.getOriginalFilename();
+
+        // 新的文件名
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String newFileName = UUID.randomUUID().toString() + extension;
+
+        // 保存文件
+        file.transferTo(new File("D:/Temp/images/" + newFileName));
+        return Result.success();
+    }
+
+}
+
+```
+
+> 注意：
+>
+> `MultipartFile` 常见方法：
+> * `String getOriginalFilename()`：获取原始文件名。
+> * `void transferTo(File dest)`：将接收的文件转存到磁盘文件中。
+> * `long getSize()`：获取文件的大小，单位为字节。
+> * `byte[] getBytes()`：获取文件内容的字节数组。
+> * `InputStream getInputStream()`：获取接收到的文件内容的输入流。
+
+在 SpringBoot 中，文件上传时默认单个文件最大大小为 1M。那么如果需要上传大文件，可以在 application.yml 中进行如下配置：
+```yaml
+spring:
+  servlet:
+    multipart:
+      # 最大单个文件大小
+      max-file-size: 10MB
+      # 最大请求大小（包括所有文件和表单数据）
+      max-request-size: 100MB
+```
+
+到此时，我们已经完成了文件上传的本地存储方式。但是这种本地存储方式还存在问题，即如果直接存储在服务器的磁盘目录中，存在以下缺点：
+* 不安全：磁盘如果损坏，所有的文件就会丢失。
+* 容量有限：如果存储大量的图片，磁盘空间有限（磁盘不可能无限制扩容）。
+* 无法直接访问。
+
+为了解决上述问题，通常有两种解决方案：
+* 自己搭建存储服务器；例如：fastDFS、MinIO。
+* 使用现成的云服务；例如：阿里云、腾讯云、华为云。
+
+### 3.3 阿里云 OSS
+
+#### 3.3.1 准备工作
+
+##### 3.3.1.1 介绍
+
+阿里云对象存储 OSS（Object Storage Service），是一款海量、安全、低成本、高可靠性的云存储服务。使用 OSS，可以通过网络随时存储和调用包括文本、图片、音频和视频等在内的各种文件。
+
+在我们使用了阿里云 OSS 对象存储服务之后，我们的项目中如果涉及到文件上传这样的业务，在前端进行文件上传并请求到服务端时，在服务器本地磁盘中就不需要再来存储文件了。我们直接将接收到的文件上传到 OSS，由 OSS 帮我们存储和管理，同时阿里云的 OSS 存储服务还保障了我们所存储内容的安全可靠。
+
+> 注意：
+>
+> **SDK**（**S**oftware **D**evelopment **K**it）：软件开发包，包括辅助软件开发的依赖（jar 包）、代码示例等，都可以叫做 SDK。
+>
+> 简单说，SDK 中包含了我们使用第三方云服务时所需要的依赖，以及一些示例代码。我们可以参照 SDK 所提供的示例代码就可以完成入门程序。
+
+阿里云 OSS 对象存储服务具体使用步骤：
+![阿里云 OSS 对象存储服务具体使用步骤](./images/09_阿里云OSS对象存储服务具体使用步骤.png "阿里云 OSS 对象存储服务具体使用步骤")
+
+> 注意：
+>
+> **Bucket**：存储空间是用户用户存储对象（Object，即文件）的容器，所有的对象都必须隶属于某个存储空间。
+
+##### 3.3.1.2 配置 AccessKey
+
+1). 创建 AccessKey
+
+点击“AccessKey管理”，进入到管理页面。
+
+点击“创建AccessKey”，并记下 AccessKey ID、AccessKey Secret。
+
+2). 配置 AccessKey
+
+以**管理员身份**打开 CMD 命令行，执行如下命令，配置系统的环境变量：
+```bash
+set OSS_ACCESS_KEY_ID=your_oss_access_key_id
+set OSS_ACCESS_KEY_SECRET=your_oss_access_key_secret
+```
+
+执行如下命令，让更改生效：
+```bash
+setx OSS_ACCESS_KEY_ID "%OSS_ACCESS_KEY_ID%"
+setx OSS_ACCESS_KEY_SECRET "%OSS_ACCESS_KEY_SECRET%"
+```
+
+执行如下命令，验证环境变量是否生效：
+```bash
+echo %OSS_ACCESS_KEY_ID%
+echo %OSS_ACCESS_KEY_SECRET%
+```
+
+#### 3.3.2 入门
+
+参照官方所提供的 SDK 示例来编写入门程序。
+
+首先，我们需要打开阿里云 OSS 的官方文档，在官方文档中找到 SDK 的示例代码。
+
+参照文档，引入依赖：
+```xml
+
+```
+
+参照文档，编写入门程序：
+```java
+
+```
+
+> 注意：
+>
+> 在以上代码中，需要替换的内容为：
+> * `endpoint`：阿里云 OSS 中的 Bucket 对应的域名。
+> * `bucketName`：Bucket 名称。
+> * `objectName`：对象名称，即在 Bucket 中存储的对象的名称。
+> * `region`：Bucket 所属区域。
+
+运行以上程序后，会把本地的文件上传到阿里云 OSS 服务器上。
+
+#### 3.3.3 集成
+
+##### 3.3.3.1 介绍
+
+我们需要在案例中集成 OSS 对象存储服务，来存储和管理案例中上传的图片。
+
+将来我们需要在系统页面中访问并展示员工的图像，需要完成以下步骤：
+1. 上传员工的图像，并把图像保存起来（存储到阿里云 OSS）。
+2. 访问员工图像（通过图像在阿里云 OSS 的存储地址访问图像）。
+   * OSS 中的每一个文件都会分配一个访问的 URL，通过这个 URL 就可以访问到存储在阿里云上的图片；所以需要把 URL 返回给前端，这样前端就可以通过 URL 获取到图像。
+
+因此，UploadController 类需要完成以下功能：
