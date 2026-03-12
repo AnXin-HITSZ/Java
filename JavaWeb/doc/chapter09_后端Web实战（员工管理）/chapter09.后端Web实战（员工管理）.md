@@ -1485,12 +1485,97 @@ echo %OSS_ACCESS_KEY_SECRET%
 
 参照文档，引入依赖：
 ```xml
-
+<!-- 阿里云 OSS 依赖 -->
+<dependency>
+    <groupId>com.aliyun.oss</groupId>
+    <artifactId>aliyun-sdk-oss</artifactId>
+    <version>3.18.4</version>
+</dependency>
+<dependency>
+    <groupId>javax.xml.bind</groupId>
+    <artifactId>jaxb-api</artifactId>
+    <version>2.3.1</version>
+</dependency>
+<dependency>
+    <groupId>javax.activation</groupId>
+    <artifactId>activation</artifactId>
+    <version>1.1.1</version>
+</dependency>
+<!-- no more than 2.3.3-->
+<dependency>
+    <groupId>org.glassfish.jaxb</groupId>
+    <artifactId>jaxb-runtime</artifactId>
+    <version>2.3.3</version>
+</dependency>
 ```
 
-参照文档，编写入门程序：
+参照文档 - 文件上传，以下代码用于将本地文件 examplefile.txt 上传到目标存储空间 examplebucket 中 exampledir 目录下的 exampleobject.txt 文件。
 ```java
+import com.aliyun.oss.*;
+import com.aliyun.oss.common.auth.*;
+import com.aliyun.oss.common.comm.SignVersion;
+import com.aliyun.oss.model.PutObjectRequest;
+import com.aliyun.oss.model.PutObjectResult;
+import java.io.File;
 
+public class Demo {
+
+    public static void main(String[] args) throws Exception {
+        // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+        String endpoint = "https://oss-cn-hangzhou.aliyuncs.com";
+        // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+        // 填写Bucket名称，例如examplebucket。
+        String bucketName = "examplebucket";
+        // 填写Object完整路径，完整路径中不能包含Bucket名称，例如exampledir/exampleobject.txt。
+        String objectName = "exampledir/exampleobject.txt";
+        // 填写本地文件的完整路径，例如D:\\localpath\\examplefile.txt。
+        // 如果未指定本地路径，则默认从示例程序所属项目对应本地路径中上传文件。
+        String filePath= "D:\\localpath\\examplefile.txt";
+        // 填写Bucket所在地域。以华东1（杭州）为例，Region填写为cn-hangzhou。
+        String region = "cn-hangzhou";
+        
+        // 创建OSSClient实例。
+        // 当OSSClient实例不再使用时，调用shutdown方法以释放资源。
+        ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+        clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);        
+        OSS ossClient = OSSClientBuilder.create()
+        .endpoint(endpoint)
+        .credentialsProvider(credentialsProvider)
+        .clientConfiguration(clientBuilderConfiguration)
+        .region(region)               
+        .build();
+
+        try {
+            // 创建PutObjectRequest对象。
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, objectName, new File(filePath));
+            // 如果需要上传时设置存储类型和访问权限，请参考以下示例代码。
+            // ObjectMetadata metadata = new ObjectMetadata();
+            // metadata.setHeader(OSSHeaders.OSS_STORAGE_CLASS, StorageClass.Standard.toString());
+            // metadata.setObjectAcl(CannedAccessControlList.Private);
+            // putObjectRequest.setMetadata(metadata);
+            
+            // 上传文件。
+            PutObjectResult result = ossClient.putObject(putObjectRequest);           
+        } catch (OSSException oe) {
+            System.out.println("Caught an OSSException, which means your request made it to OSS, "
+                    + "but was rejected with an error response for some reason.");
+            System.out.println("Error Message:" + oe.getErrorMessage());
+            System.out.println("Error Code:" + oe.getErrorCode());
+            System.out.println("Request ID:" + oe.getRequestId());
+            System.out.println("Host ID:" + oe.getHostId());
+        } catch (ClientException ce) {
+            System.out.println("Caught an ClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with OSS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message:" + ce.getMessage());
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
+    }
+}
 ```
 
 > 注意：
@@ -1514,4 +1599,279 @@ echo %OSS_ACCESS_KEY_SECRET%
 2. 访问员工图像（通过图像在阿里云 OSS 的存储地址访问图像）。
    * OSS 中的每一个文件都会分配一个访问的 URL，通过这个 URL 就可以访问到存储在阿里云上的图片；所以需要把 URL 返回给前端，这样前端就可以通过 URL 获取到图像。
 
-因此，UploadController 类需要完成以下功能：
+因此，`UploadController` 类需要完成以下功能：
+1. 接收上传的图片。
+2. 将图片存储起来（OSS）。
+3. 返回图片访问的 URL。
+
+参照接口文档来考法文件上传功能。
+
+##### 3.3.3.2 实现
+
+1). 引入阿里云 OSS 上传文件工具类（由官方的示例代码改造而来）
+
+```java
+/* utils/AliyunOSSOperator.java */
+
+package com.anxin_hitsz.utils;
+
+import com.aliyun.oss.*;
+import com.aliyun.oss.common.auth.CredentialsProviderFactory;
+import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
+import com.aliyun.oss.common.comm.SignVersion;
+import org.springframework.stereotype.Component;
+import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+@Component
+public class AliyunOSSOperator {
+
+    private String endpoint = "https://oss-cn-shenzhen.aliyuncs.com";
+    private String bucketName = "java-ai-anxin-hitsz";
+    private String region = "cn-shenzhen";
+
+    public String upload(byte[] content, String originalFilename) throws Exception {
+        // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+
+        // 填写Object完整路径，例如202406/1.png。Object完整路径中不能包含Bucket名称。
+        // 获取当前系统日期的字符串，格式为 yyyy/MM
+        String dir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
+        //生成一个新的不重复的文件名
+        String newFileName = UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."));
+        String objectName = dir + "/" + newFileName;
+
+        // 创建OSSClient实例。
+        ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+        clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+        OSS ossClient = OSSClientBuilder.create()
+                .endpoint(endpoint)
+                .credentialsProvider(credentialsProvider)
+                .clientConfiguration(clientBuilderConfiguration)
+                .region(region)
+                .build();
+
+        try {
+            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(content));
+        } finally {
+            ossClient.shutdown();
+        }
+
+        return endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + objectName;
+    }
+
+}
+
+```
+
+2). 修改 `UploadController` 代码
+
+```java
+/* controller/UploadController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.utils.AliyunOSSOperator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+
+/**
+ * ClassName: UploadController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/12 13:46
+ * @Version 1.0
+ */
+@Slf4j
+@RestController
+public class UploadController {
+
+    /**
+     * 本地磁盘存储方案
+     */
+//    @PostMapping("/upload")
+//    public Result upload(String name, Integer age, MultipartFile file) throws IOException {
+//        log.info("接收参数: {}, {}, {}", name, age, file);
+//        // 获取原始文件名
+//        String originalFilename = file.getOriginalFilename();
+//
+//        // 新的文件名
+//        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//        String newFileName = UUID.randomUUID().toString() + extension;
+//
+//        // 保存文件
+//        file.transferTo(new File("D:/Temp/images/" + newFileName));
+//        return Result.success();
+//    }
+
+    @Autowired
+    private AliyunOSSOperator aliyunOSSOperator;
+
+    @PostMapping("/upload")
+    public Result upload(MultipartFile file) throws Exception {
+        log.info("文件上传: {}", file.getOriginalFilename());
+        // 将文件交给 OSS 存储管理
+        String url = aliyunOSSOperator.upload(file.getBytes(), file.getOriginalFilename());
+        log.info("文件上传 OSS，URL: {}", url);
+
+        return Result.success(url);
+    }
+
+}
+
+```
+
+使用 Apifox 测试。
+
+接口测试通过之后，我们就可以进行前后端联调了。
+
+### 3.4 功能优化
+
+在 3.3.3 集成 小节中，我们制作了 AliyunOSS 操作的工具类，但在代码中直接将 `endpoint`、`bucketName` 参数硬编码，是非常不便于维护和管理的。
+
+对于这些容易变动的参数，我们可以将其配置在配置文件中，然后通过 `@Value` 注解来注解外部配置的属性。如下所示：
+![通过 @Value 注解来注解外部配置的属性](./images/09_通过@Value注解来注解外部配置的属性.png "通过 @Value 注解来注解外部配置的属性")
+
+如果只有少数属性需要注入，而且不需要考虑复用性，使用 `@Value` 注解即可。
+
+但是使用 `@Value` 注解注入配置文件的配置项，如果配置项多，注入繁琐，不便于维护管理和复用。
+
+在 Spring 中提供了一种简化配置参数注入的方式，可以直接将配置文件中配置项的值自动地注入到对象的属性中。
+
+Spring 提供的简化方式套路：
+1. 需要创建一个实现类，且实体类中的属性名和配置文件中 `key` 的名字必须要一致。
+   * 例如：配置文件中 `key` 的名字为 endpoint，实体类中的属性也需要被设置为 endpoint，另外实体类中的属性还需要提供 getter / setter 方法。
+2. 需要将实体类交给 Spring 的 IOC 容器管理，成为 IOC 容器中的 Bean 对象。
+3. 在实体类上添加 `@ConfigurationProperties` 注解，并通过 `perfect` 属性来指定配置参数项的前缀。
+
+如下所示：
+![Spring 提供的简化配置参数注入的方式](./images/09_Spring提供的简化配置参数注入的方式.png "Spring 提供的简化配置参数注入的方式")
+
+具体实现步骤：
+
+1). 在 application.yml 配置文件中配置相关属性
+
+```yaml
+# 阿里云 OSS
+aliyun:
+  oss:
+    endpoint: https://oss-cn-shenzhen.aliyuncs.com
+    bucketName: java-ai-anxin-hitsz
+    region: cn-shenzhen
+```
+
+1). 定义实体类 `AliyunOSSProperties`，并交给 IOC 容器管理
+
+```java
+/* utils/AliyunOSSProperties.java */
+
+package com.anxin_hitsz.utils;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+/**
+ * ClassName: AliyunOSSProperties
+ * Package: com.anxin_hitsz.utils
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/12 20:23
+ * @Version 1.0
+ */
+@Data
+@Component
+@ConfigurationProperties(prefix = "aliyun.oss")
+public class AliyunOSSProperties {
+    private String endpoint;
+    private String bucketName;
+    private String region;
+}
+
+```
+
+2). 修改 `AliyunOSSOperator`
+
+```java
+/* utils/AliyunOSSOperator.java */
+
+package com.anxin_hitsz.utils;
+
+import com.aliyun.oss.*;
+import com.aliyun.oss.common.auth.CredentialsProviderFactory;
+import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
+import com.aliyun.oss.common.comm.SignVersion;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+@Component
+public class AliyunOSSOperator {
+
+    // 方式一：通过 @Value 注解一个属性一个属性地注入
+//    @Value("${aliyun.oss.endpoint}")
+//    private String endpoint;
+//    @Value("${aliyun.oss.bucketName}")
+//    private String bucketName;
+//    @Value("${aliyun.oss.region}")
+//    private String region;
+
+    // 方法二：基于 @ConfigurationProperties 注解注入属性
+    @Autowired
+    private AliyunOSSProperties aliyunOSSProperties;
+
+    public String upload(byte[] content, String originalFilename) throws Exception {
+        String endpoint = aliyunOSSProperties.getEndpoint();
+        String bucketName = aliyunOSSProperties.getBucketName();
+        String region = aliyunOSSProperties.getRegion();
+
+
+        // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+
+        // 填写Object完整路径，例如202406/1.png。Object完整路径中不能包含Bucket名称。
+        // 获取当前系统日期的字符串，格式为 yyyy/MM
+        String dir = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM"));
+        //生成一个新的不重复的文件名
+        String newFileName = UUID.randomUUID() + originalFilename.substring(originalFilename.lastIndexOf("."));
+        String objectName = dir + "/" + newFileName;
+
+        // 创建OSSClient实例。
+        ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+        clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+        OSS ossClient = OSSClientBuilder.create()
+                .endpoint(endpoint)
+                .credentialsProvider(credentialsProvider)
+                .clientConfiguration(clientBuilderConfiguration)
+                .region(region)
+                .build();
+
+        try {
+            ossClient.putObject(bucketName, objectName, new ByteArrayInputStream(content));
+        } finally {
+            ossClient.shutdown();
+        }
+
+        return endpoint.split("//")[0] + "//" + bucketName + "." + endpoint.split("//")[1] + "/" + objectName;
+    }
+
+}
+
+```
