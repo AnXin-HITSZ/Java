@@ -34,6 +34,16 @@ public interface EmpService {
     void delete(List<Integer> ids);
 
     /**
+     * 根据 ID 查询员工
+     */
+    Emp getInfo(Integer id);
+
+    /**
+     * 修改员工
+     */
+    void update(Emp emp);
+
+    /**
      * 分页查询
      * @param page 页码
      * @param pageSize 每页记录数
