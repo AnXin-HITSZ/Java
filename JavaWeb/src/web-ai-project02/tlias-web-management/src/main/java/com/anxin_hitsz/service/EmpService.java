@@ -5,6 +5,7 @@ import com.anxin_hitsz.pojo.EmpQueryParam;
 import com.anxin_hitsz.pojo.PageResult;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * ClassName: EmpService
@@ -26,6 +27,11 @@ public interface EmpService {
      * 新增员工信息
      */
     void save(Emp emp);
+
+    /**
+     * 批量删除员工
+     */
+    void delete(List<Integer> ids);
 
     /**
      * 分页查询

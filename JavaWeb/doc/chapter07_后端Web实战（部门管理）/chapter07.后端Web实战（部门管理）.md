@@ -2240,7 +2240,7 @@ Logback 日志框架的配置文件叫 logback.xml。
 <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
     </encoder>
 </appender>
 ```
@@ -2262,7 +2262,7 @@ Logback 日志框架的配置文件叫 logback.xml。
 
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
         <!--格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
-        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
     </encoder>
 </appender>
 ```
@@ -2287,7 +2287,7 @@ Logback 日志框架的配置文件叫 logback.xml。
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示 5 个字符宽度，%logger 显示日志记录器的名称，%msg 表示日志消息，%n 表示换行符 -->
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
@@ -2304,7 +2304,7 @@ Logback 日志框架的配置文件叫 logback.xml。
 
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<!-- 格式化输出：%d 表示日期，%thread 表示线程名，%-5level 表示级别从左显示5个字符宽度，%msg 表示日志消息，%n 表示换行符 -->
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50}-%msg%n</pattern>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
