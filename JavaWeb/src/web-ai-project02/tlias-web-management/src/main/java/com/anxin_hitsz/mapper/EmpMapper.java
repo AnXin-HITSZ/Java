@@ -12,13 +12,11 @@ package com.anxin_hitsz.mapper;
 
 import com.anxin_hitsz.pojo.Emp;
 import com.anxin_hitsz.pojo.EmpQueryParam;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 员工信息
@@ -71,4 +69,16 @@ public interface EmpMapper {
      * 根据 ID 更新员工基本信息
      */
     void updateById(Emp emp);
+
+    /**
+     * 统计员工职位人数
+     */
+    @MapKey("pos")
+    List<Map<String, Object>> countEmpJobData();
+
+    /**
+     * 统计员工性别人数
+     */
+    @MapKey("name")
+    List<Map<String, Object>> countEmpGenderData();
 }

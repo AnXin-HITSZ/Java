@@ -1889,34 +1889,771 @@ ECharts 官网：[ECharts 官网](https://echarts.apache.org/zh/index.html "ECha
 
 在 pojo 包中定义实体类 `JobOption`：
 ```java
+/* pojo/JobOption.java */
+
+package com.anxin_hitsz.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * ClassName: JobOption
+ * Package: com.anxin_hitsz.pojo
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:04
+ * @Version 1.0
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobOption {
+
+    private List jobList;  // 职位列表
+    private List dataList;  // 数据列表
+
+}
 
 ```
 
 2). 定义 `ReportController`，并添加方法
 
 ```java
+/* controller/ReportController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.JobOption;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.ReportService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * ClassName: ReportController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:26
+ * @Version 1.0
+ */
+@Slf4j
+@RequestMapping("/report")
+@RestController
+public class ReportController {
+
+    @Autowired
+    private ReportService reportService;
+
+    /**
+     * 统计员工职位人数
+     */
+    @GetMapping("/empJobData")
+    public Result getEmpJobData() {
+        log.info("统计员工职位人数");
+        JobOption jobOption = reportService.getEmpJobData();
+        return Result.success(jobOption);
+    }
+
+}
 
 ```
 
 3). 定义 `ReportService` 接口，并添加接口方法
 
 ```java
+/* service/ReportService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.JobOption;
+
+/**
+ * ClassName: ReportService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:26
+ * @Version 1.0
+ */
+public interface ReportService {
+    /**
+     * 统计员工职位人数
+     */
+    JobOption getEmpJobData();
+}
 
 ```
 
 4). 定义 `ReportServiceImpl` 实现类，并实现方法
 
 ```java
+/* service/impl/ReportServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.JobOption;
+import com.anxin_hitsz.service.ReportService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ClassName: ReportServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:27
+ * @Version 1.0
+ */
+@Service
+public class ReportServiceImpl implements ReportService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    @Override
+    public JobOption getEmpJobData() {
+        // 1. 调用 Mapper 接口，获取统计数据
+        List<Map<String, Object>> list = empMapper.countEmpJobData();
+
+        // 2. 组装结果，并返回
+        List<Object> jobList = list.stream().map(dataMap -> dataMap.get("pos")).toList();
+        List<Object> dataList = list.stream().map(dataMap -> dataMap.get("num")).toList();
+
+        return new JobOption(jobList, dataList);
+    }
+}
 
 ```
 
 5). 定义 `EmpMapper` 接口
 
-需要统计的是员工的信息，所以需要操作的是员工表。因此向 EmpMapper 接口添加代码：
+需要统计的是员工的信息，所以需要操作的是员工表。因此向 `EmpMapper` 接口添加代码：
 ```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import org.apache.ibatis.annotations.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    // ------------------------------ 原始分页查询实现 ------------------------------
+    /**
+     * 查询总记录数
+     */
+//    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+//    public Long count();
+
+    /**
+     * 分页查询
+     */
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+//            "order by e.update_time desc limit #{start}, #{pageSize}")
+//    public List<Emp> list(Integer start, Integer pageSize);
+
+
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id order by e.update_time desc")
+//    public List<Emp> list(String name, Integer gender, LocalDate begin, LocalDate end);
+
+    /**
+     * 条件查询员工信息
+     */
+    public List<Emp> list(EmpQueryParam empQueryParam);
+
+    /**
+     * 新增员工基本信息
+     */
+    @Options(useGeneratedKeys = true, keyProperty = "id")   // 获取到生成的主键 - 主键返回
+    @Insert("insert into emp (username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)" +
+            " values (#{username}, #{name}, #{gender}, #{phone}, #{job}, #{salary}, #{image}, #{entryDate}, #{deptId}, #{createTime}, #{updateTime})")
+    void insert(Emp emp);
+
+    /**
+     * 根据 ID 批量删除员工的基本信息
+     */
+    void deleteByIds(List<Integer> ids);
+
+    /**
+     * 根据 ID 查询员工信息以及工作经历信息
+     */
+    Emp getById(Integer id);
+
+    /**
+     * 根据 ID 更新员工基本信息
+     */
+    void updateById(Emp emp);
+
+    /**
+     * 统计员工职位人数
+     */
+    @MapKey("pos")
+    List<Map<String, Object>> countEmpJobData();
+}
 
 ```
 
 > 注意：
 >
 > 如果查询的记录需要封装到 Map 中，可以通过 `@MapKey` 注解指定返回的 map 中的唯一标识所对应的字段。（也可以不指定。）
+
+6). 定义 EmpMapper.xml
+
+```xml
+<!-- EmpMapper.xml -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anxin_hitsz.mapper.EmpMapper">
+
+    <!-- 根据 ID 更新员工基本信息 -->
+    <!-- set 标签：1. 会自动生成 set 关键字；2. 会自动删除掉更新字段后多余的 “,” -->
+    <update id="updateById">
+        update emp
+        <set>
+            <if test="username != null and username != ''">username = #{username}, </if>
+            <if test="password != null and password != ''">password = #{password}, </if>
+            <if test="name != null and name != ''">name = #{name}, </if>
+            <if test="gender != null">gender = #{gender}, </if>
+            <if test="phone != null and phone != ''">phone = #{phone}, </if>
+            <if test="job != null">job = #{job}, </if>
+            <if test="salary != null">salary = #{salary}, </if>
+            <if test="image != null and image != ''">image = #{image}, </if>
+            <if test="entryDate != null">entry_date = #{entryDate}, </if>
+            <if test="deptId != null">dept_id = #{deptId}, </if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 批量删除员工基本信息 -->
+    <delete id="deleteByIds">
+        delete from emp where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="list" resultType="com.anxin_hitsz.pojo.Emp">
+        select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id
+        <where>
+            <if test="name != null and name != ''">
+                e.name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and e.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and e.entry_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by e.update_time desc
+    </select>
+
+    <!-- 定义 ResultMap -->
+    <resultMap id="empResultMap" type="com.anxin_hitsz.pojo.Emp">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="job" property="job"/>
+        <result column="salary" property="salary"/>
+        <result column="image" property="image"/>
+        <result column="entry_date" property="entryDate"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <!-- 封装工作经历信息 -->
+        <collection property="exprList" ofType="com.anxin_hitsz.pojo.EmpExpr">
+            <id column="ee_id" property="id"/>
+            <result column="ee_empid" property="empId"/>
+            <result column="ee_begin" property="begin"/>
+            <result column="ee_end" property="end"/>
+            <result column="ee_company" property="company"/>
+            <result column="ee_job" property="job"/>
+        </collection>
+    </resultMap>
+
+    <!-- 根据 ID 查询员工基本信息以及员工的工作经历信息 -->
+    <select id="getById" resultMap="empResultMap">
+        select
+            e.*,
+            ee.id ee_id,
+            ee.emp_id ee_empid,
+            ee.begin ee_begin,
+            ee.end ee_end,
+            ee.company ee_company,
+            ee.job ee_job
+        from emp e left join emp_expr ee on e.id = ee.emp_id
+        where e.id =#{id}
+    </select>
+
+    <!-- 统计员工职位人数 -->
+    <select id="countEmpJobData" resultType="java.util.Map">
+        select
+            (case when job = 1 then '班主任'
+                  when job = 2 then '讲师'
+                  when job = 3 then '学工主管'
+                  when job = 4 then '教研主管'
+                  when job = 5 then '咨询师'
+                  else '其他' end) pos,
+            count(*) num
+        from emp group by job order by num;
+    </select>
+
+</mapper>
+```
+
+> 注意：
+>
+> `case` 流程控制函数：
+> * 语法一：
+>   ```sql
+>   case when cond1 then res1 [when cond2 then res2 ...] else res end;
+>   ```
+>   * 含义：如果 `cond1` 成立，取 `res1`；如果 `cond2` 成立，取 `res2`；如果前面的条件都不成立，则取 `res`。
+> * 语法二（仅适用于等值匹配）：
+>   ```sql
+>   case expr when val1 then res1 [when val2 then res2 ...] else res end;
+>   ```
+>   * 含义：如果 `expr` 的值为 `val1`，取 `res1`；如果 `expr` 的值为 `val2`，取 `res2`；如果前面的条件都不成立，则取 `res`。
+
+#### 4.1.4 Apifox 测试
+
+重新启动服务，打开 Apifox 进行测试。
+
+#### 4.1.5 联调测试
+
+打开浏览器，进行前后端联调测试。
+
+### 4.2 性别统计
+
+#### 4.2.1 需求
+
+对于这类多的图形报表，服务端要做的，就是为其提供数据即可。
+
+我们可以通过官方的示例，看到提供的数据就是一段 JSON 格式的数据。
+
+#### 4.2.2 接口描述
+
+参照接口文档。
+
+#### 4.2.3 代码实现
+
+1). 在 `ReportController` 中添加方法
+
+```java
+/* controller/ReportController.java */
+
+package com.anxin_hitsz.controller;
+
+import com.anxin_hitsz.pojo.JobOption;
+import com.anxin_hitsz.pojo.Result;
+import com.anxin_hitsz.service.ReportService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ClassName: ReportController
+ * Package: com.anxin_hitsz.controller
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:26
+ * @Version 1.0
+ */
+@Slf4j
+@RequestMapping("/report")
+@RestController
+public class ReportController {
+
+    @Autowired
+    private ReportService reportService;
+
+    /**
+     * 统计员工职位人数
+     */
+    @GetMapping("/empJobData")
+    public Result getEmpJobData() {
+        log.info("统计员工职位人数");
+        JobOption jobOption = reportService.getEmpJobData();
+        return Result.success(jobOption);
+    }
+
+    /**
+     * 统计员工性别人数
+     */
+    @GetMapping("/empGenderData")
+    public Result getEmpGenderData() {
+        log.info("统计员工性别人数");
+        List<Map<String, Object>> genderList = reportService.getEmpGenderData();
+        return Result.success(genderList);
+    }
+
+}
+
+```
+
+2). 在 `ReportService` 接口中添加接口方法
+
+```java
+/* service/ReportService.java */
+
+package com.anxin_hitsz.service;
+
+import com.anxin_hitsz.pojo.JobOption;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ClassName: ReportService
+ * Package: com.anxin_hitsz.service
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:26
+ * @Version 1.0
+ */
+public interface ReportService {
+    /**
+     * 统计员工职位人数
+     */
+    JobOption getEmpJobData();
+
+    /**
+     * 统计员工性别人数
+     */
+    List<Map<String, Object>> getEmpGenderData();
+}
+
+```
+
+3). 在 `ReportServiceImpl` 实现类中实现方法
+
+```java
+/* service/impl/ReportServiceImpl.java */
+
+package com.anxin_hitsz.service.impl;
+
+import com.anxin_hitsz.mapper.EmpMapper;
+import com.anxin_hitsz.pojo.JobOption;
+import com.anxin_hitsz.service.ReportService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ClassName: ReportServiceImpl
+ * Package: com.anxin_hitsz.service.impl
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/14 13:27
+ * @Version 1.0
+ */
+@Service
+public class ReportServiceImpl implements ReportService {
+
+    @Autowired
+    private EmpMapper empMapper;
+
+    @Override
+    public JobOption getEmpJobData() {
+        // 1. 调用 Mapper 接口，获取统计数据
+        List<Map<String, Object>> list = empMapper.countEmpJobData();
+
+        // 2. 组装结果，并返回
+        List<Object> jobList = list.stream().map(dataMap -> dataMap.get("pos")).toList();
+        List<Object> dataList = list.stream().map(dataMap -> dataMap.get("num")).toList();
+
+        return new JobOption(jobList, dataList);
+    }
+
+    @Override
+    public List<Map<String, Object>> getEmpGenderData() {
+        return empMapper.countEmpGenderData();
+    }
+}
+
+```
+
+4). 定义 `EmpMapper` 接口
+
+需要统计的是员工的信息，所以需要操作的是员工表。因此向 `EmpMapper` 接口添加代码：
+```java
+/* mapper/EmpMapper.java */
+
+package com.anxin_hitsz.mapper;
+
+/**
+ * ClassName: EmpMapper
+ * Package: com.anxin_hitsz.mapper
+ * Description:
+ *
+ * @Author AnXin
+ * @Create 2026/3/10 16:30
+ * @Version 1.0
+ */
+
+import com.anxin_hitsz.pojo.Emp;
+import com.anxin_hitsz.pojo.EmpQueryParam;
+import org.apache.ibatis.annotations.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 员工信息
+ */
+@Mapper
+public interface EmpMapper {
+
+    // ------------------------------ 原始分页查询实现 ------------------------------
+    /**
+     * 查询总记录数
+     */
+//    @Select("select count(*) from emp e left join dept d on e.dept_id = d.id")
+//    public Long count();
+
+    /**
+     * 分页查询
+     */
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id " +
+//            "order by e.update_time desc limit #{start}, #{pageSize}")
+//    public List<Emp> list(Integer start, Integer pageSize);
+
+
+//    @Select("select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id order by e.update_time desc")
+//    public List<Emp> list(String name, Integer gender, LocalDate begin, LocalDate end);
+
+    /**
+     * 条件查询员工信息
+     */
+    public List<Emp> list(EmpQueryParam empQueryParam);
+
+    /**
+     * 新增员工基本信息
+     */
+    @Options(useGeneratedKeys = true, keyProperty = "id")   // 获取到生成的主键 - 主键返回
+    @Insert("insert into emp (username, name, gender, phone, job, salary, image, entry_date, dept_id, create_time, update_time)" +
+            " values (#{username}, #{name}, #{gender}, #{phone}, #{job}, #{salary}, #{image}, #{entryDate}, #{deptId}, #{createTime}, #{updateTime})")
+    void insert(Emp emp);
+
+    /**
+     * 根据 ID 批量删除员工的基本信息
+     */
+    void deleteByIds(List<Integer> ids);
+
+    /**
+     * 根据 ID 查询员工信息以及工作经历信息
+     */
+    Emp getById(Integer id);
+
+    /**
+     * 根据 ID 更新员工基本信息
+     */
+    void updateById(Emp emp);
+
+    /**
+     * 统计员工职位人数
+     */
+    @MapKey("pos")
+    List<Map<String, Object>> countEmpJobData();
+
+    /**
+     * 统计员工性别人数
+     */
+    @MapKey("name")
+    List<Map<String, Object>> countEmpGenderData();
+}
+
+```
+
+5). 定义 EmpMapper.xml
+
+```xml
+<!-- EmpMapper.xml -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anxin_hitsz.mapper.EmpMapper">
+
+    <!-- 根据 ID 更新员工基本信息 -->
+    <!-- set 标签：1. 会自动生成 set 关键字；2. 会自动删除掉更新字段后多余的 “,” -->
+    <update id="updateById">
+        update emp
+        <set>
+            <if test="username != null and username != ''">username = #{username}, </if>
+            <if test="password != null and password != ''">password = #{password}, </if>
+            <if test="name != null and name != ''">name = #{name}, </if>
+            <if test="gender != null">gender = #{gender}, </if>
+            <if test="phone != null and phone != ''">phone = #{phone}, </if>
+            <if test="job != null">job = #{job}, </if>
+            <if test="salary != null">salary = #{salary}, </if>
+            <if test="image != null and image != ''">image = #{image}, </if>
+            <if test="entryDate != null">entry_date = #{entryDate}, </if>
+            <if test="deptId != null">dept_id = #{deptId}, </if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 批量删除员工基本信息 -->
+    <delete id="deleteByIds">
+        delete from emp where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="list" resultType="com.anxin_hitsz.pojo.Emp">
+        select e.*, d.name deptName from emp e left join dept d on e.dept_id = d.id
+        <where>
+            <if test="name != null and name != ''">
+                e.name like concat('%', #{name}, '%')
+            </if>
+            <if test="gender != null">
+                and e.gender = #{gender}
+            </if>
+            <if test="begin != null and end != null">
+                and e.entry_date between #{begin} and #{end}
+            </if>
+        </where>
+        order by e.update_time desc
+    </select>
+
+    <!-- 定义 ResultMap -->
+    <resultMap id="empResultMap" type="com.anxin_hitsz.pojo.Emp">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="job" property="job"/>
+        <result column="salary" property="salary"/>
+        <result column="image" property="image"/>
+        <result column="entry_date" property="entryDate"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <!-- 封装工作经历信息 -->
+        <collection property="exprList" ofType="com.anxin_hitsz.pojo.EmpExpr">
+            <id column="ee_id" property="id"/>
+            <result column="ee_empid" property="empId"/>
+            <result column="ee_begin" property="begin"/>
+            <result column="ee_end" property="end"/>
+            <result column="ee_company" property="company"/>
+            <result column="ee_job" property="job"/>
+        </collection>
+    </resultMap>
+
+    <!-- 根据 ID 查询员工基本信息以及员工的工作经历信息 -->
+    <select id="getById" resultMap="empResultMap">
+        select
+            e.*,
+            ee.id ee_id,
+            ee.emp_id ee_empid,
+            ee.begin ee_begin,
+            ee.end ee_end,
+            ee.company ee_company,
+            ee.job ee_job
+        from emp e left join emp_expr ee on e.id = ee.emp_id
+        where e.id =#{id}
+    </select>
+
+    <!-- 统计员工职位人数 -->
+    <select id="countEmpJobData" resultType="java.util.Map">
+        select
+            (case when job = 1 then '班主任'
+                  when job = 2 then '讲师'
+                  when job = 3 then '学工主管'
+                  when job = 4 then '教研主管'
+                  when job = 5 then '咨询师'
+                  else '其他' end) pos,
+            count(*) num
+        from emp group by job order by num;
+    </select>
+
+    <!-- 统计员工性别人数 -->
+    <select id="countEmpGenderData" resultType="java.util.Map">
+        select
+            if (gender = 1, '男性员工', '女性员工') name,
+            count(*) value
+        from emp group by gender;
+    </select>
+
+</mapper>
+```
+
+> 注意：
+> * `if` 函数语法：
+>   ```sql
+>   if (expr, val1, val2)
+>   ```
+>   * 如果表达式 `expr` 成立，取 `val1`；否则取 `val2`。
+> * `ifnull` 函数语法：
+>   ```sql
+>   ifnull (expr, val1)
+>   ```
+>   * 如果 `expr` 不为 `null`，取自身；否则取 `val1`。
+
+#### 4.2.4 Apifox 测试
+
+重新启动服务，打开 Apifox 进行测试。
+
+#### 4.2.5 联调测试
+
+打开浏览器，进行前后端联调测试。
