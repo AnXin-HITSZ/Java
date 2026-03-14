@@ -1,2 +1,4 @@
 2026/03/11 15:42:16 [alert] 27248#27120: worker process 41228 exited with code C0000142
 2026/03/11 15:42:16 [alert] 27248#27120: could not respawn worker
+2026/03/14 14:35:38 [alert] 35604#38380: worker process 3864 exited with code C0000142
+2026/03/14 14:35:38 [alert] 35604#38380: could not respawn worker

@@ -189,7 +189,7 @@ alert('Hello JavaScript');
 > ```html
 > <body>
 > 
->     <scrip>
+>     <script>
 >         // var 声明变量
 >         var name = "A";
 >         name = "B";
